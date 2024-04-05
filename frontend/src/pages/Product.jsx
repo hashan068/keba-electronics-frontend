@@ -34,7 +34,7 @@ export default function Product() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <Box component="main" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '70%' }}>
+      <Box component="main" sx={{justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}>
         <Typography variant="h3" align="center" sx={{ marginTop: "55px" }}>
           Products
         </Typography>

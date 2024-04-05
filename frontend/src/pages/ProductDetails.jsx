@@ -8,6 +8,10 @@ const ProductDetails = () => {
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
 
+
+  // By defining fetchProduct inside the useEffect hook, we ensure that it is called only when the id parameter changes, and not on every re-render of the component. 
+  // This is important for performance reasons, as we don't want to make unnecessary API calls if the id parameter hasn't changed.
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
