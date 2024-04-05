@@ -1,11 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashbord from "./pages/Dashbord";
+import Dashboard from "./pages/Dashboard";
 import Product from "./pages/Product";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
-import ResponsiveAppBar from "./components/AppBar"; // Import the AppBar component
+import Layout from "./components/Layout"; // Import the Layout component
+import ProductDetails from "./pages/ProductDetails";
 
 function Logout() {
   localStorage.clear();
@@ -20,13 +21,14 @@ function RegisterAndLogout() {
 function App() {
   return (
     <BrowserRouter>
-      <ResponsiveAppBar /> {/* Render the AppBar component */}
       <Routes>
         <Route
           path="/"
           element={
             <ProtectedRoute>
-              <Dashbord />
+              <Layout>
+                <Dashboard />
+              </Layout>
             </ProtectedRoute>
           }
         />
@@ -34,10 +36,25 @@ function App() {
           path="/product"
           element={
             <ProtectedRoute>
-              <Product />
+              <Layout>
+                <Product />
+              </Layout>
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/product/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ProductDetails />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/register" element={<RegisterAndLogout />} />

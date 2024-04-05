@@ -4,7 +4,9 @@ import { ACCESS_TOKEN } from "./constants";
 
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL 
+  baseURL: import.meta.env.VITE_API_URL,  
+
+  maxRedirects: 10, // Set the maximum number of redirects to follow
 })
 
 api.interceptors.request.use(

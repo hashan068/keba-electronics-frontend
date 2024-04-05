@@ -1,9 +1,10 @@
+// pages/Dashbord.jsx
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import PermanentDrawerLeft from '../components/PermanentDrawerLeft';
 
 
-export default function Dashbord() {
+export default function Dashboard() {
   return(
     <Box sx={{ flexGrow: 1 }}>
       <PermanentDrawerLeft/>
