@@ -6,41 +6,47 @@ import api from '../api';
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
-
-
-  // By defining fetchProduct inside the useEffect hook, we ensure that it is called only when the id parameter changes, and not on every re-render of the component. 
-  // This is important for performance reasons, as we don't want to make unnecessary API calls if the id parameter hasn't changed.
+  const [product, setProduct] = useState({ name: '', description: '', price: '' });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
-      try {
-        const response = await api.get(`/api/sales/products/${id}/`);
-        setProduct(response.data);
-      } catch (error) {
-        console.error(error);
+      if (id) {
+        setIsLoading(true);
+        try {
+          const response = await api.get(`/api/sales/products/${id}/`);
+          setProduct(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
     fetchProduct();
   }, [id]);
 
-  const handleUpdate = async () => {
+  const handleSave = async () => {
     try {
-      await api.put(`/api/sales/products/${id}/`, product);
+      if (id) {
+        await api.put(`/api/sales/products/${id}/`, product);
+      } else {
+        await api.post('/api/sales/products/', product);
+      }
       navigate('/product');
     } catch (error) {
       console.error(error);
     }
   };
 
-  if (!product) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Product Details
+        {id ? 'Product Details' : 'New Product'}
       </Typography>
       <TextField
         label="Name"
@@ -64,8 +70,8 @@ const ProductDetails = () => {
         fullWidth
         margin="normal"
       />
-      <Button variant="contained" onClick={handleUpdate}>
-        Update
+      <Button variant="contained" onClick={handleSave}>
+        {id ? 'Update' : 'Create'}
       </Button>
     </Box>
   );

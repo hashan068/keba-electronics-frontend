@@ -3,19 +3,19 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import { useNavigate } from 'react-router-dom';
 import api from "../api";
 
-export default function Product() {
-  const [products, setProducts] = useState([]);
+export default function SalesOrder() {
+  const [salesOrders, setSalesOrders] = useState([]);
   const navigate = useNavigate();
 
-  const getProducts = () => {
+  const getSalesOrders = () => {
     api
-      .get("/api/sales/products/")
+      .get("/api/sales/orders/")
       .then((res) => {
         console.log(res.data);
         return res.data;
       })
       .then((data) => {
-        setProducts(data);
+        setSalesOrders(data);
         console.log(data);
       })
       .catch((err) => {
@@ -25,44 +25,46 @@ export default function Product() {
   };
 
   useEffect(() => {
-    getProducts();
+    getSalesOrders();
   }, []);
 
-  const handleRowClick = (productId) => {
-    navigate(`/product/${productId}`);
+  const handleRowClick = (salesOrderId) => {
+    navigate(`/salesorder/${salesOrderId}`);
   };
 
-  const handleAddProduct = () => {
-    navigate(`/product/new`);
+  const handleAddSalesOrder = () => {
+    navigate(`/salesorder/new`);
   }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Box component="main" sx={{justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}>
         <Typography variant="h3" align="center" sx={{ marginTop: "55px" }}>
-          Products
+          Sales Orders
         </Typography>
-        <Button variant="contained" onClick={handleAddProduct}>
-          Add Product
+        <Button variant="contained" onClick={handleAddSalesOrder}>
+          Add Sales Order
         </Button>
 
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell>Product Name</TableCell>
-                <TableCell align="right">Description</TableCell>
-                <TableCell align="right">Price</TableCell>
+                <TableCell>Order ID</TableCell>
+                <TableCell align="right">Customer</TableCell>
+                <TableCell align="right">Total Amount</TableCell>
+                <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id} onClick={() => handleRowClick(product.id)} style={{ cursor: 'pointer' }}>
+              {salesOrders.map((salesOrder) => (
+                <TableRow key={salesOrder.id} onClick={() => handleRowClick(salesOrder.id)} style={{ cursor: 'pointer' }}>
                   <TableCell component="th" scope="row">
-                    {product.name}
+                    {salesOrder.id}
                   </TableCell>
-                  <TableCell align="right">{product.description}</TableCell>
-                  <TableCell align="right">{product.price}</TableCell>
+                  <TableCell align="right">{salesOrder.customer.name}</TableCell>
+                  <TableCell align="right">{salesOrder.total_amount}</TableCell>
+                  <TableCell align="right">{salesOrder.status}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
