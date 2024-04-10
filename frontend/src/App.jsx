@@ -9,6 +9,8 @@ import Layout from "./components/Layout"; // Import the Layout component
 import ProductDetails from "./pages/ProductDetails";
 import SalesOrder from './pages/SalesOrder';
 import SalesOrderForm from './components/SalesOrderForm';
+import SalesOrderDetails from './pages/SalesOrderDetails'
+
 
 function Logout() {
   localStorage.clear();
@@ -86,6 +88,8 @@ function App() {
               </Layout>
             </ProtectedRoute>
           }
+
+
         />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />

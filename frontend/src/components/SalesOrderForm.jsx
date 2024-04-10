@@ -48,27 +48,28 @@ const SalesOrderForm = () => {
       setProduct(null);
     }
   };
+
   const validateForm = () => {
     if (!customer) {
       alert('Please select a customer.');
       return false;
     }
-  
+
     if (salesOrderItems.length === 0) {
       alert('Please add at least one item to the order.');
       return false;
     }
-  
+
     return true;
   };
-  
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
     if (!validateForm()) {
       return;
     }
-  
+
     // Prepare the sales order data to be sent to the API
     const salesOrderData = {
       customer: customer.id,
@@ -78,7 +79,7 @@ const SalesOrderForm = () => {
         price: item.price,
       })),
     };
-  
+
     try {
       // Send the data to the server-side API
       const response = await fetch('http://127.0.0.1:8000/api/sales/orders/', {
@@ -88,7 +89,7 @@ const SalesOrderForm = () => {
         },
         body: JSON.stringify(salesOrderData),
       });
-  
+
       if (response.ok) {
         // If the API returns a successful response, reset the form or perform other actions
         alert('Sales order created successfully!');
@@ -104,6 +105,12 @@ const SalesOrderForm = () => {
       console.error('Error creating sales order:', error);
       alert('An error occurred while creating the sales order. Please try again later.');
     }
+  };
+
+  const handleDeleteItem = (index) => {
+    const updatedSalesOrderItems = [...salesOrderItems];
+    updatedSalesOrderItems.splice(index, 1);
+    setSalesOrderItems(updatedSalesOrderItems);
   };
 
   return (
@@ -127,6 +134,7 @@ const SalesOrderForm = () => {
                 <TableCell align="right">Quantity</TableCell>
                 <TableCell align="right">Price</TableCell>
                 <TableCell align="right">Total</TableCell>
+                <TableCell align="right">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -136,12 +144,17 @@ const SalesOrderForm = () => {
                   <TableCell align="right">{item.quantity}</TableCell>
                   <TableCell align="right">{item.price}</TableCell>
                   <TableCell align="right">{item.quantity * item.price}</TableCell>
+                  <TableCell align="right">
+                    <Button variant="contained" color="error" onClick={() => handleDeleteItem(index)}>
+                      Delete
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-        
+
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, }}>
           <Autocomplete
             options={products}
