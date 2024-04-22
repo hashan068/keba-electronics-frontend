@@ -7,6 +7,10 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout"; // Import the Layout component
 import ProductDetails from "./pages/ProductDetails";
+import SalesOrder from './pages/SalesOrder';
+import SalesOrderForm from './components/SalesOrderForm';
+import SalesOrderDetails from './pages/SalesOrderDetails'
+
 
 function Logout() {
   localStorage.clear();
@@ -44,6 +48,17 @@ function App() {
         />
 
         <Route
+          path="/product/new"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ProductDetails />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/product/:id"
           element={
             <ProtectedRoute>
@@ -54,7 +69,28 @@ function App() {
           }
         />
 
+        <Route
+          path="/salesorder"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <SalesOrder /> {/* render the SalesOrder component */}
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/salesorder/new"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <SalesOrderForm />
+              </Layout>
+            </ProtectedRoute>
+          }
 
+
+        />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/register" element={<RegisterAndLogout />} />
