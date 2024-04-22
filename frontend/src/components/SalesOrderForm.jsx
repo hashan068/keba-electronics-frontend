@@ -23,13 +23,17 @@ const SalesOrderForm = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const customersResponse = await fetch('http://127.0.0.1:8000/api/sales/customers/');
-      const customersData = await customersResponse.json();
-      setCustomers(customersData);
+      try {
+        const customersResponse = await fetch('http://127.0.0.1:8000/api/sales/customers/');
+        const customersData = await customersResponse.json();
+        setCustomers(customersData);
 
-      const productsResponse = await fetch('http://127.0.0.1:8000/api/sales/products/');
-      const productsData = await productsResponse.json();
-      setProducts(productsData);
+        const productsResponse = await fetch('http://127.0.0.1:8000/api/sales/products/');
+        const productsData = await productsResponse.json();
+        setProducts(productsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
 
     fetchData();
@@ -38,7 +42,7 @@ const SalesOrderForm = () => {
   const handleAddItem = () => {
     if (product && quantity > 0) {
       const newItem = {
-        product: product.name,
+        product,
         quantity,
         price: product.price,
       };
@@ -65,23 +69,23 @@ const SalesOrderForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
     if (!validateForm()) {
       return;
     }
-
-    // Prepare the sales order data to be sent to the API
+  
     const salesOrderData = {
       customer: customer.id,
-      items: salesOrderItems.map((item) => ({
-        product: item.product,
+      order_items: salesOrderItems.map((item) => ({
+        product: item.product.id,
         quantity: item.quantity,
         price: item.price,
       })),
     };
-
+  
+    console.log('Sending data:', salesOrderData); // Log the data being sent
+  
     try {
-      // Send the data to the server-side API
       const response = await fetch('http://127.0.0.1:8000/api/sales/orders/', {
         method: 'POST',
         headers: {
@@ -89,23 +93,24 @@ const SalesOrderForm = () => {
         },
         body: JSON.stringify(salesOrderData),
       });
-
+  
+      const responseData = await response.json();
+  
+      console.log('Received data:', responseData); // Log the response data
+  
       if (response.ok) {
-        // If the API returns a successful response, reset the form or perform other actions
         alert('Sales order created successfully!');
         setCustomer(null);
         setSalesOrderItems([]);
       } else {
-        // Handle any errors returned by the API
-        const errorData = await response.json();
-        alert(`Error creating sales order: ${errorData.message}`);
+        alert(`Error creating sales order: ${responseData.error || 'Unknown error'}`);
       }
     } catch (error) {
-      // Handle any network or fetch errors
       console.error('Error creating sales order:', error);
       alert('An error occurred while creating the sales order. Please try again later.');
     }
   };
+  
 
   const handleDeleteItem = (index) => {
     const updatedSalesOrderItems = [...salesOrderItems];
@@ -140,7 +145,7 @@ const SalesOrderForm = () => {
             <TableBody>
               {salesOrderItems.map((item, index) => (
                 <TableRow key={index}>
-                  <TableCell>{item.product}</TableCell>
+                  <TableCell>{item.product.name}</TableCell>
                   <TableCell align="right">{item.quantity}</TableCell>
                   <TableCell align="right">{item.price}</TableCell>
                   <TableCell align="right">{item.quantity * item.price}</TableCell>
@@ -155,7 +160,7 @@ const SalesOrderForm = () => {
           </Table>
         </TableContainer>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
           <Autocomplete
             options={products}
             value={product}
