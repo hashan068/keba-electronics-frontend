@@ -166,6 +166,11 @@ const SalesOrderForm = () => {
             value={product}
             onChange={(event, newValue) => setProduct(newValue)}
             getOptionLabel={(option) => option.name}
+            renderOption={(props, option) => (
+              <li {...props} key={option.id}> {/* Use option.id instead of option.name as the key */}
+                {option.name}
+              </li>
+            )}
             renderInput={(params) => <TextField {...params} label="Product" margin="normal" />}
             sx={{ width: '50%' }}
           />
