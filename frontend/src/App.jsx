@@ -9,7 +9,8 @@ import Layout from "./components/Layout"; // Import the Layout component
 import ProductDetails from "./pages/ProductDetails";
 import SalesOrder from './pages/SalesOrder';
 import SalesOrderForm from './components/SalesOrderForm';
-import SalesOrderDetails from './pages/SalesOrderDetails'
+// import SalesOrderDetails from './pages/SalesOrderDetails'
+import MfgOrder from './pages/ManufacturingOrder';
 
 
 function Logout() {
@@ -88,9 +89,18 @@ function App() {
               </Layout>
             </ProtectedRoute>
           }
-
-
         />
+        <Route
+          path="/mfgorder"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <MfgOrder />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/register" element={<RegisterAndLogout />} />

@@ -3,6 +3,7 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import { useNavigate } from 'react-router-dom';
 import api from "../api";
 
+
 export default function SalesOrder() {
   const [salesOrders, setSalesOrders] = useState([]);
   const navigate = useNavigate();

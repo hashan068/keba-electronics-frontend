@@ -11,6 +11,7 @@ import {
   TableRow,
   Paper,
 } from '@mui/material';
+import Alert from '@mui/material/Alert';
 import { Autocomplete, TextField } from '@mui/material';
 
 const SalesOrderForm = () => {
@@ -20,6 +21,7 @@ const SalesOrderForm = () => {
   const [salesOrderItems, setSalesOrderItems] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [alert, setAlert] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,7 +101,11 @@ const SalesOrderForm = () => {
       console.log('Received data:', responseData); // Log the response data
   
       if (response.ok) {
-        alert('Sales order created successfully!');
+        // alert('Sales order created successfully!');
+        setAlert({ severity: 'success', message: 'This is a success Alert.' });
+        setTimeout(() => {
+          setAlert(null);
+        }, 3000); // Hide the alert after 3 seconds
         setCustomer(null);
         setSalesOrderItems([]);
       } else {
@@ -191,6 +197,10 @@ const SalesOrderForm = () => {
           Submit Order
         </Button>
       </form>
+      <div>
+      {alert && <Alert severity={alert.severity}>{alert.message}</Alert>}
+      {/* Rest of the component JSX */}
+    </div>
     </Box>
   );
 };
