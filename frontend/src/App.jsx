@@ -11,6 +11,10 @@ import SalesOrder from './pages/SalesOrder';
 import SalesOrderForm from './components/SalesOrderForm';
 // import SalesOrderDetails from './pages/SalesOrderDetails'
 import MfgOrder from './pages/ManufacturingOrder';
+import Quotations from './pages/Quotations';
+
+import QuotationDetail from './pages/QuotationDetail';
+import QuotationForm from './components/QuotationForm';
 
 
 function Logout() {
@@ -69,7 +73,38 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/quotations/"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Quotations />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
+        <Route
+          path="/quotations/new"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <QuotationForm />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/quotations/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <QuotationDetail />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/salesorder"
           element={
