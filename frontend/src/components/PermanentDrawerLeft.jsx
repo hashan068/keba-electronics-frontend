@@ -58,6 +58,7 @@ export default function PermanentDrawerLeft() {
         <Toolbar />
         <Divider />
         <List>
+
           <ListItem disablePadding onClick={() => handleNavigate('/')}>
             <ListItemButton
               sx={{
@@ -72,6 +73,20 @@ export default function PermanentDrawerLeft() {
               <ListItemText primary="Dashboard" />
             </ListItemButton>
           </ListItem>
+
+          <ListItem disablePadding onClick={() => handleNavigate('/quotations')}>
+            <ListItemButton
+              sx={{
+                minHeight: '50px',
+                justifyContent: 'center',
+                backgroundColor: '#f5f5f5',
+              }}
+            >
+              <ListItemIcon></ListItemIcon>
+              <ListItemText primary="Quotations" />
+            </ListItemButton>
+          </ListItem>
+
           <ListItem disablePadding onClick={() => handleNavigate('/product')}>
             <ListItemButton
               sx={{
@@ -84,6 +99,7 @@ export default function PermanentDrawerLeft() {
               <ListItemText primary="Product" />
             </ListItemButton>
           </ListItem>
+
           <ListItem disablePadding onClick={() => handleNavigate('/salesorder')}>
             <ListItemButton
               sx={{
@@ -96,6 +112,20 @@ export default function PermanentDrawerLeft() {
               <ListItemText primary="Sales Order" />
             </ListItemButton>
           </ListItem>
+
+          <ListItem disablePadding onClick={() => handleNavigate('/mfgorder')}>
+            <ListItemButton
+              sx={{
+                minHeight: '50px',
+                justifyContent: 'center',
+                backgroundColor: '#f5f5f5',
+              }}
+            >
+              <ListItemIcon></ListItemIcon>
+              <ListItemText primary="Manufacturing Order" />
+            </ListItemButton>
+          </ListItem>
+
         </List>
         <Divider />
       </Drawer>

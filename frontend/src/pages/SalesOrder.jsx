@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import api from "../api";
 
@@ -28,48 +29,40 @@ export default function SalesOrder() {
     getSalesOrders();
   }, []);
 
-  const handleRowClick = (salesOrderId) => {
-    navigate(`/salesorder/${salesOrderId}`);
+  const handleRowClick = (params) => {
+    navigate(`/salesorder/${params.row.id}`);
   };
 
   const handleAddSalesOrder = () => {
     navigate(`/salesorder/new`);
-  }
+  };
+
+  const columns = [
+    { field: 'id', headerName: 'Order ID', width: 150 },
+    { field: 'customer_name', headerName: 'Customer', width: 200 },
+    { field: 'total_amount', headerName: 'Total Amount', type: 'number', width: 150 },
+    { field: 'status', headerName: 'Status', width: 150 },
+  ];
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <Box component="main" sx={{justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}>
-        <Typography variant="h3" align="center" sx={{ marginTop: "55px" }}>
+      <Box component="main" sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}>
+        <Typography variant="h3" align="center" sx={{ marginTop: "28px" }}>
           Sales Orders
         </Typography>
-        <Button variant="contained" onClick={handleAddSalesOrder}>
+        <Button variant="contained" sx={{ margin: 2 }} onClick={handleAddSalesOrder}>
           Add Sales Order
         </Button>
 
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Order ID</TableCell>
-                <TableCell align="right">Customer</TableCell>
-                <TableCell align="right">Total Amount</TableCell>
-                <TableCell align="right">Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {salesOrders.map((salesOrder) => (
-                <TableRow key={salesOrder.id} onClick={() => handleRowClick(salesOrder.id)} style={{ cursor: 'pointer' }}>
-                  <TableCell component="th" scope="row">
-                    {salesOrder.id}
-                  </TableCell>
-                  <TableCell align="right">{salesOrder.customer.name}</TableCell>
-                  <TableCell align="right">{salesOrder.total_amount}</TableCell>
-                  <TableCell align="right">{salesOrder.status}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <div style={{ height: 400, width: '100%', margin: 20 }}>
+          <DataGrid
+            rows={salesOrders}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[5]}
+            onRowClick={handleRowClick}
+          />
+        </div>
       </Box>
     </Box>
   );

@@ -14,13 +14,17 @@ import {
 import Alert from '@mui/material/Alert';
 import { Autocomplete, TextField } from '@mui/material';
 
-const SalesOrderForm = () => {
+const QuotationForm = () => {
   const [customer, setCustomer] = useState(null);
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [salesOrderItems, setSalesOrderItems] = useState([]);
+  const [quotationItems, setQuotationItems] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [unitPrice, setUnitPrice] = useState(0);
+  const [date, setDate] = useState('');
+  const [expirationDate, setExpirationDate] = useState('');
+  const [invoicingAndShippingAddress, setInvoicingAndShippingAddress] = useState('');
   const [alert, setAlert] = useState(null);
 
   useEffect(() => {
@@ -47,88 +51,111 @@ const SalesOrderForm = () => {
         product,
         quantity,
         price: product.price,
+        unitPrice,
       };
 
-      setSalesOrderItems([...salesOrderItems, newItem]);
+      setQuotationItems([...quotationItems, newItem]);
       setQuantity(1);
       setProduct(null);
+      setUnitPrice(0);
     }
   };
 
   const validateForm = () => {
     if (!customer) {
-      alert('Please select a customer.');
+      setAlert({ severity: 'error', message: 'Please select a customer.' });
       return false;
     }
-
-    if (salesOrderItems.length === 0) {
-      alert('Please add at least one item to the order.');
+  
+    if (quotationItems.length === 0) {
+      setAlert({ severity: 'error', message: 'Please add at least one item to the quotation.' });
       return false;
     }
-
+  
+    if (!date) {
+      setAlert({ severity: 'error', message: 'Please enter a date.' });
+      return false;
+    }
+  
+    if (!expirationDate) {
+      setAlert({ severity: 'error', message: 'Please enter an expiration date.' });
+      return false;
+    }
+  
+    if (!invoicingAndShippingAddress) {
+      setAlert({ severity: 'error', message: 'Please enter an invoicing and shipping address.' });
+      return false;
+    }
+  
     return true;
   };
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
     if (!validateForm()) {
       return;
     }
-  
-    const salesOrderData = {
+
+    const quotationData = {
+      date,
+      expiration_date: expirationDate,
+      invoicing_and_shipping_address: invoicingAndShippingAddress,
       customer: customer.id,
-      order_items: salesOrderItems.map((item) => ({
+      quotation_items: quotationItems.map((item) => ({
         product: item.product.id,
         quantity: item.quantity,
         price: item.price,
+        unit_price: item.unitPrice,
       })),
     };
-  
-    console.log('Sending data:', salesOrderData); // Log the data being sent
-  
+
+    console.log('Quotation data being sent:', quotationData);
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/sales/orders/', {
+      const response = await fetch('http://127.0.0.1:8000/api/sales/quotations/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(salesOrderData),
+        body: JSON.stringify(quotationData),
       });
-  
+
       const responseData = await response.json();
-  
-      console.log('Received data:', responseData); // Log the response data
-  
+
+      console.log('Quotation data received:', responseData);
+
       if (response.ok) {
-        // alert('Sales order created successfully!');
         setAlert({ severity: 'success', message: 'This is a success Alert.' });
         setTimeout(() => {
           setAlert(null);
-        }, 3000); // Hide the alert after 3 seconds
+        }, 3000);
         setCustomer(null);
-        setSalesOrderItems([]);
+        setQuotationItems([]);
       } else {
-        alert(`Error creating sales order: ${responseData.error || 'Unknown error'}`);
+        setAlert({ severity: 'error', message: `Error creating quotation: ${responseData.error || 'Unknown error'}` });
       }
     } catch (error) {
-      console.error('Error creating sales order:', error);
-      alert('An error occurred while creating the sales order. Please try again later.');
+      console.error('Error creating quotation:', error);
+      setAlert({ severity: 'error', message: 'An error occurred while creating the quotation. Please try again later.' });
     }
   };
-  
 
   const handleDeleteItem = (index) => {
-    const updatedSalesOrderItems = [...salesOrderItems];
-    updatedSalesOrderItems.splice(index, 1);
-    setSalesOrderItems(updatedSalesOrderItems);
+    const updatedQuotationItems = [...quotationItems];
+    updatedQuotationItems.splice(index, 1);
+    setQuotationItems(updatedQuotationItems);
   };
 
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Sales Order Form
+        Quotation Form
       </Typography>
+      <div>
+        {alert && <Alert severity={alert.severity}>{alert.message}</Alert>}
+      </div>
       <form onSubmit={handleSubmit}>
         <Autocomplete
           options={customers}
@@ -137,6 +164,32 @@ const SalesOrderForm = () => {
           getOptionLabel={(option) => option.name}
           renderInput={(params) => <TextField {...params} label="Customer" fullWidth margin="normal" />}
         />
+        <TextField
+          type="date"
+          label="Date"
+          value={date}
+          onChange={(event) => setDate(event.target.value)}
+          fullWidth
+          margin="normal"
+        />
+
+        <TextField
+          type="date"
+          label="Expiration Date"
+          value={expirationDate}
+          onChange={(event) => setExpirationDate(event.target.value)}
+          fullWidth
+          margin="normal"
+        />
+
+        <TextField
+          label="Invoicing and Shipping Address"
+          value={invoicingAndShippingAddress}
+          onChange={(event) => setInvoicingAndShippingAddress(event.target.value)}
+          fullWidth
+          margin="normal"
+        />
+
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -144,16 +197,18 @@ const SalesOrderForm = () => {
                 <TableCell>Product</TableCell>
                 <TableCell align="right">Quantity</TableCell>
                 <TableCell align="right">Price</TableCell>
+                <TableCell align="right">Unit Price</TableCell>
                 <TableCell align="right">Total</TableCell>
                 <TableCell align="right">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {salesOrderItems.map((item, index) => (
+              {quotationItems.map((item, index) => (
                 <TableRow key={index}>
                   <TableCell>{item.product.name}</TableCell>
                   <TableCell align="right">{item.quantity}</TableCell>
                   <TableCell align="right">{item.price}</TableCell>
+                  <TableCell align="right">{item.unitPrice}</TableCell>
                   <TableCell align="right">{item.quantity * item.price}</TableCell>
                   <TableCell align="right">
                     <Button variant="contained" color="error" onClick={() => handleDeleteItem(index)}>
@@ -173,7 +228,7 @@ const SalesOrderForm = () => {
             onChange={(event, newValue) => setProduct(newValue)}
             getOptionLabel={(option) => option.name}
             renderOption={(props, option) => (
-              <li {...props} key={option.id}> {/* Use option.id instead of option.name as the key */}
+              <li {...props} key={option.id}>
                 {option.name}
               </li>
             )}
@@ -188,21 +243,26 @@ const SalesOrderForm = () => {
             margin="normal"
             sx={{ ml: 2, mr: 2, width: '300px' }}
           />
+          <TextField
+          type="number"
+          value={unitPrice}
+          onChange={(event) => setUnitPrice(event.target.value)}
+          label="Unit Price"
+          margin="normal"
+          sx={{ ml: 2, mr: 2, width: '300px' }}
+          />
           <Button variant="contained" onClick={handleAddItem}>
             Add Item
           </Button>
         </Box>
 
         <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
-          Submit Order
+          Submit Quotation
         </Button>
       </form>
-      <div>
-      {alert && <Alert severity={alert.severity}>{alert.message}</Alert>}
-      {/* Rest of the component JSX */}
-    </div>
+
     </Box>
   );
 };
 
-export default SalesOrderForm;
+export default QuotationForm;
