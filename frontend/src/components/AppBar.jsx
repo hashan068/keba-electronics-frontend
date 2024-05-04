@@ -1,5 +1,6 @@
 // components/AppBar.jsx
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -21,6 +22,7 @@ const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -33,8 +35,12 @@ function ResponsiveAppBar() {
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = () => {
+  const handleCloseUserMenu = (setting) => {
     setAnchorElUser(null);
+    if (setting === 'Logout') {
+      navigate('/logout');
+      console.log('Logout');
+    }
   };
 
   return (
@@ -133,6 +139,7 @@ function ResponsiveAppBar() {
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
               </IconButton>
             </Tooltip>
+
             <Menu
               sx={{ mt: '45px' }}
               id="menu-appbar"
@@ -150,7 +157,7 @@ function ResponsiveAppBar() {
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                <MenuItem key={setting} onClick={(event) => handleCloseUserMenu(setting)}>
                   <Typography textAlign="center">{setting}</Typography>
                 </MenuItem>
               ))}

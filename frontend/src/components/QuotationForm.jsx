@@ -10,10 +10,20 @@ import {
   TableHead,
   TableRow,
   Paper,
+  FormLabel,
+  OutlinedInput,
+
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import { Autocomplete, TextField } from '@mui/material';
-
+import FormGrid from './forms/FormGrid';
+// const FormGrid = styled(Grid)(() => ({
+//   display: 'flex',
+//   flexDirection: 'column',
+// }));
+const handleExpirationDateChange = (event) => {
+  setExpirationDate(event.target.value);
+};
 const QuotationForm = () => {
   const [customer, setCustomer] = useState(null);
   const [product, setProduct] = useState(null);
@@ -66,30 +76,30 @@ const QuotationForm = () => {
       setAlert({ severity: 'error', message: 'Please select a customer.' });
       return false;
     }
-  
+
     if (quotationItems.length === 0) {
       setAlert({ severity: 'error', message: 'Please add at least one item to the quotation.' });
       return false;
     }
-  
+
     if (!date) {
       setAlert({ severity: 'error', message: 'Please enter a date.' });
       return false;
     }
-  
+
     if (!expirationDate) {
       setAlert({ severity: 'error', message: 'Please enter an expiration date.' });
       return false;
     }
-  
+
     if (!invoicingAndShippingAddress) {
       setAlert({ severity: 'error', message: 'Please enter an invoicing and shipping address.' });
       return false;
     }
-  
+
     return true;
   };
-  
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -164,23 +174,65 @@ const QuotationForm = () => {
           getOptionLabel={(option) => option.name}
           renderInput={(params) => <TextField {...params} label="Customer" fullWidth margin="normal" />}
         />
-        <TextField
-          type="date"
-          label="Date"
-          value={date}
-          onChange={(event) => setDate(event.target.value)}
-          fullWidth
-          margin="normal"
-        />
 
-        <TextField
-          type="date"
-          label="Expiration Date"
-          value={expirationDate}
-          onChange={(event) => setExpirationDate(event.target.value)}
-          fullWidth
-          margin="normal"
-        />
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <FormGrid sx={{ flexGrow: 1 }}>
+            <FormLabel htmlFor="card-name" required>
+              Name
+            </FormLabel>
+            <OutlinedInput
+              id="card-name"
+              autoComplete="card-name"
+              placeholder="John Smith"
+              required
+            />
+          </FormGrid>
+          <FormGrid sx={{ flexGrow: 1 }}>
+            <FormLabel htmlFor="card-expiration" required>
+              Expiration date
+            </FormLabel>
+            <OutlinedInput
+              id="card-expiration"
+              autoComplete="card-expiration"
+              placeholder="MM/YY"
+              required
+              value={expirationDate}
+              onChange={handleExpirationDateChange}
+            />
+          </FormGrid>
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <FormGrid sx={{ flexGrow: 1 }}>
+            <FormLabel htmlFor="card-name" required>
+              Name
+            </FormLabel>
+            <TextField
+              type="date"
+              // label="Date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+              fullWidth
+              margin="normal"
+            />
+          </FormGrid>
+          <FormGrid sx={{ flexGrow: 1 }}>
+            <FormLabel htmlFor="card-expiration" required>
+              Expiration date
+            </FormLabel>
+            <TextField
+              type="date"
+              // label="Expiration Date"
+              value={expirationDate}
+              onChange={(event) => setExpirationDate(event.target.value)}
+              fullWidth
+              margin="normal"
+            />
+          </FormGrid>
+        </Box>
+
+
+        
 
         <TextField
           label="Invoicing and Shipping Address"
@@ -244,12 +296,12 @@ const QuotationForm = () => {
             sx={{ ml: 2, mr: 2, width: '300px' }}
           />
           <TextField
-          type="number"
-          value={unitPrice}
-          onChange={(event) => setUnitPrice(event.target.value)}
-          label="Unit Price"
-          margin="normal"
-          sx={{ ml: 2, mr: 2, width: '300px' }}
+            type="number"
+            value={unitPrice}
+            onChange={(event) => setUnitPrice(event.target.value)}
+            label="Unit Price"
+            margin="normal"
+            sx={{ ml: 2, mr: 2, width: '300px' }}
           />
           <Button variant="contained" onClick={handleAddItem}>
             Add Item
