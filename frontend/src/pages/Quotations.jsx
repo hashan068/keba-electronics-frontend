@@ -74,7 +74,7 @@ export default function Quotations() {
           <DataGrid
             rows={quotations}
             columns={columns}
-            pageSize={5}
+            pageSize={10}
             rowsPerPageOptions={[5]}
             onRowClick={handleRowClick}
           />
