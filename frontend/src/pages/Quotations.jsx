@@ -3,6 +3,7 @@ import { Box, Typography, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
+import { parse, format } from 'date-fns';
 
 export default function Quotations() {
   const [quotations, setQuotations] = useState([]);
@@ -30,7 +31,7 @@ export default function Quotations() {
   }, []);
 
   const handleRowClick = (params) => {
-    navigate(`/quotation/${params.row.id}/detail`);
+    navigate(`/quotation/${params.row.id}`);
   };
 
   const handleAddQuotation = () => {
@@ -40,30 +41,33 @@ export default function Quotations() {
   const columns = [
     { field: 'id', headerName: 'ID', width: 100 },
     { field: 'quotation_number', headerName: 'Quotation Number', width: 150 },
-    { field: 'customer', headerName: 'Customer', width: 200 },
+    { field: 'customer_name', headerName: 'Customer', width: 200 },
     {
       field: 'date',
       headerName: 'Date',
       type: 'date',
       width: 150,
-      valueGetter: (params) =>
-        params.value instanceof Date ? params.value : new Date(params.value),
+      valueFormatter: (params) => params.value && format(new Date(params.value), 'yyyy/MM/dd'),
     },
     {
       field: 'expiration_date',
       headerName: 'Expiration Date',
       type: 'date',
       width: 150,
-      valueGetter: (params) =>
-        params.value instanceof Date ? params.value : new Date(params.value),
+      valueFormatter: (params) => params.value && format(new Date(params.value), 'yyyy/MM/dd'),
     },
     { field: 'total_amount', headerName: 'Total Amount', type: 'number', width: 150 },
     { field: 'status', headerName: 'Status', width: 150 },
   ];
+  
+  
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <Box component="main" sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}>
+      <Box
+        component="main"
+        sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}
+      >
         <Typography variant="h3" align="center" sx={{ marginTop: '28px' }}>
           Quotations
         </Typography>
