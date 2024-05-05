@@ -1,3 +1,4 @@
+// src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -96,7 +97,7 @@ function App() {
         />
 
         <Route
-          path="/quotations/:id"
+          path="/quotation/:id"
           element={
             <ProtectedRoute>
               <Layout>

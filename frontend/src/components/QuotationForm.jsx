@@ -31,7 +31,7 @@ const QuotationForm = () => {
   const [quotationItems, setQuotationItems] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
-  const [unitPrice, setUnitPrice] = useState(0);
+  
   const [date, setDate] = useState('');
   const [expirationDate, setExpirationDate] = useState('');
   const [invoicingAndShippingAddress, setInvoicingAndShippingAddress] = useState('');
@@ -56,18 +56,16 @@ const QuotationForm = () => {
   }, []);
 
   const handleAddItem = () => {
-    if (product && quantity > 0) {
+    if (product && quantity > 0 && product.price !== null) {
       const newItem = {
         product,
         quantity,
         price: product.price,
-        unitPrice,
       };
-
+  
       setQuotationItems([...quotationItems, newItem]);
       setQuantity(1);
       setProduct(null);
-      setUnitPrice(0);
     }
   };
 
@@ -116,8 +114,8 @@ const QuotationForm = () => {
       quotation_items: quotationItems.map((item) => ({
         product: item.product.id,
         quantity: item.quantity,
-        price: item.price,
-        unit_price: item.unitPrice,
+        unit_price: item.price,
+        
       })),
     };
 
@@ -187,7 +185,7 @@ const QuotationForm = () => {
               required
             />
           </FormGrid>
-          <FormGrid sx={{ flexGrow: 1 }}>
+          {/* <FormGrid sx={{ flexGrow: 1 }}>
             <FormLabel htmlFor="card-expiration" required>
               Expiration date
             </FormLabel>
@@ -199,7 +197,7 @@ const QuotationForm = () => {
               value={expirationDate}
               onChange={handleExpirationDateChange}
             />
-          </FormGrid>
+          </FormGrid> */}
         </Box>
 
         <Box sx={{ display: 'flex', gap: 2 }}>
@@ -232,8 +230,6 @@ const QuotationForm = () => {
         </Box>
 
 
-        
-
         <TextField
           label="Invoicing and Shipping Address"
           value={invoicingAndShippingAddress}
@@ -249,7 +245,7 @@ const QuotationForm = () => {
                 <TableCell>Product</TableCell>
                 <TableCell align="right">Quantity</TableCell>
                 <TableCell align="right">Price</TableCell>
-                <TableCell align="right">Unit Price</TableCell>
+
                 <TableCell align="right">Total</TableCell>
                 <TableCell align="right">Action</TableCell>
               </TableRow>
@@ -260,7 +256,7 @@ const QuotationForm = () => {
                   <TableCell>{item.product.name}</TableCell>
                   <TableCell align="right">{item.quantity}</TableCell>
                   <TableCell align="right">{item.price}</TableCell>
-                  <TableCell align="right">{item.unitPrice}</TableCell>
+
                   <TableCell align="right">{item.quantity * item.price}</TableCell>
                   <TableCell align="right">
                     <Button variant="contained" color="error" onClick={() => handleDeleteItem(index)}>
@@ -295,14 +291,7 @@ const QuotationForm = () => {
             margin="normal"
             sx={{ ml: 2, mr: 2, width: '300px' }}
           />
-          <TextField
-            type="number"
-            value={unitPrice}
-            onChange={(event) => setUnitPrice(event.target.value)}
-            label="Unit Price"
-            margin="normal"
-            sx={{ ml: 2, mr: 2, width: '300px' }}
-          />
+
           <Button variant="contained" onClick={handleAddItem}>
             Add Item
           </Button>

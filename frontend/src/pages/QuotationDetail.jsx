@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import api from '../api';
+import PreviewDownloadButtons from '../components/PreviewDownloadButtons';
+import saveAs from 'file-saver';
 
 export default function QuotationDetail() {
   const { id } = useParams();
   const [quotation, setQuotation] = useState(null);
 
   useEffect(() => {
-    api.get(`/api/quotations/${id}/`)
+    api.get(`/api/sales/quotations/${id}/`)
       .then((res) => {
         setQuotation(res.data);
       })
@@ -18,14 +20,37 @@ export default function QuotationDetail() {
       });
   }, [id]);
 
+  const handlePreview = () => {
+    // Add your preview logic here
+    console.log('Preview clicked');
+  };
+
+  const handleDownload = () => {
+    api
+      .get(`/api/sales/quotations/${id}/download/`, {
+        responseType: 'blob',
+      })
+      .then((res) => {
+        const pdfBlob = new Blob([res.data], { type: 'application/pdf' });
+        saveAs(pdfBlob, `quotation_${id}.pdf`);
+      })
+      .catch((err) => {
+        console.log(err);
+        alert('Error downloading quotation');
+      });
+  };
+
   if (!quotation) {
     return <div>Loading...</div>;
   }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <Box component="main" sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}>
-        <Typography variant="h3" align="center" sx={{ marginTop: "28px" }}>
+      <Box
+        component="main"
+        sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}
+      >
+        <Typography variant="h3" align="center" sx={{ marginTop: '28px' }}>
           Quotation Details
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 2 }}>
@@ -58,6 +83,7 @@ export default function QuotationDetail() {
             <Typography>{quotation.status}</Typography>
           </Box>
         </Box>
+        <PreviewDownloadButtons onPreview={handlePreview} onDownload={handleDownload} />
       </Box>
     </Box>
   );

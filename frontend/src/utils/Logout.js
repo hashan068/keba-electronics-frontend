@@ -1,3 +1,4 @@
+// src/utils/Logout.js
 import { Navigate } from "react-router-dom";
 
 const Logout = () => {
