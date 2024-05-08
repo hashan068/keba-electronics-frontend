@@ -8,14 +8,17 @@ const SalesOrderDetails = () => {
   const navigate = useNavigate();
   const [salesOrder, setSalesOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [salesOrderItems, setSalesOrderItems] = useState([]);
 
   useEffect(() => {
     const fetchSalesOrder = async () => {
       if (id) {
         setIsLoading(true);
         try {
-          const response = await api.get(`/api/sales/orders/${id}/`);
-          setSalesOrder(response.data);
+          const { data } = await api.get(`/api/sales/orders/${id}/`);
+          setSalesOrder(data);
+          setSalesOrderItems(data.order_items);
+          console.log(data);
         } catch (error) {
           console.error(error);
         } finally {
@@ -26,8 +29,35 @@ const SalesOrderDetails = () => {
     fetchSalesOrder();
   }, [id]);
 
+  const createManufacturingOrder = async (salesOrderItemId) => {
+    const salesOrderItem = salesOrderItems.find(item => item.id === salesOrderItemId);
+    if (!salesOrderItem) return;
+
+    const manufacturingOrderData = {
+      sales_order_item: salesOrderItem.id,
+      quantity: salesOrderItem.quantity,
+      product: salesOrderItem.product,
+    };
+
+    console.log(manufacturingOrderData);
+    try {
+      const response = await api.post('/api/manufacturing/manufacturing-orders/', manufacturingOrderData);
+      console.log(response.data);
+      // Handle successful creation of manufacturing order
+    } catch (error) {
+      console.error(error);
+      // Handle error in creating manufacturing order
+    }
+  };
+
   const handleEdit = () => {
-    navigate(`/salesorder/${id}/edit`);
+    navigate(`/salesorder/${id}`);
+  };
+
+  const handleManufacture = () => {
+    salesOrderItems.forEach((item) => {
+      createManufacturingOrder(item.id);
+    });
   };
 
   if (isLoading) {
@@ -43,12 +73,20 @@ const SalesOrderDetails = () => {
       <Typography variant="h4" gutterBottom>
         Sales Order Details
       </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Button variant="contained" onClick={handleEdit}>
+          Edit
+        </Button>
+        <Button variant="contained" color="primary" onClick={handleManufacture}>
+          Manufacture
+        </Button>
+      </Box>
       <Box>
         <Typography variant="h6" gutterBottom>
           Order ID: {salesOrder.id}
         </Typography>
         <Typography variant="h6" gutterBottom>
-          Customer: {salesOrder.customer.name}
+          Customer: {salesOrder.customer_name}
         </Typography>
         <Typography variant="h6" gutterBottom>
           Total Amount: {salesOrder.total_amount}
@@ -68,22 +106,17 @@ const SalesOrderDetails = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {salesOrder.items.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>{item.product}</TableCell>
+            {salesOrderItems.map((item) => (
+              <TableRow key={item.product}>
+                <TableCell>{item.product.name}</TableCell>
                 <TableCell align="right">{item.quantity}</TableCell>
                 <TableCell align="right">{item.price}</TableCell>
-                <TableCell align="right">{item.quantity * item.price}</TableCell>
+                <TableCell align="right">{(item.quantity * parseFloat(item.price)).toFixed(2)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      <Box sx={{ mt: 2 }}>
-        <Button variant="contained" onClick={handleEdit}>
-          Edit
-        </Button>
-      </Box>
     </Box>
   );
 };

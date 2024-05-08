@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Button, Alert } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import api from '../api';
-import PreviewDownloadButtons from '../components/PreviewDownloadButtons';
+import api from '../../api';
+import PreviewDownloadButtons from '../../components/PreviewDownloadButtons';
 import saveAs from 'file-saver';
 
 export default function QuotationDetail() {
   const { id } = useParams();
   const [quotation, setQuotation] = useState(null);
-  const [customer, setCustomer] = useState(null);
-  const [product, setProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
+  // const [customer, setCustomer] = useState(null);
+  // const [product, setProduct] = useState(null);
+  // const [quantity, setQuantity] = useState(1);
   const [salesOrderItems, setSalesOrderItems] = useState([]);
   const [alert, setAlert] = useState(null);
 

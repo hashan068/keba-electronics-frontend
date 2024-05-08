@@ -1,3 +1,4 @@
+// QuotationForm.jsx
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -174,7 +175,7 @@ const QuotationForm = () => {
         />
 
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <FormGrid sx={{ flexGrow: 1 }}>
+          {/* <FormGrid sx={{ flexGrow: 1 }}>
             <FormLabel htmlFor="card-name" required>
               Name
             </FormLabel>
@@ -184,7 +185,7 @@ const QuotationForm = () => {
               placeholder="John Smith"
               required
             />
-          </FormGrid>
+          </FormGrid> */}
           {/* <FormGrid sx={{ flexGrow: 1 }}>
             <FormLabel htmlFor="card-expiration" required>
               Expiration date
@@ -203,7 +204,7 @@ const QuotationForm = () => {
         <Box sx={{ display: 'flex', gap: 2 }}>
           <FormGrid sx={{ flexGrow: 1 }}>
             <FormLabel htmlFor="card-name" required>
-              Name
+              Date
             </FormLabel>
             <TextField
               type="date"

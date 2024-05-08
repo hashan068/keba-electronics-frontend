@@ -2,21 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
-import api from "../api";
+import api from "../../api";
 
-export default function ManufacturingOrderList() {
-  const [manufacturingOrders, setManufacturingOrders] = useState([]);
+export default function SalesOrder() {
+  const [salesOrders, setSalesOrders] = useState([]);
   const navigate = useNavigate();
 
-  const getManufacturingOrders = () => {
+  const getSalesOrders = () => {
     api
-      .get("/api/manufacturing/manufacturing-orders/")
+      .get("/api/sales/orders/")
       .then((res) => {
         console.log(res.data);
         return res.data;
       })
       .then((data) => {
-        setManufacturingOrders(data);
+        setSalesOrders(data);
         console.log(data);
       })
       .catch((err) => {
@@ -26,15 +26,15 @@ export default function ManufacturingOrderList() {
   };
 
   useEffect(() => {
-    getManufacturingOrders();
+    getSalesOrders();
   }, []);
 
   const handleRowClick = (params) => {
-    navigate(`/manufacturingorder/${params.row.id}`);
+    navigate(`/salesorder/${params.row.id}`);
   };
 
-  const handleAddManufacturingOrder = () => {
-    navigate(`/manufacturingorder/new`);
+  const handleAddSalesOrder = () => {
+    navigate(`/salesorder/new`);
   };
 
   const columns = [
@@ -47,9 +47,10 @@ export default function ManufacturingOrderList() {
       headerClassName: 'super-app-theme--header'
     },
     { field: 'id', headerName: 'Order ID', width: 150, headerClassName: 'super-app-theme--header' },
-    { field: 'sales_order_id', headerName: 'Sales Order ID', width: 200, headerClassName: 'super-app-theme--header' },
-    { field: 'product_id', headerName: 'Product ID', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
+    { field: 'customer_name', headerName: 'Customer', width: 200, headerClassName: 'super-app-theme--header' },
+    { field: 'total_amount', headerName: 'Total Amount', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
     { field: 'status', headerName: 'Status', width: 150, headerClassName: 'super-app-theme--header' },
+
   ];
 
   return (
@@ -63,9 +64,12 @@ export default function ManufacturingOrderList() {
     }}>
       <Box component="main" sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '95%' }}>
         <Typography variant="h3" align="center" sx={{ marginTop: "28px" }}>
-          Manufacturing Orders
+          Sales Orders
         </Typography>
 
+        <Button variant="contained" sx={{ margin: 2 }} onClick={handleAddSalesOrder}>
+          Add Sales Order
+        </Button>
         <Box sx={{
           height: 600,
           width: '100%',
@@ -76,7 +80,7 @@ export default function ManufacturingOrderList() {
           },
         }}>
           <DataGrid
-            rows={manufacturingOrders}
+            rows={salesOrders}
             columns={columns}
             pageSize={8}
             rowsPerPageOptions={[10]}

@@ -4,19 +4,19 @@ import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import api from "../api";
 
-export default function ManufacturingOrderList() {
-  const [manufacturingOrders, setManufacturingOrders] = useState([]);
+export default function Components() {
+  const [components, setComponents] = useState([]);
   const navigate = useNavigate();
 
-  const getManufacturingOrders = () => {
+  const getComponents = () => {
     api
-      .get("/api/manufacturing/manufacturing-orders/")
+      .get("/api/inventory/components/")
       .then((res) => {
         console.log(res.data);
         return res.data;
       })
       .then((data) => {
-        setManufacturingOrders(data);
+        setComponents(data);
         console.log(data);
       })
       .catch((err) => {
@@ -26,30 +26,25 @@ export default function ManufacturingOrderList() {
   };
 
   useEffect(() => {
-    getManufacturingOrders();
+    getComponents();
   }, []);
 
   const handleRowClick = (params) => {
-    navigate(`/manufacturingorder/${params.row.id}`);
+    navigate(`/component/${params.row.id}`);
   };
 
-  const handleAddManufacturingOrder = () => {
-    navigate(`/manufacturingorder/new`);
+  const handleAddComponent = () => {
+    navigate(`/component/new`);
   };
 
   const columns = [
-    {
-      field: 'date',
-      headerName: 'Date',
-      type: 'date',
-      width: 150,
-      valueFormatter: (params) => params.value && format(new Date(params.value), 'yyyy/MM/dd'),
-      headerClassName: 'super-app-theme--header'
-    },
-    { field: 'id', headerName: 'Order ID', width: 150, headerClassName: 'super-app-theme--header' },
-    { field: 'sales_order_id', headerName: 'Sales Order ID', width: 200, headerClassName: 'super-app-theme--header' },
-    { field: 'product_id', headerName: 'Product ID', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
-    { field: 'status', headerName: 'Status', width: 150, headerClassName: 'super-app-theme--header' },
+    { field: 'name', headerName: 'Component Name', width: 200, headerClassName: 'super-app-theme--header' },
+    { field: 'description', headerName: 'Description', width: 300, headerClassName: 'super-app-theme--header' },
+    { field: 'quantity', headerName: 'Quantity', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
+    { field: 'reorder_level', headerName: 'Reorder Level', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
+    { field: 'unit_of_measure', headerName: 'Unit of Measure', width: 150, headerClassName: 'super-app-theme--header' },
+    { field: 'supplier', headerName: 'Supplier', width: 200, headerClassName: 'super-app-theme--header' },
+    { field: 'cost', headerName: 'Cost', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
   ];
 
   return (
@@ -61,22 +56,23 @@ export default function ManufacturingOrderList() {
       height: '100%',
       width: '100%',
     }}>
-      <Box component="main" sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '95%' }}>
-        <Typography variant="h3" align="center" sx={{ marginTop: "28px" }}>
-          Manufacturing Orders
+      <Box component="main" sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}>
+        <Typography variant="h3" align="center" sx={{ marginTop: "55px" }}>
+          Components
         </Typography>
-
+        <Button variant="contained" onClick={handleAddComponent}>
+          Add Component
+        </Button>
         <Box sx={{
           height: 600,
           width: '100%',
           '& .super-app-theme--header': {
             backgroundColor: '#cfd8dc',
-            // color: 'white',
-            
+            color: 'white',
           },
         }}>
           <DataGrid
-            rows={manufacturingOrders}
+            rows={components}
             columns={columns}
             pageSize={8}
             rowsPerPageOptions={[10]}
