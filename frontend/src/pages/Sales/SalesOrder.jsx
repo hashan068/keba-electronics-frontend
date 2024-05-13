@@ -39,46 +39,50 @@ export default function SalesOrder() {
 
   const columns = [
     {
-      field: 'date',
+      field: 'id',
+      headerName: 'Order ID',
+      width: 150,
+      headerClassName: 'super-app-theme--header'
+    },
+    {
+      field: 'customer_name',
+      headerName: 'Customer',
+      width: 200,
+      headerClassName: 'super-app-theme--header'
+    },
+    {
+      field: 'total_amount',
+      headerName: 'Total Amount',
+      type: 'number',
+      width: 150,
+      headerClassName: 'super-app-theme--header'
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 150,
+      headerClassName: 'super-app-theme--header'
+    },
+    {
+      field: 'created_at_date',
       headerName: 'Date',
       type: 'date',
       width: 150,
-      valueFormatter: (params) => params.value && format(new Date(params.value), 'yyyy/MM/dd'),
+      valueFormatter: (params) => params.value && new Date(params.value).toLocaleDateString(),
       headerClassName: 'super-app-theme--header'
     },
-    { field: 'id', headerName: 'Order ID', width: 150, headerClassName: 'super-app-theme--header' },
-    { field: 'customer_name', headerName: 'Customer', width: 200, headerClassName: 'super-app-theme--header' },
-    { field: 'total_amount', headerName: 'Total Amount', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
-    { field: 'status', headerName: 'Status', width: 150, headerClassName: 'super-app-theme--header' },
-
   ];
 
   return (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100%',
-      width: '100%',
-    }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', }}>
       <Box component="main" sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '95%' }}>
         <Typography variant="h3" align="center" sx={{ marginTop: "28px" }}>
           Sales Orders
         </Typography>
-
         <Button variant="contained" sx={{ margin: 2 }} onClick={handleAddSalesOrder}>
           Add Sales Order
         </Button>
-        <Box sx={{
-          height: 600,
-          width: '100%',
-          '& .super-app-theme--header': {
-            backgroundColor: '#cfd8dc',
-            // color: 'white',
-            
-          },
-        }}>
+        <Box sx={{ height: 600, width: '100%', '& .super-app-theme--header': { backgroundColor: '#cfd8dc' } }}>
           <DataGrid
             rows={salesOrders}
             columns={columns}
@@ -89,12 +93,8 @@ export default function SalesOrder() {
               boxShadow: 2,
               border: 2,
               borderColor: 'primary.light',
-              '& .MuiDataGrid-cell:hover': {
-                color: 'primary.main',
-              },
-              ".MuiDataGrid-iconButtonContainer": {
-                marginLeft: '50px !important'
-              },
+              '& .MuiDataGrid-cell:hover': { color: 'primary.main' },
+              ".MuiDataGrid-iconButtonContainer": { marginLeft: '50px !important' },
             }}
           />
         </Box>

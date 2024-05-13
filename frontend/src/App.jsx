@@ -3,20 +3,20 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import Product from "./pages/Product";
+import Product from "./pages/Sales/Product";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout"; // Import the Layout component
 import ProductDetails from "./pages/ProductDetails";
-import SalesOrder from './pages/SalesOrder';
+import SalesOrder from './pages/Sales/SalesOrder';
 import SalesOrderForm from './components/SalesOrderForm';
-import MfgOrder from './pages/ManufacturingOrder';
-import Quotations from './pages/Quotations';
-import QuotationDetail from './pages/QuotationDetail';
+
+import Quotations from './pages/Sales/Quotations';
+import QuotationDetail from './pages/Sales/QuotationDetail';
 import QuotationForm from './components/QuotationForm';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import SalesOrderDetails from "./pages/SalesOrderDetails";
-import ManufacturingOrder from "./pages/ManufacturingOrder";
+import SalesOrderDetails from "./pages/Sales/SalesOrderDetails";
+import ManufacturingOrder from "./pages/Manufacturing/ManufacturingOrder";
 
 const theme = createTheme({
   palette: {

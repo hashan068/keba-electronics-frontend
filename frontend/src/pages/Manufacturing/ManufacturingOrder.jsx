@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
-import api from "../api";
+import api from "../../api";
 
 export default function ManufacturingOrderList() {
   const [manufacturingOrders, setManufacturingOrders] = useState([]);

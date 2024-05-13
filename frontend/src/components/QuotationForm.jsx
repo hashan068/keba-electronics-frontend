@@ -22,9 +22,11 @@ import FormGrid from './forms/FormGrid';
 //   display: 'flex',
 //   flexDirection: 'column',
 // }));
+
 const handleExpirationDateChange = (event) => {
   setExpirationDate(event.target.value);
 };
+
 const QuotationForm = () => {
   const [customer, setCustomer] = useState(null);
   const [product, setProduct] = useState(null);

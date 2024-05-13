@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
-import api from '../api';
+import api from '../../api';
+
 
 const SalesOrderDetails = () => {
   const { id } = useParams();
@@ -31,15 +32,17 @@ const SalesOrderDetails = () => {
 
   const createManufacturingOrder = async (salesOrderItemId) => {
     const salesOrderItem = salesOrderItems.find(item => item.id === salesOrderItemId);
+  
     if (!salesOrderItem) return;
-
+  
     const manufacturingOrderData = {
-      sales_order_item: salesOrderItem.id,
+      sales_order_item: salesOrderItem, // Pass the entire salesOrderItem object
       quantity: salesOrderItem.quantity,
       product: salesOrderItem.product,
     };
-
+  
     console.log(manufacturingOrderData);
+  
     try {
       const response = await api.post('/api/manufacturing/manufacturing-orders/', manufacturingOrderData);
       console.log(response.data);
@@ -74,9 +77,7 @@ const SalesOrderDetails = () => {
         Sales Order Details
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <Button variant="contained" onClick={handleEdit}>
-          Edit
-        </Button>
+
         <Button variant="contained" color="primary" onClick={handleManufacture}>
           Manufacture
         </Button>
@@ -99,7 +100,7 @@ const SalesOrderDetails = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Product</TableCell>
+              <TableCell align="right">Product</TableCell>
               <TableCell align="right">Quantity</TableCell>
               <TableCell align="right">Price</TableCell>
               <TableCell align="right">Total</TableCell>
@@ -108,7 +109,7 @@ const SalesOrderDetails = () => {
           <TableBody>
             {salesOrderItems.map((item) => (
               <TableRow key={item.product}>
-                <TableCell>{item.product.name}</TableCell>
+                <TableCell>{item.product}</TableCell>
                 <TableCell align="right">{item.quantity}</TableCell>
                 <TableCell align="right">{item.price}</TableCell>
                 <TableCell align="right">{(item.quantity * parseFloat(item.price)).toFixed(2)}</TableCell>

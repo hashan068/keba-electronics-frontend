@@ -120,14 +120,7 @@ export default function QuotationDetail() {
         <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mr: 2 }}>
           Create Sales Order
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleConfirm}
-          sx={{ mr: 2 }}
-        >
-          Confirm
-        </Button>
+
 
         {alert && (
           <Alert severity={alert.severity} onClose={() => setAlert(null)}>
