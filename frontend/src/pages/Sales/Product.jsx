@@ -30,11 +30,11 @@ export default function Product() {
   }, []);
 
   const handleRowClick = (params) => {
-    navigate(`/product/${params.row.id}`);
+    navigate(`/sales/product/${params.row.id}`);
   };
 
   const handleAddProduct = () => {
-    navigate(`/product/new`);
+    navigate(`/sales/product/new`);
   };
 
   const columns = [

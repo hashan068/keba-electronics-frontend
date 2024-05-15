@@ -3,7 +3,6 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
-import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
@@ -74,7 +73,7 @@ export default function PermanentDrawerLeft() {
             </ListItemButton>
           </ListItem>
 
-          <ListItem disablePadding onClick={() => handleNavigate('/quotations')}>
+          <ListItem disablePadding onClick={() => handleNavigate('/sales/quotations')}>
             <ListItemButton
               sx={{
                 minHeight: '50px',
@@ -87,7 +86,7 @@ export default function PermanentDrawerLeft() {
             </ListItemButton>
           </ListItem>
 
-          <ListItem disablePadding onClick={() => handleNavigate('/product')}>
+          <ListItem disablePadding onClick={() => handleNavigate('/sales/product')}>
             <ListItemButton
               sx={{
                 minHeight: '50px',
@@ -100,7 +99,7 @@ export default function PermanentDrawerLeft() {
             </ListItemButton>
           </ListItem>
 
-          <ListItem disablePadding onClick={() => handleNavigate('/salesorder')}>
+          <ListItem disablePadding onClick={() => handleNavigate('/sales/salesorder')}>
             <ListItemButton
               sx={{
                 minHeight: '50px',
@@ -113,7 +112,7 @@ export default function PermanentDrawerLeft() {
             </ListItemButton>
           </ListItem>
 
-          <ListItem disablePadding onClick={() => handleNavigate('/mfgorder')}>
+          <ListItem disablePadding onClick={() => handleNavigate('/mfg/mfgorder')}>
             <ListItemButton
               sx={{
                 minHeight: '50px',
