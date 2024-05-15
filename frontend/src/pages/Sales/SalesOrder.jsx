@@ -30,11 +30,11 @@ export default function SalesOrder() {
   }, []);
 
   const handleRowClick = (params) => {
-    navigate(`/salesorder/${params.row.id}`);
+    navigate(`/sales/salesorder/${params.row.id}`);
   };
 
   const handleAddSalesOrder = () => {
-    navigate(`/salesorder/new`);
+    navigate(`/sales/salesorder/new`);
   };
 
   const columns = [

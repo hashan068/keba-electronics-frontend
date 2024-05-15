@@ -31,11 +31,11 @@ export default function Quotations() {
   }, []);
 
   const handleRowClick = (params) => {
-    navigate(`/quotation/${params.row.id}`);
+    navigate(`/sales/quotation/${params.row.id}`);
   };
 
   const handleAddQuotation = () => {
-    navigate('/quotations/new');
+    navigate('/sales/quotations/new');
   };
 
   const columns = [

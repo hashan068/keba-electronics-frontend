@@ -1,8 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  Container,
+  Grid,
+  Card,
+  CardHeader,
+  CardContent,
+  Skeleton,
+} from '@mui/material';
 import api from '../../api';
-
 
 const SalesOrderDetails = () => {
   const { id } = useParams();
@@ -33,12 +49,15 @@ const SalesOrderDetails = () => {
   const createManufacturingOrder = async (salesOrderItemId) => {
     const salesOrderItem = salesOrderItems.find(item => item.id === salesOrderItemId);
   
+    console.log(salesOrderItem); // This will log the salesOrderItem object
+  
     if (!salesOrderItem) return;
   
     const manufacturingOrderData = {
-      sales_order_item: salesOrderItem, // Pass the entire salesOrderItem object
+      sales_order_item_id: salesOrderItem.sales_order_item_id,
+
       quantity: salesOrderItem.quantity,
-      product: salesOrderItem.product,
+      product_id: salesOrderItem.product,
     };
   
     console.log(manufacturingOrderData);
@@ -46,12 +65,11 @@ const SalesOrderDetails = () => {
     try {
       const response = await api.post('/api/manufacturing/manufacturing-orders/', manufacturingOrderData);
       console.log(response.data);
-      // Handle successful creation of manufacturing order
     } catch (error) {
       console.error(error);
-      // Handle error in creating manufacturing order
     }
   };
+  
 
   const handleEdit = () => {
     navigate(`/salesorder/${id}`);
@@ -63,8 +81,20 @@ const SalesOrderDetails = () => {
     });
   };
 
+  
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Skeleton variant="rectangular" height={60} />
+          </Grid>
+          <Grid item xs={12}>
+            <Skeleton variant="rectangular" height={300} />
+          </Grid>
+        </Grid>
+      </Container>
+    );
   }
 
   if (!salesOrder) {
@@ -72,54 +102,74 @@ const SalesOrderDetails = () => {
   }
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Sales Order Details
-      </Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-
-        <Button variant="contained" color="primary" onClick={handleManufacture}>
-          Manufacture
-        </Button>
-      </Box>
-      <Box>
-        <Typography variant="h6" gutterBottom>
-          Order ID: {salesOrder.id}
-        </Typography>
-        <Typography variant="h6" gutterBottom>
-          Customer: {salesOrder.customer_name}
-        </Typography>
-        <Typography variant="h6" gutterBottom>
-          Total Amount: {salesOrder.total_amount}
-        </Typography>
-        <Typography variant="h6" gutterBottom>
-          Status: {salesOrder.status}
-        </Typography>
-      </Box>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell align="right">Product</TableCell>
-              <TableCell align="right">Quantity</TableCell>
-              <TableCell align="right">Price</TableCell>
-              <TableCell align="right">Total</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {salesOrderItems.map((item) => (
-              <TableRow key={item.product}>
-                <TableCell>{item.product}</TableCell>
-                <TableCell align="right">{item.quantity}</TableCell>
-                <TableCell align="right">{item.price}</TableCell>
-                <TableCell align="right">{(item.quantity * parseFloat(item.price)).toFixed(2)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+    <Container maxWidth="lg" sx={{ py: 4, px: 2, backgroundColor: '#f5f5f5' }}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Typography variant="h4" gutterBottom sx={{ color: '#3f51b5', fontWeight: 'bold' }}>
+            Sales Order Details
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Card sx={{ boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)' }}>
+            <CardHeader
+              title="Order Details"
+              action={
+                <Button variant="contained" color="primary" onClick={handleManufacture} sx={{ backgroundColor: '#3f51b5', '&:hover': { backgroundColor: '#303f9f' } }}>
+                  Manufacture
+                </Button>
+              }
+            />
+            <CardContent>
+              <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
+                Order ID: {salesOrder.id}
+              </Typography>
+              <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
+                Customer: {salesOrder.customer_name}
+              </Typography>
+              <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
+                Total Amount: {salesOrder.total_amount}
+              </Typography>
+              <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
+                Status: {salesOrder.status}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Card sx={{ boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)' }}>
+            <CardHeader title="Order Items" />
+            <CardContent>
+              <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>ID</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Product</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Price</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {salesOrderItems.map((item) => (
+                      <TableRow key={item.product}>
+                        <TableCell>{item.sales_order_item_id}</TableCell>
+                        <TableCell>{item.product}</TableCell>
+                        <TableCell align="right">{item.quantity}</TableCell>
+                        <TableCell align="right">{item.price}</TableCell>
+                        <TableCell align="right">{(item.quantity * parseFloat(item.price)).toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Container>
   );
+
 };
 
 export default SalesOrderDetails;

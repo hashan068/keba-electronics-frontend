@@ -1,4 +1,3 @@
-// QuotationForm.jsx
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -13,19 +12,36 @@ import {
   Paper,
   FormLabel,
   OutlinedInput,
-
+  Grid,
+  Container,
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import { Autocomplete, TextField } from '@mui/material';
 import FormGrid from './forms/FormGrid';
-// const FormGrid = styled(Grid)(() => ({
-//   display: 'flex',
-//   flexDirection: 'column',
-// }));
+import { styled } from '@mui/system';
 
-const handleExpirationDateChange = (event) => {
-  setExpirationDate(event.target.value);
-};
+const StyledContainer = styled(Container)(({ theme }) => ({
+  padding: theme.spacing(4),
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[2],
+}));
+
+const StyledForm = styled('form')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing(3),
+}));
+
+const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+  marginTop: theme.spacing(3),
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(3),
+  alignSelf: 'center',
+  padding: theme.spacing(1.5, 4),
+}));
 
 const QuotationForm = () => {
   const [customer, setCustomer] = useState(null);
@@ -34,7 +50,6 @@ const QuotationForm = () => {
   const [quotationItems, setQuotationItems] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
-  
   const [date, setDate] = useState('');
   const [expirationDate, setExpirationDate] = useState('');
   const [invoicingAndShippingAddress, setInvoicingAndShippingAddress] = useState('');
@@ -49,7 +64,13 @@ const QuotationForm = () => {
 
         const productsResponse = await fetch('http://127.0.0.1:8000/api/sales/products/');
         const productsData = await productsResponse.json();
-        setProducts(productsData);
+        setProducts(productsData.map(product => ({
+          id: product.id,
+          name: product.product_name,
+          description: product.description,
+          price: parseFloat(product.price),
+          bom: product.bom
+        })));
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -65,7 +86,7 @@ const QuotationForm = () => {
         quantity,
         price: product.price,
       };
-  
+
       setQuotationItems([...quotationItems, newItem]);
       setQuantity(1);
       setProduct(null);
@@ -101,7 +122,6 @@ const QuotationForm = () => {
     return true;
   };
 
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -118,7 +138,6 @@ const QuotationForm = () => {
         product: item.product.id,
         quantity: item.quantity,
         unit_price: item.price,
-        
       })),
     };
 
@@ -138,7 +157,7 @@ const QuotationForm = () => {
       console.log('Quotation data received:', responseData);
 
       if (response.ok) {
-        setAlert({ severity: 'success', message: 'This is a success Alert.' });
+        setAlert({ severity: 'success', message: 'Quotation Created Successfully!' });
         setTimeout(() => {
           setAlert(null);
         }, 3000);
@@ -160,95 +179,67 @@ const QuotationForm = () => {
   };
 
   return (
-    <Box sx={{ p: 4 }}>
+    <StyledContainer maxWidth="lg">
       <Typography variant="h4" gutterBottom>
         Quotation Form
       </Typography>
       <div>
         {alert && <Alert severity={alert.severity}>{alert.message}</Alert>}
       </div>
-      <form onSubmit={handleSubmit}>
-        <Autocomplete
-          options={customers}
-          value={customer}
-          onChange={(event, newValue) => setCustomer(newValue)}
-          getOptionLabel={(option) => option.name}
-          renderInput={(params) => <TextField {...params} label="Customer" fullWidth margin="normal" />}
-        />
+      <StyledForm onSubmit={handleSubmit}>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          {/* <FormGrid sx={{ flexGrow: 1 }}>
-            <FormLabel htmlFor="card-name" required>
-              Name
-            </FormLabel>
-            <OutlinedInput
-              id="card-name"
-              autoComplete="card-name"
-              placeholder="John Smith"
-              required
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Autocomplete
+              options={customers}
+              value={customer}
+              onChange={(event, newValue) => setCustomer(newValue)}
+              getOptionLabel={(option) => option.name}
+              renderInput={(params) => <TextField {...params} label="Customer" fullWidth />}
             />
-          </FormGrid> */}
-          {/* <FormGrid sx={{ flexGrow: 1 }}>
-            <FormLabel htmlFor="card-expiration" required>
-              Expiration date
-            </FormLabel>
-            <OutlinedInput
-              id="card-expiration"
-              autoComplete="card-expiration"
-              placeholder="MM/YY"
-              required
-              value={expirationDate}
-              onChange={handleExpirationDateChange}
-            />
-          </FormGrid> */}
-        </Box>
+          </Grid>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <FormGrid sx={{ flexGrow: 1 }}>
-            <FormLabel htmlFor="card-name" required>
-              Date
-            </FormLabel>
+          <Grid item xs={12} md={6}>
+            <FormLabel>Date</FormLabel>
             <TextField
               type="date"
-              // label="Date"
+
               value={date}
               onChange={(event) => setDate(event.target.value)}
               fullWidth
-              margin="normal"
             />
-          </FormGrid>
-          <FormGrid sx={{ flexGrow: 1 }}>
-            <FormLabel htmlFor="card-expiration" required>
-              Expiration date
-            </FormLabel>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <FormLabel>Expiration Date</FormLabel>
             <TextField
               type="date"
-              // label="Expiration Date"
+
               value={expirationDate}
               onChange={(event) => setExpirationDate(event.target.value)}
               fullWidth
-              margin="normal"
             />
-          </FormGrid>
-        </Box>
+          </Grid>
 
+          <Grid item xs={12}>
 
-        <TextField
-          label="Invoicing and Shipping Address"
-          value={invoicingAndShippingAddress}
-          onChange={(event) => setInvoicingAndShippingAddress(event.target.value)}
-          fullWidth
-          margin="normal"
-        />
+            <TextField
+              label="Invoicing and Shipping Address"
+              value={invoicingAndShippingAddress}
+              onChange={(event) => setInvoicingAndShippingAddress(event.target.value)}
+              fullWidth
+              multiline
+              rows={4}
+            />
+          </Grid>
+        </Grid>
 
-        <TableContainer component={Paper}>
+        <StyledTableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Product</TableCell>
                 <TableCell align="right">Quantity</TableCell>
                 <TableCell align="right">Price</TableCell>
-
                 <TableCell align="right">Total</TableCell>
                 <TableCell align="right">Action</TableCell>
               </TableRow>
@@ -259,7 +250,6 @@ const QuotationForm = () => {
                   <TableCell>{item.product.name}</TableCell>
                   <TableCell align="right">{item.quantity}</TableCell>
                   <TableCell align="right">{item.price}</TableCell>
-
                   <TableCell align="right">{item.quantity * item.price}</TableCell>
                   <TableCell align="right">
                     <Button variant="contained" color="error" onClick={() => handleDeleteItem(index)}>
@@ -270,43 +260,47 @@ const QuotationForm = () => {
               ))}
             </TableBody>
           </Table>
-        </TableContainer>
+        </StyledTableContainer>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-          <Autocomplete
-            options={products}
-            value={product}
-            onChange={(event, newValue) => setProduct(newValue)}
-            getOptionLabel={(option) => option.name}
-            renderOption={(props, option) => (
-              <li {...props} key={option.id}>
-                {option.name}
-              </li>
-            )}
-            renderInput={(params) => <TextField {...params} label="Product" margin="normal" />}
-            sx={{ width: '50%' }}
-          />
-          <TextField
-            type="number"
-            value={quantity}
-            onChange={(event) => setQuantity(event.target.value)}
-            label="Quantity"
-            margin="normal"
-            sx={{ ml: 2, mr: 2, width: '300px' }}
-          />
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Autocomplete
+              options={products}
+              value={product}
+              onChange={(event, newValue) => setProduct(newValue)}
+              getOptionLabel={(option) => option.name}
+              renderOption={(props, option) => (
+                <li {...props} key={option.id}>
+                  {option.name}
+                </li>
+              )}
+              renderInput={(params) => <TextField {...params} label="Product" margin="normal" />}
+              sx={{ width: '50%' }}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <TextField
+              type="number"
+              value={quantity}
+              onChange={(event) => setQuantity(event.target.value)}
+              label="Quantity"
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Button variant="contained" onClick={handleAddItem} fullWidth>
+              Add Item
+            </Button>
+          </Grid>
+        </Grid>
 
-          <Button variant="contained" onClick={handleAddItem}>
-            Add Item
-          </Button>
-        </Box>
-
-        <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
+        <StyledButton type="submit" variant="contained" color="primary">
           Submit Quotation
-        </Button>
-      </form>
-
-    </Box>
+        </StyledButton>
+      </StyledForm>
+    </StyledContainer>
   );
-};
+
+}
 
 export default QuotationForm;

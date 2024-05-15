@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, TextField, Button } from '@mui/material';
+import { Box, Typography, TextField, Button, Container, Paper, Grid } from '@mui/material';
 import api from '../api';
 
 const ProductDetails = () => {
@@ -44,36 +44,50 @@ const ProductDetails = () => {
   }
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        {id ? 'Product Details' : 'New Product'}
-      </Typography>
-      <TextField
-        label="Name"
-        value={product.name}
-        onChange={(e) => setProduct({ ...product, name: e.target.value })}
-        fullWidth
-        margin="normal"
-      />
-      <TextField
-        label="Description"
-        value={product.description}
-        onChange={(e) => setProduct({ ...product, description: e.target.value })}
-        fullWidth
-        margin="normal"
-      />
-      <TextField
-        label="Price"
-        value={product.price}
-        onChange={(e) => setProduct({ ...product, price: e.target.value })}
-        type="number"
-        fullWidth
-        margin="normal"
-      />
-      <Button variant="contained" onClick={handleSave}>
-        {id ? 'Update' : 'Create'}
-      </Button>
-    </Box>
+    <Container maxWidth="md">
+      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+        <Typography variant="h4" gutterBottom align="center">
+          {id ? 'Product Details' : 'New Product'}
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <TextField
+              label="Name"
+              value={product.name}
+              onChange={(e) => setProduct({ ...product, name: e.target.value })}
+              fullWidth
+              required
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Description"
+              value={product.description}
+              onChange={(e) => setProduct({ ...product, description: e.target.value })}
+              fullWidth
+              multiline
+              rows={4}
+              required
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Price"
+              value={product.price}
+              onChange={(e) => setProduct({ ...product, price: e.target.value })}
+              type="number"
+              fullWidth
+              required
+            />
+          </Grid>
+          <Grid item xs={12} align="center">
+            <Button variant="contained" color="primary" onClick={handleSave}>
+              {id ? 'Update' : 'Create'}
+            </Button>
+          </Grid>
+        </Grid>
+      </Paper>
+    </Container>
   );
 };
 

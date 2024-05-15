@@ -3,20 +3,17 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import Product from "./pages/Sales/Product";
+
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout"; // Import the Layout component
-import ProductDetails from "./pages/ProductDetails";
-import SalesOrder from './pages/Sales/SalesOrder';
-import SalesOrderForm from './components/SalesOrderForm';
 
-import Quotations from './pages/Sales/Quotations';
-import QuotationDetail from './pages/Sales/QuotationDetail';
-import QuotationForm from './components/QuotationForm';
+import SalesRoutes from './routes/salesRoutes';
+import ManufacturingRoutes from './routes/ManufacturingRoutes';
+
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import SalesOrderDetails from "./pages/Sales/SalesOrderDetails";
-import ManufacturingOrder from "./pages/Manufacturing/ManufacturingOrder";
+
+
 
 const theme = createTheme({
   palette: {
@@ -53,110 +50,13 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/product"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Product />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
 
-          <Route
-            path="/product/new"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <ProductDetails />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/sales/*" element={<SalesRoutes />} /> {/* Render sales routes */}
+          <Route path="/mfg/*" element={<ManufacturingRoutes />} /> {/* Render manufacturing routes */}
+          {/* Add other route sections here */}
+          
 
-          <Route
-            path="/product/:id"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <ProductDetails />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/quotations/"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Quotations />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/quotations/new"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <QuotationForm />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/quotation/:id"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <QuotationDetail />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/salesorder"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <SalesOrder /> {/* render the SalesOrder component */}
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/salesorder/:id"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <SalesOrderDetails /> {/* render the SalesOrder component */}
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/salesorder/new"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <SalesOrderForm />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mfgorder"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <ManufacturingOrder />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+          
 
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Logout />} />

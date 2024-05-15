@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import api from "../../api";
 
-export default function ManufacturingOrderList() {
+const ManufacturingOrder = () => {
   const [manufacturingOrders, setManufacturingOrders] = useState([]);
   const navigate = useNavigate();
 
@@ -30,51 +30,57 @@ export default function ManufacturingOrderList() {
   }, []);
 
   const handleRowClick = (params) => {
-    navigate(`/manufacturingorder/${params.row.id}`);
+    navigate(`/mfg/mfgorder/${params.row.id}`);
   };
 
   const handleAddManufacturingOrder = () => {
-    navigate(`/manufacturingorder/new`);
+    navigate(`/mfg/manufacturingorder/new`);
   };
 
   const columns = [
     {
-      field: 'date',
-      headerName: 'Date',
-      type: 'date',
+      field: 'id',
+      headerName: 'Order ID',
       width: 150,
-      valueFormatter: (params) => params.value && format(new Date(params.value), 'yyyy/MM/dd'),
       headerClassName: 'super-app-theme--header'
     },
-    { field: 'id', headerName: 'Order ID', width: 150, headerClassName: 'super-app-theme--header' },
-    { field: 'sales_order_id', headerName: 'Sales Order ID', width: 200, headerClassName: 'super-app-theme--header' },
-    { field: 'product_id', headerName: 'Product ID', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
-    { field: 'status', headerName: 'Status', width: 150, headerClassName: 'super-app-theme--header' },
+    {
+      field: 'product_id',
+      headerName: 'Product',
+      width: 200,
+      headerClassName: 'super-app-theme--header'
+    },
+    {
+      field: 'quantity',
+      headerName: 'Quantity',
+      type: 'number',
+      width: 150,
+      headerClassName: 'super-app-theme--header'
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 150,
+      headerClassName: 'super-app-theme--header'
+    },
+    {
+      field: 'created_at',
+      headerName: 'Created At',
+      type: 'date',
+      width: 180,
+      valueFormatter: (params) => params.value && new Date(params.value).toLocaleDateString(),
+      headerClassName: 'super-app-theme--header'
+    },
   ];
 
   return (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100%',
-      width: '100%',
-    }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', }}>
       <Box component="main" sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '95%' }}>
         <Typography variant="h3" align="center" sx={{ marginTop: "28px" }}>
           Manufacturing Orders
         </Typography>
 
-        <Box sx={{
-          height: 600,
-          width: '100%',
-          '& .super-app-theme--header': {
-            backgroundColor: '#cfd8dc',
-            // color: 'white',
-            
-          },
-        }}>
+        <Box sx={{ height: 600, width: '100%', '& .super-app-theme--header': { backgroundColor: '#cfd8dc' } }}>
           <DataGrid
             rows={manufacturingOrders}
             columns={columns}
@@ -85,12 +91,8 @@ export default function ManufacturingOrderList() {
               boxShadow: 2,
               border: 2,
               borderColor: 'primary.light',
-              '& .MuiDataGrid-cell:hover': {
-                color: 'primary.main',
-              },
-              ".MuiDataGrid-iconButtonContainer": {
-                marginLeft: '50px !important'
-              },
+              '& .MuiDataGrid-cell:hover': { color: 'primary.main' },
+              ".MuiDataGrid-iconButtonContainer": { marginLeft: '50px !important' },
             }}
           />
         </Box>
@@ -98,3 +100,4 @@ export default function ManufacturingOrderList() {
     </Box>
   );
 }
+export default ManufacturingOrder;
