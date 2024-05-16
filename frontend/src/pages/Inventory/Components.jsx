@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
-import api from "../api";
+import api from "../../api";
 
 export default function Components() {
   const [components, setComponents] = useState([]);
@@ -30,11 +30,11 @@ export default function Components() {
   }, []);
 
   const handleRowClick = (params) => {
-    navigate(`/component/${params.row.id}`);
+    navigate('/inventory/component/${params.row.id}');
   };
 
   const handleAddComponent = () => {
-    navigate(`/component/new`);
+    navigate('/inventory/component/new');
   };
 
   const columns = [
@@ -60,9 +60,11 @@ export default function Components() {
         <Typography variant="h3" align="center" sx={{ marginTop: "55px" }}>
           Components
         </Typography>
-        <Button variant="contained" onClick={handleAddComponent}>
+
+        <Button sx={{m:5}} variant="contained" onClick={handleAddComponent}>
           Add Component
         </Button>
+        
         <Box sx={{
           height: 600,
           width: '100%',

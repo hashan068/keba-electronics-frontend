@@ -10,6 +10,7 @@ import Layout from "./components/Layout"; // Import the Layout component
 
 import SalesRoutes from './routes/salesRoutes';
 import ManufacturingRoutes from './routes/ManufacturingRoutes';
+import InventoryRoutes from './routes/InventoryRoutes';
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
@@ -54,7 +55,7 @@ function App() {
           <Route path="/sales/*" element={<SalesRoutes />} /> {/* Render sales routes */}
           <Route path="/mfg/*" element={<ManufacturingRoutes />} /> {/* Render manufacturing routes */}
           {/* Add other route sections here */}
-          
+          <Route path="/inventory/*" element={<InventoryRoutes />} />
 
           
 

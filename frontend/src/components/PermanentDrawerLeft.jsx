@@ -125,6 +125,69 @@ export default function PermanentDrawerLeft() {
             </ListItemButton>
           </ListItem>
 
+          <ListItem disablePadding onClick={() => handleNavigate('/mfg/bom')}>
+            <ListItemButton
+              sx={{
+                minHeight: '50px',
+                justifyContent: 'center',
+                backgroundColor: '#f5f5f5',
+              }}
+            >
+              <ListItemIcon></ListItemIcon>
+              <ListItemText primary="BOM" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding onClick={() => handleNavigate('/mfg/materialreq')}>
+            <ListItemButton
+              sx={{
+                minHeight: '50px',
+                justifyContent: 'center',
+                backgroundColor: '#f5f5f5',
+              }}
+            >
+              <ListItemIcon></ListItemIcon>
+              <ListItemText primary="Material Requisition" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding onClick={() => handleNavigate('/inventory/component')}>
+            <ListItemButton
+              sx={{
+                minHeight: '50px',
+                justifyContent: 'center',
+                backgroundColor: '#f5f5f5',
+              }}
+            >
+              <ListItemIcon></ListItemIcon>
+              <ListItemText primary="Components" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding onClick={() => handleNavigate('/inventory/purchas-req')}>
+            <ListItemButton
+              sx={{
+                minHeight: '50px',
+                justifyContent: 'center',
+                backgroundColor: '#f5f5f5',
+              }}
+            >
+              <ListItemIcon></ListItemIcon>
+              <ListItemText primary="Purchase Requisitions" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding onClick={() => handleNavigate('/inventory/po')}>
+            <ListItemButton
+              sx={{
+                minHeight: '50px',
+                justifyContent: 'center',
+                backgroundColor: '#f5f5f5',
+              }}
+            >
+              <ListItemIcon></ListItemIcon>
+              <ListItemText primary="Purchase Order" />
+            </ListItemButton>
+          </ListItem>
+
         </List>
         <Divider />
       </Drawer>
