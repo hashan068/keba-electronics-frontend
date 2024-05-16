@@ -48,20 +48,20 @@ const SalesOrderDetails = () => {
 
   const createManufacturingOrder = async (salesOrderItemId) => {
     const salesOrderItem = salesOrderItems.find(item => item.id === salesOrderItemId);
-  
+
     console.log(salesOrderItem); // This will log the salesOrderItem object
-  
+
     if (!salesOrderItem) return;
-  
+
     const manufacturingOrderData = {
       sales_order_item_id: salesOrderItem.sales_order_item_id,
 
       quantity: salesOrderItem.quantity,
       product_id: salesOrderItem.product,
     };
-  
+
     console.log(manufacturingOrderData);
-  
+
     try {
       const response = await api.post('/api/manufacturing/manufacturing-orders/', manufacturingOrderData);
       console.log(response.data);
@@ -69,7 +69,7 @@ const SalesOrderDetails = () => {
       console.error(error);
     }
   };
-  
+
 
   const handleEdit = () => {
     navigate(`/salesorder/${id}`);
@@ -81,7 +81,7 @@ const SalesOrderDetails = () => {
     });
   };
 
-  
+
   if (isLoading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -102,7 +102,7 @@ const SalesOrderDetails = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4, px: 2, backgroundColor: '#f5f5f5' }}>
+    <Container maxWidth="lg" sx={{ mt: 2, py: 4, px: 2, backgroundColor: '#b0bec5' }}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Typography variant="h4" gutterBottom sx={{ color: '#3f51b5', fontWeight: 'bold' }}>
@@ -114,7 +114,7 @@ const SalesOrderDetails = () => {
             <CardHeader
               title="Order Details"
               action={
-                <Button variant="contained" color="primary" onClick={handleManufacture} sx={{ backgroundColor: '#3f51b5', '&:hover': { backgroundColor: '#303f9f' } }}>
+                <Button variant="contained" color="primary" onClick={handleManufacture} sx={{ backgroundColor: '#3f51b5', '&:hover': { backgroundColor: '#303fff' } }}>
                   Manufacture
                 </Button>
               }
@@ -126,9 +126,7 @@ const SalesOrderDetails = () => {
               <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
                 Customer: {salesOrder.customer_name}
               </Typography>
-              <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
-                Total Amount: {salesOrder.total_amount}
-              </Typography>
+
               <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
                 Status: {salesOrder.status}
               </Typography>
@@ -162,6 +160,11 @@ const SalesOrderDetails = () => {
                     ))}
                   </TableBody>
                 </Table>
+
+                <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold', margin: 4, textAlign: 'right' }}>
+                  Total Amount: {salesOrder.total_amount}
+                </Typography>
+
               </TableContainer>
             </CardContent>
           </Card>
