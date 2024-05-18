@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from'react';
-import { useNavigate, useParams } from'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../api';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-
 import {
   Box,
   Typography,
@@ -13,7 +12,43 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Grid,
+  ThemeProvider,
+  createTheme,
+  Stack
 } from '@mui/material';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#6200ea',
+    },
+    secondary: {
+      main: '#03dac6',
+    },
+  },
+  typography: {
+    h4: {
+      fontWeight: 600,
+    },
+  },
+  components: {
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+        },
+      },
+    },
+  },
+});
 
 const ComponentForm = () => {
   const { id } = useParams();
@@ -32,8 +67,8 @@ const ComponentForm = () => {
   useEffect(() => {
     if (id) {
       api
-       .get(`/api/inventory/components/${id}/`)
-       .then((response) => {
+        .get(`/api/inventory/components/${id}/`)
+        .then((response) => {
           const {
             name,
             description,
@@ -53,7 +88,7 @@ const ComponentForm = () => {
             cost,
           });
         })
-       .catch((error) => console.error(error));
+        .catch((error) => console.error(error));
     }
   }, [id]);
 
@@ -61,21 +96,21 @@ const ComponentForm = () => {
     name: Yup.string().required('Name is required'),
     description: Yup.string().required('Description is required'),
     quantity: Yup.number()
-     .required('Quantity is required')
-     .positive('Quantity must be a positive number'),
+      .required('Quantity is required')
+      .positive('Quantity must be a positive number'),
     reorderLevel: Yup.number()
-     .required('Reorder Level is required')
-     .positive('Reorder Level must be a positive number'),
+      .required('Reorder Level is required')
+      .positive('Reorder Level must be a positive number'),
     unitOfMeasure: Yup.string().required('Unit of Measure is required'),
     supplierId: Yup.string(),
     cost: Yup.number()
-     .required('Cost is required')
-     .positive('Cost must be a positive number'),
+      .required('Cost is required')
+      .positive('Cost must be a positive number'),
   });
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
-      setSubmitting(true); // Set submitting state to true
+      setSubmitting(true);
 
       const data = {
         name: values.name,
@@ -96,10 +131,8 @@ const ComponentForm = () => {
 
       const { id: newId } = response.data;
 
-      // Update the URL to include the new component ID
       navigate(`/components/${newId}`);
 
-      // Clear the form fields only after successful creation
       setInitialValues({
         name: '',
         description: '',
@@ -110,127 +143,150 @@ const ComponentForm = () => {
         cost: 0,
       });
 
-      setSubmitting(false); // Set submitting state to false
+      setSubmitting(false);
     } catch (error) {
       console.error(error);
       setFieldError('general', 'Failed to create component.');
-      setSubmitting(false); // Set submitting state to false
+      setSubmitting(false);
     }
   };
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        {id? 'Edit Component' : 'Create Component'}
-      </Typography>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ values, errors, touched, handleChange, handleBlur, isSubmitting }) => (
-          <form onSubmit={(e) => e.preventDefault()} /* Prevent default form submission */>
-            <TextField
-              label="Name"
-              value={values.name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.name && errors.name}
-              helperText={touched.name && errors.name}
-              fullWidth
-              margin="normal"
-              required
-              name="name"
-            />
-            <TextField
-              label="Description"
-              value={values.description}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.description && errors.description}
-              helperText={touched.description && errors.description}
-              fullWidth
-              margin="normal"
-              required
-              name="description"
-            />
-            <TextField
-              label="Quantity"
-              value={values.quantity}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.quantity && errors.quantity}
-              helperText={touched.quantity && errors.quantity}
-              type="number"
-              fullWidth
-              margin="normal"
-              required
-              name="quantity"
-            />
-            <TextField
-              label="Reorder Level"
-              value={values.reorderLevel}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.reorderLevel && errors.reorderLevel}
-              helperText={touched.reorderLevel && errors.reorderLevel}
-              type="number"
-              fullWidth
-              margin="normal"
-              required
-              name="reorderLevel"
-            />
-            <FormControl fullWidth margin="normal" required>
-              <InputLabel>Unit of Measure</InputLabel>
-              <Select
-                value={values.unitOfMeasure}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.unitOfMeasure && errors.unitOfMeasure}
-                name="unitOfMeasure"
-              >
-                <MenuItem value="pcs">Pieces</MenuItem>
-                <MenuItem value="kg">Kilograms</MenuItem>
-                <MenuItem value="l">Liters</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              label="Supplier ID"
-              value={values.supplierId}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.supplierId && errors.supplierId}
-              helperText={touched.supplierId && errors.supplierId}
-              fullWidth
-              margin="normal"
-              name="supplierId"
-            />
-            <TextField
-              label="Cost"
-              value={values.cost}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.cost && errors.cost}
-              helperText={touched.cost && errors.cost}
-              type="number"
-              fullWidth
-              margin="normal"
-              required
-              name="cost"
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              disabled={isSubmitting}
-              sx={{ mt: 2 }}
-            >
-              {id? 'Update' : 'Create'}
-            </Button>
-          </form>
-        )}
-      </Formik>
-    </Box>
+    <ThemeProvider theme={theme}>
+      <Box sx={{ p: 4, bgcolor: 'background.paper', boxShadow: 3, borderRadius: 2 }}>
+        <Typography variant="h4" gutterBottom>
+          {id ? 'Edit Component' : 'Create Component'}
+        </Typography>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          enableReinitialize
+          onSubmit={handleSubmit}
+        >
+          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+            <form onSubmit={handleSubmit}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Name"
+                    value={values.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.name && Boolean(errors.name)}
+                    helperText={touched.name && errors.name}
+                    fullWidth
+                    required
+                    name="name"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Description"
+                    value={values.description}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.description && Boolean(errors.description)}
+                    helperText={touched.description && errors.description}
+                    fullWidth
+                    required
+                    name="description"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Quantity"
+                    value={values.quantity}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.quantity && Boolean(errors.quantity)}
+                    helperText={touched.quantity && errors.quantity}
+                    type="number"
+                    fullWidth
+                    required
+                    name="quantity"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Reorder Level"
+                    value={values.reorderLevel}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.reorderLevel && Boolean(errors.reorderLevel)}
+                    helperText={touched.reorderLevel && errors.reorderLevel}
+                    type="number"
+                    fullWidth
+                    required
+                    name="reorderLevel"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth required>
+                    <InputLabel>Unit of Measure</InputLabel>
+                    <Select
+                      value={values.unitOfMeasure}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.unitOfMeasure && Boolean(errors.unitOfMeasure)}
+                      name="unitOfMeasure"
+                    >
+                      <MenuItem value="pcs">Pieces</MenuItem>
+                      <MenuItem value="kg">Kilograms</MenuItem>
+                      <MenuItem value="l">Liters</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Supplier ID"
+                    value={values.supplierId}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.supplierId && Boolean(errors.supplierId)}
+                    helperText={touched.supplierId && errors.supplierId}
+                    fullWidth
+                    name="supplierId"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Cost"
+                    value={values.cost}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.cost && Boolean(errors.cost)}
+                    helperText={touched.cost && errors.cost}
+                    type="number"
+                    fullWidth
+                    required
+                    name="cost"
+                  />
+                </Grid>
+              </Grid>
+              <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => navigate(-1)}
+                  sx={{ flexGrow: 1 }}
+                >
+                  Back
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting}
+                  sx={{ flexGrow: 2 }}
+                >
+                  {id ? 'Update' : 'Create'}
+                </Button>
+              </Stack>
+            </form>
+          )}
+        </Formik>
+      </Box>
+    </ThemeProvider>
   );
 };
 

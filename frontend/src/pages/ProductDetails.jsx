@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, TextField, Button, Container, Paper, Grid } from '@mui/material';
+import { Box, Typography, TextField, Button, Container, Paper, Grid, CircularProgress } from '@mui/material';
 import api from '../api';
 
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [product, setProduct] = useState({ name: '', description: '', price: '' });
+  const [product, setProduct] = useState({ product_name: '', description: '', price: '' });
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -40,21 +40,25 @@ const ProductDetails = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
     <Container maxWidth="md">
-      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, mt: 4, borderRadius: 2 }}>
         <Typography variant="h4" gutterBottom align="center">
           {id ? 'Product Details' : 'New Product'}
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <TextField
-              label="Name"
-              value={product.name}
-              onChange={(e) => setProduct({ ...product, name: e.target.value })}
+              label="Product Name"
+              value={product.product_name}
+              onChange={(e) => setProduct({ ...product, product_name: e.target.value })}
               fullWidth
               required
             />
