@@ -1,27 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import {
+  Typography,
+  Box,
+  Button,
+  Paper,
+  Grid,
+  Container,
+  CircularProgress,
+  Toolbar,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  useTheme,
+  useMediaQuery,
+  Pagination,
+} from '@mui/material';
+import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
-import api from "../../api";
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import api from '../../api';
 
 export default function Components() {
   const [components, setComponents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pageSize, setPageSize] = useState(8);
+  const [page, setPage] = useState(1);
+  const [searchText, setSearchText] = useState('');
+  const [filteredComponents, setFilteredComponents] = useState([]);
   const navigate = useNavigate();
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const getComponents = () => {
+    setLoading(true);
     api
-      .get("/api/inventory/components/")
+      .get('/api/inventory/components/')
       .then((res) => {
-        console.log(res.data);
-        return res.data;
-      })
-      .then((data) => {
-        setComponents(data);
-        console.log(data);
+        setComponents(res.data);
+        setFilteredComponents(res.data);
+        setLoading(false);
       })
       .catch((err) => {
-        console.log(err);
-        alert(err);
+        console.error(err);
+        setLoading(false);
       });
   };
 
@@ -30,69 +55,148 @@ export default function Components() {
   }, []);
 
   const handleRowClick = (params) => {
-    navigate('/inventory/component/${params.row.id}');
+    navigate(`/inventory/component/${params.row.id}`);
   };
 
   const handleAddComponent = () => {
     navigate('/inventory/component/new');
   };
 
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchText(value);
+    const filteredData = components.filter((component) =>
+      Object.values(component).some((field) =>
+        field.toString().toLowerCase().includes(value.toLowerCase())
+      )
+    );
+    setFilteredComponents(filteredData);
+    setPage(1); // Reset to the first page whenever the search text changes
+  };
+
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
   const columns = [
-    { field: 'name', headerName: 'Component Name', width: 200, headerClassName: 'super-app-theme--header' },
-    { field: 'description', headerName: 'Description', width: 300, headerClassName: 'super-app-theme--header' },
-    { field: 'quantity', headerName: 'Quantity', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
-    { field: 'reorder_level', headerName: 'Reorder Level', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
-    { field: 'unit_of_measure', headerName: 'Unit of Measure', width: 150, headerClassName: 'super-app-theme--header' },
-    { field: 'supplier', headerName: 'Supplier', width: 200, headerClassName: 'super-app-theme--header' },
-    { field: 'cost', headerName: 'Cost', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
+    { field: 'name', headerName: 'Component Name', width: 200 },
+    { field: 'description', headerName: 'Description', width: 300 },
+    { field: 'quantity', headerName: 'Quantity', type: 'number', width: 100 },
+    { field: 'reorder_level', headerName: 'Reorder Level', type: 'number', width: 100 },
+    { field: 'unit_of_measure', headerName: 'Unit of Measure', width: 100 },
+    { field: 'cost', headerName: 'Cost', type: 'number', width: 150 },
   ];
 
-  return (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100%',
-      width: '100%',
-    }}>
-      <Box component="main" sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}>
-        <Typography variant="h3" align="center" sx={{ marginTop: "55px" }}>
-          Components
-        </Typography>
+  const CustomToolbar = () => (
+    <GridToolbarContainer>
+      <GridToolbarExport />
+    </GridToolbarContainer>
+  );
 
-        <Button sx={{m:5}} variant="contained" onClick={handleAddComponent}>
-          Add Component
-        </Button>
-        
-        <Box sx={{
-          height: 600,
-          width: '100%',
-          '& .super-app-theme--header': {
-            backgroundColor: '#cfd8dc',
-            color: 'white',
-          },
-        }}>
-          <DataGrid
-            rows={components}
-            columns={columns}
-            pageSize={8}
-            rowsPerPageOptions={[10]}
-            onRowClick={handleRowClick}
+  return (
+    <Container maxWidth="lg" sx={{ py: 3 }}>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Components
+          </Typography>
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Search..."
+            value={searchText}
+            onChange={handleSearchChange}
+            InputProps={{
+              startAdornment: <SearchIcon position="start" />,
+            }}
+            sx={{ marginRight: 2 }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddComponent}
+            startIcon={<AddIcon />}
             sx={{
-              boxShadow: 2,
-              border: 2,
-              borderColor: 'primary.light',
-              '& .MuiDataGrid-cell:hover': {
-                color: 'primary.main',
-              },
-              ".MuiDataGrid-iconButtonContainer": {
-                marginLeft: '50px !important'
+              backgroundColor: theme.palette.secondary.main,
+              '&:hover': {
+                backgroundColor: theme.palette.secondary.dark,
               },
             }}
-          />
-        </Box>
-      </Box>
-    </Box>
+          >
+            Add Component
+          </Button>
+        </Toolbar>
+      </Paper>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <>
+              <Paper sx={{ p: 2, height: 500 }}>
+                <DataGrid
+                  rows={filteredComponents.slice((page - 1) * pageSize, page * pageSize)}
+                  columns={columns}
+                  pageSize={pageSize}
+                  rowCount={filteredComponents.length}
+                  paginationMode="server"
+                  onRowClick={handleRowClick}
+                  components={{
+                    Toolbar: CustomToolbar,
+                  }}
+                  sx={{
+                    '& .MuiDataGrid-cell:hover': {
+                      backgroundColor: '#f5f5f5',
+                    },
+                    '& .MuiDataGrid-iconSeparator': {
+                      display: 'none',
+                    },
+                    '& .MuiDataGrid-columnHeaders': {
+                      backgroundColor: '#fafafa',
+                      borderBottom: '1px solid #e0e0e0',
+                    },
+                    '& .MuiDataGrid-footerContainer': {
+                      borderTop: '1px solid #e0e0e0',
+                    },
+                    '& .MuiDataGrid-sortIcon': {
+                      color: theme.palette.secondary.main,
+                    },
+                    '& .MuiTablePagination-root': {
+                      color: theme.palette.secondary.main,
+                    },
+                    '& .MuiPaginationItem-root.Mui-selected': {
+                      backgroundColor: theme.palette.secondary.light,
+                      color: '#fff',
+                    },
+                  }}
+                />
+              </Paper>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel>Rows per page</InputLabel>
+                  <Select
+                    value={pageSize}
+                    onChange={(e) => setPageSize(e.target.value)}
+                    label="Rows per page"
+                  >
+                    <MenuItem value={8}>8</MenuItem>
+                    <MenuItem value={16}>16</MenuItem>
+                    <MenuItem value={24}>24</MenuItem>
+                  </Select>
+                </FormControl>
+                <Pagination
+                  count={Math.ceil(filteredComponents.length / pageSize)}
+                  page={page}
+                  onChange={handlePageChange}
+                  color="primary"
+                />
+              </Box>
+            </>
+          )}
+        </Grid>
+      </Grid>
+    </Container>
   );
 }

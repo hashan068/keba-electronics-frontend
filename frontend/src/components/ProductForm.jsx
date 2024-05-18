@@ -1,102 +1,189 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  TextField,
-  Alert,
-  Autocomplete,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from '@mui/material';
-import { useHistory } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Box, Typography, TextField, Button, Alert, Container, Paper, Grid, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+
+// Validation schema using Yup
+const validationSchema = Yup.object({
+  name: Yup.string().required('Name is required'),
+  email: Yup.string().email('Invalid email address').required('Email is required'),
+  phone: Yup.string().required('Phone number is required'),
+  address: Yup.string().required('Address is required'),
+});
 
 const CustomerForm = () => {
-  const history = useHistory();
-
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
+  const navigate = useNavigate();
   const [alert, setAlert] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values, { setSubmitting }) => {
+      setOpen(false);  // Close confirmation dialog
+      try {
+        const response = await fetch('http://localhost:8000/api/sales/customers/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(values),
+        });
 
-    try {
-      // Simulate sending data to the server
-      const response = await fetch('/api/sales/customers/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          phone,
-          address,
-        }),
-      });
+        const responseData = await response.json();
+        console.log('Received data:', responseData);
 
-      if (response.ok) {
-        setAlert({ severity: 'success', message: 'Customer created successfully.' });
-        setName('');
-        setEmail('');
-        setPhone('');
-        setAddress('');
-        history.push('/customers'); // Redirect to customer list
-      } else {
-        setAlert({ severity: 'error', message: 'Error creating customer.' });
+        if (response.ok) {
+          setAlert({ severity: 'success', message: 'Customer created successfully.' });
+          formik.resetForm();
+          setAlertDialogOpen(true);
+          setTimeout(() => {
+            setAlertDialogOpen(false);
+            navigate('/sales/product');  // Redirect to product page after 3 seconds
+          }, 3000);
+        } else {
+          setAlert({ severity: 'error', message: `Error creating customer: ${JSON.stringify(responseData)}` });
+          setAlertDialogOpen(true);
+        }
+      } catch (error) {
+        console.error('Fetch Error:', error);
+        setAlert({ severity: 'error', message: 'An error occurred while creating the customer.' });
+        setAlertDialogOpen(true);
+      } finally {
+        setSubmitting(false);
       }
-    } catch (error) {
-      setAlert({ severity: 'error', message: 'An error occurred while creating the customer.' });
-    }
+    },
+  });
+
+  const handleDialogOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setOpen(false);
+  };
+
+  const handleAlertDialogClose = () => {
+    setAlertDialogOpen(false);
   };
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Customer Form
-      </Typography>
-      <div>
-        {alert && <Alert severity={alert.severity}>{alert.message}</Alert>}
-      </div>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          label="Name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Phone"
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Address"
-          value={address}
-          onChange={(event) => setAddress(event.target.value)}
-          fullWidth
-          margin="normal"
-        />
-        <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
-          Submit
-        </Button>
-      </form>
-    </Box>
+    <Container maxWidth="md">
+      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+        <Typography variant="h4" gutterBottom align="center">
+          Customer Form
+        </Typography>
+        <form onSubmit={formik.handleSubmit}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TextField
+                label="Name"
+                name="name"
+                value={formik.values.name}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+                helperText={formik.touched.name && formik.errors.name}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Email"
+                name="email"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.email && Boolean(formik.errors.email)}
+                helperText={formik.touched.email && formik.errors.email}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Phone"
+                name="phone"
+                value={formik.values.phone}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.phone && Boolean(formik.errors.phone)}
+                helperText={formik.touched.phone && formik.errors.phone}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Address"
+                name="address"
+                value={formik.values.address}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.address && Boolean(formik.errors.address)}
+                helperText={formik.touched.address && formik.errors.address}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12} align="center">
+              <Button type="button" variant="contained" color="primary" sx={{ mt: 2 }} onClick={handleDialogOpen}>
+                Submit
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+
+        <Dialog
+          open={open}
+          onClose={handleDialogClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Confirm Submission"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to submit this form?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={formik.handleSubmit} color="primary" autoFocus>
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog
+          open={alertDialogOpen}
+          onClose={handleAlertDialogClose}
+          aria-labelledby="alert-dialog-alert-title"
+          aria-describedby="alert-dialog-alert-description"
+        >
+          <DialogTitle id="alert-dialog-alert-title">{alert?.severity === 'success' ? 'Success' : 'Error'}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-alert-description">
+              {alert?.message}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleAlertDialogClose} color="primary" autoFocus>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Paper>
+    </Container>
   );
 };
 

@@ -38,9 +38,10 @@ export default function Product() {
   };
 
   const columns = [
-    { field: 'name', headerName: 'Product Name', width: 200, headerClassName: 'super-app-theme--header' },
+    { field: 'product_name', headerName: 'Product Name', width: 200, headerClassName: 'super-app-theme--header' },
     { field: 'description', headerName: 'Description', width: 300, headerClassName: 'super-app-theme--header' },
     { field: 'price', headerName: 'Price', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
+    { field: 'bom', headerName: 'BOM', width: 150, headerClassName: 'super-app-theme--header' },  // Added BOM column
   ];
 
   return (
@@ -57,8 +58,6 @@ export default function Product() {
           width: '100%',
           '& .super-app-theme--header': {
             backgroundColor: '#cfd8dc',
-            // color: 'white',
-            
           },
         }}>
           <DataGrid
