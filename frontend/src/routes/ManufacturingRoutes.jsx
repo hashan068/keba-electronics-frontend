@@ -52,7 +52,7 @@ const ManufacturingRoutes = () => (
         </Layout>
       </ProtectedRoute>
     } />
-    {/* Add other sales-related routes here */}
+
   </Routes>
 );
 

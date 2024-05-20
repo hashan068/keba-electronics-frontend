@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from "../../../api";
 import { Typography, Box, Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const MaterialReq = () => {
   const [materialReqs, setMaterialReqs] = useState([]);
-  const { id } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,7 +20,7 @@ const MaterialReq = () => {
   }, []);
 
   const handleRowClick = (materialReqId) => {
-    navigate(`/material-requisitions/${materialReqId}`);
+    navigate(`/mfg/materialreq/${materialReqId}`);
   };
 
   return (
@@ -40,7 +39,7 @@ const MaterialReq = () => {
           </TableHead>
           <TableBody>
             {materialReqs.map((materialReq) => (
-              <TableRow key={materialReq.id} onClick={() => handleRowClick(materialReq.id)}>
+              <TableRow key={materialReq.id} onClick={() => handleRowClick(materialReq.id)} style={{ cursor: 'pointer' }}>
                 <TableCell>{materialReq.id}</TableCell>
                 <TableCell>{materialReq.status}</TableCell>
                 <TableCell>

@@ -39,8 +39,8 @@ const MfgOrderDetails = () => {
   const handleMaterialRequest = async () => {
     try {
       const payload = { 
-        order_id: id 
-        
+        manufacturing_order: id,
+        bom: bomId
       
       };
       await api.post(`/api/manufacturing/material-requisitions/`, payload);

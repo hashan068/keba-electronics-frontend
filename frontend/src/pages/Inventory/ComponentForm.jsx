@@ -64,6 +64,8 @@ const ComponentForm = () => {
     cost: 0,
   });
 
+  const [submitAction, setSubmitAction] = useState('close');
+
   useEffect(() => {
     if (id) {
       api
@@ -108,7 +110,7 @@ const ComponentForm = () => {
       .positive('Cost must be a positive number'),
   });
 
-  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
+  const handleSubmit = async (values, { setSubmitting, setFieldError, resetForm }) => {
     try {
       setSubmitting(true);
 
@@ -131,17 +133,20 @@ const ComponentForm = () => {
 
       const { id: newId } = response.data;
 
-      navigate(`/components/${newId}`);
-
-      setInitialValues({
-        name: '',
-        description: '',
-        quantity: 0,
-        reorderLevel: 0,
-        unitOfMeasure: '',
-        supplierId: '',
-        cost: 0,
-      });
+      if (submitAction === 'close') {
+        navigate(`/inventory/components/${newId}`);
+      } else {
+        resetForm();
+        setInitialValues({
+          name: '',
+          description: '',
+          quantity: 0,
+          reorderLevel: 0,
+          unitOfMeasure: '',
+          supplierId: '',
+          cost: 0,
+        });
+      }
 
       setSubmitting(false);
     } catch (error) {
@@ -273,13 +278,30 @@ const ComponentForm = () => {
                   Back
                 </Button>
                 <Button
-                  type="submit"
+                  type="button"
                   variant="contained"
                   color="primary"
                   disabled={isSubmitting}
+                  onClick={() => {
+                    setSubmitAction('close');
+                    handleSubmit();
+                  }}
                   sx={{ flexGrow: 2 }}
                 >
-                  {id ? 'Update' : 'Create'}
+                  {id ? 'Update and Close' : 'Create and Close'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    setSubmitAction('addNew');
+                    handleSubmit();
+                  }}
+                  sx={{ flexGrow: 2 }}
+                >
+                  {id ? 'Update and Add New' : 'Create and Add New'}
                 </Button>
               </Stack>
             </form>
