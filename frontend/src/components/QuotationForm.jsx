@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import { Autocomplete, TextField } from '@mui/material';
-import FormGrid from './forms/FormGrid';
 import { styled } from '@mui/system';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -129,6 +128,8 @@ const QuotationForm = () => {
       return;
     }
 
+    const userId = localStorage.getItem('user_id');
+
     const quotationData = {
       date,
       expiration_date: expirationDate,
@@ -139,6 +140,8 @@ const QuotationForm = () => {
         quantity: item.quantity,
         unit_price: item.price,
       })),
+      created_by: userId,
+      
     };
 
     console.log('Quotation data being sent:', quotationData);

@@ -15,8 +15,11 @@ import {
   CircularProgress,
   Grid,
   useTheme,
-  styled
+  styled,
+  Snackbar,
+  Alert,
 } from '@mui/material';
+import { USER_ID } from '../../../constants';
 
 const StyledBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -30,6 +33,7 @@ const MaterialReqDetails = () => {
   const [components, setComponents] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [alert, setAlert] = useState(null);
 
   useEffect(() => {
     const fetchMaterialReq = async () => {
@@ -68,15 +72,36 @@ const MaterialReqDetails = () => {
   }, [id]);
 
   const handleApproveRequisition = async () => {
+    const userId = parseInt(localStorage.getItem(USER_ID), 10);
+
+    const payload = materialReq.items.map((item) => ({
+      material_requisition_item: item.id,
+      component_id: item.component,
+      quantity: item.quantity,
+      user_id: userId,
+    }));
+
     try {
-      const response = await api.post(`/api/manufacturing/material-requisitions/${id}/approve/`);
-      // Optionally, you can handle success response here
-      console.log('Material requisition approved successfully:', response.data);
-  
-      // You may want to refresh the materialReq state or redirect after approval
+      const response = await fetch('http://127.0.0.1:8000/api/inventory/consumption-transactions/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      console.log(payload)
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        setAlert({ severity: 'success', message: 'Material requisition approved successfully' });
+      } else {
+        setAlert({ severity: 'error', message: `Error approving material requisition: ${responseData.error || 'Unknown error'}` });
+      }
+
     } catch (error) {
       console.error('Error approving material requisition:', error);
-      setError('Error approving material requisition');
+      setAlert({ severity: 'error', message: 'An error occurred while approving the material requisition. Please try again later.' });
     }
   };
 
@@ -149,6 +174,17 @@ const MaterialReqDetails = () => {
           </TableContainer>
         </Grid>
       </Grid>
+
+      <Snackbar
+        open={!!alert}
+        autoHideDuration={6000}
+        onClose={() => setAlert(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setAlert(null)} severity={alert?.severity}>
+          {alert?.message}
+        </Alert>
+      </Snackbar>
     </StyledBox>
   );
 };

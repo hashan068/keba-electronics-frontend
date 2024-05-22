@@ -133,10 +133,6 @@ const AddBOMForm = () => {
         body: JSON.stringify(bomData),
 
       });
-
-      // console.log('BOM Data:', bomData);
-      // console.log('Response:', response);
-
       const responseData = await response.json();
 
       if (response.ok) {
