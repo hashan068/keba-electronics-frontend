@@ -4,7 +4,8 @@ import api from '../../../api';
 import {
   Typography,
   Box,
-  Paper,
+  Card,
+  CardContent,
   TableContainer,
   Table,
   TableHead,
@@ -14,21 +15,31 @@ import {
   Button,
   CircularProgress,
   Grid,
-  useTheme,
-  styled,
   Snackbar,
   Alert,
+  LinearProgress,
 } from '@mui/material';
+import { styled } from '@mui/system';
 import { USER_ID } from '../../../constants';
 
 const StyledBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
 }));
 
+const CenteredBox = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '100vh',
+}));
+
+const BoldTypography = styled(Typography)(({ theme }) => ({
+  fontWeight: 'bold',
+}));
+
 const MaterialReqDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const theme = useTheme();
   const [materialReq, setMaterialReq] = useState(null);
   const [components, setComponents] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -40,8 +51,6 @@ const MaterialReqDetails = () => {
       try {
         const response = await api.get(`/api/manufacturing/material-requisitions/${id}/`);
         setMaterialReq(response.data);
-
-        // Fetch components after fetching material requisition
         await fetchComponents(response.data.items);
       } catch (error) {
         console.error('Error fetching material requisition:', error);
@@ -89,12 +98,12 @@ const MaterialReqDetails = () => {
         },
         body: JSON.stringify(payload),
       });
-      console.log(payload)
 
       const responseData = await response.json();
 
       if (response.ok) {
         setAlert({ severity: 'success', message: 'Material requisition approved successfully' });
+        setMaterialReq(prev => ({ ...prev, status: 'approved' }));
       } else {
         setAlert({ severity: 'error', message: `Error approving material requisition: ${responseData.error || 'Unknown error'}` });
       }
@@ -105,60 +114,120 @@ const MaterialReqDetails = () => {
     }
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'approved':
+        return 'success';
+      case 'pending':
+        return 'warning';
+      case 'rejected':
+        return 'error';
+      case 'fulfilled':
+        return 'info';
+      default:
+        return 'default';
+    }
+  };
+
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <CenteredBox>
         <CircularProgress />
-      </Box>
+      </CenteredBox>
     );
   }
 
   if (error) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <CenteredBox>
         <Typography variant="h6" color="error">{error}</Typography>
-      </Box>
+      </CenteredBox>
     );
   }
 
   if (!materialReq) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <CenteredBox>
         <Typography variant="h6">Material Requisition not found</Typography>
-      </Box>
+      </CenteredBox>
     );
   }
 
   return (
     <StyledBox>
-      <Button variant="contained" onClick={() => navigate(-1)} sx={{ mb: 2 }}>
-        Back
-      </Button>
-      <Button variant="contained" onClick={handleApproveRequisition} sx={{ mb: 2, ml: 2 }}>
-        Approve
-      </Button>
+      <Grid container spacing={2} justifyContent="space-between" sx={{ mb: 2 }}>
+        <Grid item>
+          <Button variant="contained" onClick={() => navigate(-1)}>
+            Back
+          </Button>
+        </Grid>
+        {materialReq.status === 'pending' && (
+          <Grid item>
+            <Button variant="contained" color="primary" onClick={handleApproveRequisition}>
+              Approve
+            </Button>
+          </Grid>
+        )}
+      </Grid>
       <Typography variant="h4" gutterBottom>
         Material Requisition Details
       </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h6">Requisition ID: {materialReq.id}</Typography>
-            <Typography variant="h6">Manufacturing Order ID: {materialReq.manufacturing_order}</Typography>
-            <Typography variant="h6">BOM ID: {materialReq.bom}</Typography>
-            <Typography variant="h6">Status: {materialReq.status}</Typography>
-            <Typography variant="h6">Created At: {new Date(materialReq.created_at).toLocaleString()}</Typography>
-            <Typography variant="h6">Updated At: {new Date(materialReq.updated_at).toLocaleString()}</Typography>
-          </Paper>
+          <Card>
+            <CardContent>
+              <Grid container spacing={1}>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">Requisition ID:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{materialReq.id}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">Manufacturing Order ID:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{materialReq.manufacturing_order}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">BOM ID:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{materialReq.bom}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">Status:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{materialReq.status}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">Created At:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{new Date(materialReq.created_at).toLocaleString()}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">Updated At:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{new Date(materialReq.updated_at).toLocaleString()}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <LinearProgress color={getStatusColor(materialReq.status)} variant="determinate" value={materialReq.status === 'approved' ? 100 : 50} />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         </Grid>
         <Grid item xs={12}>
-          <TableContainer component={Paper}>
+          <TableContainer component={Card}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Item ID</TableCell>
-                  <TableCell>Component</TableCell>
-                  <TableCell>Quantity</TableCell>
+                  <TableCell><BoldTypography>Item ID</BoldTypography></TableCell>
+                  <TableCell><BoldTypography>Component</BoldTypography></TableCell>
+                  <TableCell><BoldTypography>Quantity</BoldTypography></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -174,7 +243,6 @@ const MaterialReqDetails = () => {
           </TableContainer>
         </Grid>
       </Grid>
-
       <Snackbar
         open={!!alert}
         autoHideDuration={6000}

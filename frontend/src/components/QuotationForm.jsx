@@ -11,13 +11,15 @@ import {
   TableRow,
   Paper,
   FormLabel,
-  OutlinedInput,
+  TextField,
   Grid,
   Container,
+  Alert,
 } from '@mui/material';
-import Alert from '@mui/material/Alert';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { styled } from '@mui/system';
+import { useFormik, FormikProvider, Form, FieldArray } from 'formik';
+import * as Yup from 'yup';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -43,15 +45,8 @@ const StyledButton = styled(Button)(({ theme }) => ({
 }));
 
 const QuotationForm = () => {
-  const [customer, setCustomer] = useState(null);
-  const [product, setProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
-  const [quotationItems, setQuotationItems] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
-  const [date, setDate] = useState('');
-  const [expirationDate, setExpirationDate] = useState('');
-  const [invoicingAndShippingAddress, setInvoicingAndShippingAddress] = useState('');
   const [alert, setAlert] = useState(null);
 
   useEffect(() => {
@@ -78,110 +73,71 @@ const QuotationForm = () => {
     fetchData();
   }, []);
 
-  const handleAddItem = () => {
-    if (product && quantity > 0 && product.price !== null) {
-      const newItem = {
-        product,
-        quantity,
-        price: product.price,
+  const validationSchema = Yup.object({
+    customer: Yup.object().nullable().required('Please select a customer.'),
+    date: Yup.string().required('Please enter a date.'),
+    expirationDate: Yup.string().required('Please enter an expiration date.'),
+    invoicingAndShippingAddress: Yup.string().required('Please enter an invoicing and shipping address.'),
+    quotationItems: Yup.array()
+      .of(
+        Yup.object().shape({
+          product: Yup.object().nullable().required('Please select a product.'),
+          quantity: Yup.number().min(1, 'Quantity must be at least 1').required('Please enter a quantity.'),
+        })
+      )
+      .min(1, 'Please add at least one item to the quotation.')
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      customer: null,
+      date: '',
+      expirationDate: '',
+      invoicingAndShippingAddress: '',
+      quotationItems: [],
+    },
+    validationSchema,
+    onSubmit: async (values) => {
+      const userId = localStorage.getItem('user_id');
+      const quotationData = {
+        date: values.date,
+        expiration_date: values.expirationDate,
+        invoicing_and_shipping_address: values.invoicingAndShippingAddress,
+        customer: values.customer.id,
+        quotation_items: values.quotationItems.map((item) => ({
+          product: item.product.id,
+          quantity: item.quantity,
+          unit_price: item.product.price,
+        })),
+        created_by: userId,
       };
 
-      setQuotationItems([...quotationItems, newItem]);
-      setQuantity(1);
-      setProduct(null);
-    }
-  };
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/sales/quotations/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(quotationData),
+        });
 
-  const validateForm = () => {
-    if (!customer) {
-      setAlert({ severity: 'error', message: 'Please select a customer.' });
-      return false;
-    }
+        const responseData = await response.json();
 
-    if (quotationItems.length === 0) {
-      setAlert({ severity: 'error', message: 'Please add at least one item to the quotation.' });
-      return false;
-    }
-
-    if (!date) {
-      setAlert({ severity: 'error', message: 'Please enter a date.' });
-      return false;
-    }
-
-    if (!expirationDate) {
-      setAlert({ severity: 'error', message: 'Please enter an expiration date.' });
-      return false;
-    }
-
-    if (!invoicingAndShippingAddress) {
-      setAlert({ severity: 'error', message: 'Please enter an invoicing and shipping address.' });
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    const userId = localStorage.getItem('user_id');
-
-    const quotationData = {
-      date,
-      expiration_date: expirationDate,
-      invoicing_and_shipping_address: invoicingAndShippingAddress,
-      customer: customer.id,
-      quotation_items: quotationItems.map((item) => ({
-        product: item.product.id,
-        quantity: item.quantity,
-        unit_price: item.price,
-      })),
-      created_by: userId,
-      
-    };
-
-    console.log('Quotation data being sent:', quotationData);
-
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/sales/quotations/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(quotationData),
-      });
-
-      const responseData = await response.json();
-
-      console.log('Quotation data received:', responseData);
-
-      if (response.ok) {
-        setAlert({ severity: 'success', message: 'Quotation Created Successfully!' });
-        setTimeout(() => {
-          setAlert(null);
-        }, 3000);
-        setCustomer(null);
-        setQuotationItems([]);
-      } else {
-        setAlert({ severity: 'error', message: `Error creating quotation: ${responseData.error || 'Unknown error'}` });
+        if (response.ok) {
+          setAlert({ severity: 'success', message: 'Quotation Created Successfully!' });
+          formik.resetForm();
+          setTimeout(() => setAlert(null), 3000);
+        } else {
+          setAlert({ severity: 'error', message: `Error creating quotation: ${responseData.error || 'Unknown error'}` });
+        }
+      } catch (error) {
+        console.error('Error creating quotation:', error);
+        setAlert({ severity: 'error', message: 'An error occurred while creating the quotation. Please try again later.' });
       }
-    } catch (error) {
-      console.error('Error creating quotation:', error);
-      setAlert({ severity: 'error', message: 'An error occurred while creating the quotation. Please try again later.' });
-    }
-  };
+    },
+  });
 
-  const handleDeleteItem = (index) => {
-    const updatedQuotationItems = [...quotationItems];
-    updatedQuotationItems.splice(index, 1);
-    setQuotationItems(updatedQuotationItems);
-  };
-
-  return (
+return (
     <StyledContainer maxWidth="lg">
       <Typography variant="h4" gutterBottom>
         Quotation Form
@@ -189,121 +145,151 @@ const QuotationForm = () => {
       <div>
         {alert && <Alert severity={alert.severity}>{alert.message}</Alert>}
       </div>
-      <StyledForm onSubmit={handleSubmit}>
+      <FormikProvider value={formik}>
+        <Form>
+          <StyledForm>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Autocomplete
+                  options={customers}
+                  value={formik.values.customer}
+                  onChange={(event, newValue) => formik.setFieldValue('customer', newValue)}
+                  getOptionLabel={(option) => option.name}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Customer"
+                      error={Boolean(formik.touched.customer && formik.errors.customer)}
+                      helperText={formik.touched.customer && formik.errors.customer}
+                      fullWidth
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  type="date"
+                  label="Date"
+                  value={formik.values.date}
+                  onChange={formik.handleChange('date')}
+                  error={Boolean(formik.touched.date && formik.errors.date)}
+                  helperText={formik.touched.date && formik.errors.date}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  type="date"
+                  label="Expiration Date"
+                  value={formik.values.expirationDate}
+                  onChange={formik.handleChange('expirationDate')}
+                  error={Boolean(formik.touched.expirationDate && formik.errors.expirationDate)}
+                  helperText={formik.touched.expirationDate && formik.errors.expirationDate}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Invoicing and Shipping Address"
+                  value={formik.values.invoicingAndShippingAddress}
+                  onChange={formik.handleChange('invoicingAndShippingAddress')}
+                  error={Boolean(formik.touched.invoicingAndShippingAddress && formik.errors.invoicingAndShippingAddress)}
+                  helperText={formik.touched.invoicingAndShippingAddress && formik.errors.invoicingAndShippingAddress}
+                  fullWidth
+                  multiline
+                  rows={4}
+                />
+              </Grid>
+            </Grid>
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Autocomplete
-              options={customers}
-              value={customer}
-              onChange={(event, newValue) => setCustomer(newValue)}
-              getOptionLabel={(option) => option.name}
-              renderInput={(params) => <TextField {...params} label="Customer" fullWidth />}
-            />
-          </Grid>
+            <StyledTableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Product</TableCell>
+                    <TableCell align="right">Quantity</TableCell>
+                    <TableCell align="right">Price</TableCell>
+                    <TableCell align="right">Total</TableCell>
+                    <TableCell align="right">Action</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <FieldArray name="quotationItems">
+                    {({ push, remove }) => (
+                      <>
+                        {formik.values.quotationItems.map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{item.product?.name}</TableCell>
+                            <TableCell align="right">{item.quantity}</TableCell>
+                            <TableCell align="right">{item.product?.price}</TableCell>
+                            <TableCell align="right">{item.quantity * item.product?.price}</TableCell>
+                            <TableCell align="right">
+                              <Button variant="contained" color="error" onClick={() => remove(index)}>
+                                Delete
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow>
+                          <TableCell>
+                            <Autocomplete
+                              options={products}
+                              value={formik.values.newProduct}
+                              onChange={(event, newValue) => formik.setFieldValue('newProduct', newValue)}
+                              getOptionLabel={(option) => option.name}
+                              renderOption={(props, option) => (
+                                <li {...props} key={option.id}>
+                                  {option.name}
+                                </li>
+                              )}
+                              renderInput={(params) => <TextField {...params} label="Product" margin="normal" />}
+                              sx={{ width: '50%' }}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <TextField
+                              type="number"
+                              value={formik.values.newQuantity}
+                              onChange={formik.handleChange('newQuantity')}
+                              label="Quantity"
+                              fullWidth
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <Button
+                              variant="contained"
+                              onClick={() => {
+                                formik.setFieldValue('quotationItems', [
+                                  ...formik.values.quotationItems,
+                                  {
+                                    product: formik.values.newProduct,
+                                    quantity: formik.values.newQuantity,
+                                  },
+                                ]);
+                                formik.setFieldValue('newProduct', null);
+                                formik.setFieldValue('newQuantity', '');
+                              }}
+                              fullWidth
+                            >
+                              Add Item
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      </>
+                    )}
+                  </FieldArray>
+                </TableBody>
+              </Table>
+            </StyledTableContainer>
 
-          <Grid item xs={12} md={6}>
-            <FormLabel>Date</FormLabel>
-            <TextField
-              type="date"
-
-              value={date}
-              onChange={(event) => setDate(event.target.value)}
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormLabel>Expiration Date</FormLabel>
-            <TextField
-              type="date"
-
-              value={expirationDate}
-              onChange={(event) => setExpirationDate(event.target.value)}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-
-            <TextField
-              label="Invoicing and Shipping Address"
-              value={invoicingAndShippingAddress}
-              onChange={(event) => setInvoicingAndShippingAddress(event.target.value)}
-              fullWidth
-              multiline
-              rows={4}
-            />
-          </Grid>
-        </Grid>
-
-        <StyledTableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Product</TableCell>
-                <TableCell align="right">Quantity</TableCell>
-                <TableCell align="right">Price</TableCell>
-                <TableCell align="right">Total</TableCell>
-                <TableCell align="right">Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {quotationItems.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{item.product.name}</TableCell>
-                  <TableCell align="right">{item.quantity}</TableCell>
-                  <TableCell align="right">{item.price}</TableCell>
-                  <TableCell align="right">{item.quantity * item.price}</TableCell>
-                  <TableCell align="right">
-                    <Button variant="contained" color="error" onClick={() => handleDeleteItem(index)}>
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </StyledTableContainer>
-
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Autocomplete
-              options={products}
-              value={product}
-              onChange={(event, newValue) => setProduct(newValue)}
-              getOptionLabel={(option) => option.name}
-              renderOption={(props, option) => (
-                <li {...props} key={option.id}>
-                  {option.name}
-                </li>
-              )}
-              renderInput={(params) => <TextField {...params} label="Product" margin="normal" />}
-              sx={{ width: '50%' }}
-            />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <TextField
-              type="number"
-              value={quantity}
-              onChange={(event) => setQuantity(event.target.value)}
-              label="Quantity"
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <Button variant="contained" onClick={handleAddItem} fullWidth>
-              Add Item
-            </Button>
-          </Grid>
-        </Grid>
-
-        <StyledButton type="submit" variant="contained" color="primary">
-          Submit Quotation
-        </StyledButton>
-      </StyledForm>
+            <StyledButton type="submit" variant="contained" color="primary">
+              Submit Quotation
+            </StyledButton>
+          </StyledForm>
+        </Form>
+      </FormikProvider>
     </StyledContainer>
   );
-
-}
+};
 
 export default QuotationForm;

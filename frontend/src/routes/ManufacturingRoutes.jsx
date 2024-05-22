@@ -54,6 +54,8 @@ const ManufacturingRoutes = () => (
     } />
 
   </Routes>
+
+
 );
 
 export default ManufacturingRoutes;
