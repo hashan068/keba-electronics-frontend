@@ -15,7 +15,8 @@ import {
   Grid,
   ThemeProvider,
   createTheme,
-  Stack
+  Stack,
+  Autocomplete,
 } from '@mui/material';
 
 const theme = createTheme({
@@ -55,30 +56,43 @@ const PRForm = () => {
   const navigate = useNavigate();
 
   const [initialValues, setInitialValues] = useState({
-    componentId: '',
+    component: null, // Change from componentId to component
     quantity: 0,
-    status: '',
+
     notes: '',
+    priority: 'high',
   });
 
+  const [components, setComponents] = useState([]);
   const [submitAction, setSubmitAction] = useState('close');
 
   useEffect(() => {
+    const fetchComponents = async () => {
+      try {
+        const response = await api.get('/api/inventory/components/');
+        setComponents(response.data);
+      } catch (error) {
+        console.error('Error fetching components:', error);
+      }
+    };
+
+    fetchComponents();
+
     if (id) {
       api
         .get(`/api/inventory/purchase-requisitions/${id}/`)
         .then((response) => {
           const {
-            component_id,
+            component,
             quantity,
-            status,
             notes,
+            priority,
           } = response.data;
           setInitialValues({
-            componentId: component_id,
+            component,
             quantity,
-            status,
             notes,
+            priority,
           });
         })
         .catch((error) => console.error(error));
@@ -86,12 +100,13 @@ const PRForm = () => {
   }, [id]);
 
   const validationSchema = Yup.object({
-    componentId: Yup.string().required('Component is required'),
+    component: Yup.object().required('Component is required'),
     quantity: Yup.number()
       .required('Quantity is required')
       .positive('Quantity must be a positive number'),
-    status: Yup.string().required('Status is required'),
+
     notes: Yup.string(),
+    priority: Yup.string().required('Priority is required'),
   });
 
   const handleSubmit = async (values, { setSubmitting, setFieldError, resetForm }) => {
@@ -99,10 +114,11 @@ const PRForm = () => {
       setSubmitting(true);
 
       const data = {
-        component_id: values.componentId,
+        component_id: values.component.id, // Use values.component.id instead of values.componentId
         quantity: parseInt(values.quantity, 10),
-        status: values.status,
+
         notes: values.notes,
+        priority: values.priority,
       };
 
       let response;
@@ -119,10 +135,10 @@ const PRForm = () => {
       } else {
         resetForm();
         setInitialValues({
-          componentId: '',
+          component: null,
           quantity: 0,
-          status: '',
           notes: '',
+          priority: 'high',
         });
       }
 
@@ -150,16 +166,25 @@ const PRForm = () => {
             <form onSubmit={handleSubmit}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <TextField
-                    label="Component ID"
-                    value={values.componentId}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.componentId && Boolean(errors.componentId)}
-                    helperText={touched.componentId && errors.componentId}
-                    fullWidth
-                    required
-                    name="componentId"
+                  <Autocomplete
+                    options={components}
+                    value={values.component}
+                    onChange={(event, newValue) => {
+                      handleChange({
+                        target: { name: 'component', value: newValue },
+                      });
+                    }}
+                    getOptionLabel={(option) => option.name || ''}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Component"
+                        error={touched.component && Boolean(errors.component)}
+                        helperText={touched.component && errors.component}
+                        required
+                      />
+                    )}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -177,25 +202,21 @@ const PRForm = () => {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControl fullWidth required>
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      value={values.status}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.status && Boolean(errors.status)}
-                      name="status"
-                    >
-                      <MenuItem value="created">Created</MenuItem>
-                      <MenuItem value="pending">Pending</MenuItem>
-                      <MenuItem value="approved">Approved</MenuItem>
-                      <MenuItem value="rejected">Rejected</MenuItem>
-                      <MenuItem value="cancelled">Cancelled</MenuItem>
-                      <MenuItem value="partially_fulfilled">Partially Fulfilled</MenuItem>
-                      <MenuItem value="fulfilled">Fulfilled</MenuItem>
-                      <MenuItem value="closed">Closed</MenuItem>
-                    </Select>
-                  </FormControl>
+
+                </Grid>
+                <Grid>
+                  <InputLabel>Priority</InputLabel>
+                  <Select
+                    value={values.priority}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.priority && Boolean(errors.priority)}
+                    name="priority"
+                  >
+                    <MenuItem value="high">High</MenuItem>
+                    <MenuItem value="medium">Medium</MenuItem>
+                    <MenuItem value="low">Low</MenuItem>
+                  </Select>
                 </Grid>
                 <Grid item xs={12}>
                   <TextField

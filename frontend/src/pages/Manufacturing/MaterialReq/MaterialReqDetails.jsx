@@ -82,14 +82,14 @@ const MaterialReqDetails = () => {
 
   const handleApproveRequisition = async () => {
     const userId = parseInt(localStorage.getItem(USER_ID), 10);
-
+  
     const payload = materialReq.items.map((item) => ({
       material_requisition_item: item.id,
       component_id: item.component,
       quantity: item.quantity,
       user_id: userId,
     }));
-
+  
     try {
       const response = await fetch('http://127.0.0.1:8000/api/inventory/consumption-transactions/', {
         method: 'POST',
@@ -98,21 +98,24 @@ const MaterialReqDetails = () => {
         },
         body: JSON.stringify(payload),
       });
-
+  
       const responseData = await response.json();
-
+  
       if (response.ok) {
         setAlert({ severity: 'success', message: 'Material requisition approved successfully' });
         setMaterialReq(prev => ({ ...prev, status: 'approved' }));
       } else {
-        setAlert({ severity: 'error', message: `Error approving material requisition: ${responseData.error || 'Unknown error'}` });
+        // Here's where you set the alert state with the error message
+        setAlert({ severity: 'error', message: responseData.error || 'Unknown error' });
       }
-
+  
     } catch (error) {
       console.error('Error approving material requisition:', error);
+      // Here's where you set the alert state with the error message
       setAlert({ severity: 'error', message: 'An error occurred while approving the material requisition. Please try again later.' });
     }
   };
+  
 
   const getStatusColor = (status) => {
     switch (status) {
