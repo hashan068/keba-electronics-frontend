@@ -23,25 +23,25 @@ import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import api from '../../api';
 
-export default function SalesOrder() {
-  const [salesOrders, setSalesOrders] = useState([]);
+export default function POs() {
+  const [purchaseOrders, setPurchaseOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(8);
   const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState('');
-  const [filteredSalesOrders, setFilteredSalesOrders] = useState([]);
+  const [filteredPurchaseOrders, setFilteredPurchaseOrders] = useState([]);
   const navigate = useNavigate();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const getSalesOrders = () => {
+  const getPurchaseOrders = () => {
     setLoading(true);
     api
-      .get('/api/sales/orders/')
+      .get('/api/inventory/purchase-orders/')
       .then((res) => {
-        setSalesOrders(res.data);
-        setFilteredSalesOrders(res.data);
+        setPurchaseOrders(res.data);
+        setFilteredPurchaseOrders(res.data);
         setLoading(false);
       })
       .catch((err) => {
@@ -51,26 +51,26 @@ export default function SalesOrder() {
   };
 
   useEffect(() => {
-    getSalesOrders();
+    getPurchaseOrders();
   }, []);
 
   const handleRowClick = (params) => {
-    navigate(`/sales/salesorder/${params.row.id}`);
+    navigate(`/inventory/purchase-order/${params.row.id}`);
   };
 
-  const handleAddSalesOrder = () => {
-    navigate('/sales/salesorder/new');
+  const handleAddPurchaseOrder = () => {
+    navigate('/inventory/purchase-order/new');
   };
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
     setSearchText(value);
-    const filteredData = salesOrders.filter((order) =>
-      Object.values(order).some((field) =>
+    const filteredData = purchaseOrders.filter((po) =>
+      Object.values(po).some((field) =>
         field.toString().toLowerCase().includes(value.toLowerCase())
       )
     );
-    setFilteredSalesOrders(filteredData);
+    setFilteredPurchaseOrders(filteredData);
     setPage(1); // Reset to the first page whenever the search text changes
   };
 
@@ -78,16 +78,14 @@ export default function SalesOrder() {
     setPage(newPage);
   };
 
-  const handlePageSizeChange = (event) => {
-    setPageSize(event.target.value);
-  };
-
   const columns = [
-    { field: 'id', headerName: 'Order ID', width: 150 },
-    { field: 'customer_name', headerName: 'Customer', width: 200 },
-    { field: 'total_amount', headerName: 'Total Amount', type: 'number', width: 150 },
+    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'purchase_requisition_details', headerName: 'Purchase Requisition', width: 300 },
+    { field: 'supplier_id', headerName: 'Supplier', width: 150 },
+    { field: 'purchase_manager_approval', headerName: 'Manager Approval', type: 'boolean', width: 150 },
     { field: 'status', headerName: 'Status', width: 150 },
-    { field: 'created_at_date', headerName: 'Date', type: 'date', width: 150, valueFormatter: (params) => params.value && new Date(params.value).toLocaleDateString() },
+    { field: 'notes', headerName: 'Notes', width: 300 },
+    { field: 'created_at', headerName: 'Created At', width: 200 },
   ];
 
   const CustomToolbar = () => (
@@ -101,7 +99,7 @@ export default function SalesOrder() {
       <Paper sx={{ p: 3, mb: 3 }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Sales Orders
+            Purchase Orders
           </Typography>
           <TextField
             variant="outlined"
@@ -117,7 +115,7 @@ export default function SalesOrder() {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleAddSalesOrder}
+            onClick={handleAddPurchaseOrder}
             startIcon={<AddIcon />}
             sx={{
               backgroundColor: theme.palette.secondary.main,
@@ -126,7 +124,7 @@ export default function SalesOrder() {
               },
             }}
           >
-            Add Sales Order
+            Add Purchase Order
           </Button>
         </Toolbar>
       </Paper>
@@ -140,25 +138,35 @@ export default function SalesOrder() {
             <>
               <Paper sx={{ p: 2, height: 500 }}>
                 <DataGrid
-                  rows={filteredSalesOrders.slice((page - 1) * pageSize, page * pageSize)}
+                  rows={filteredPurchaseOrders.slice((page - 1) * pageSize, page * pageSize)}
                   columns={columns}
                   pageSize={pageSize}
-                  rowCount={filteredSalesOrders.length}
+                  rowCount={filteredPurchaseOrders.length}
                   paginationMode="server"
                   onRowClick={handleRowClick}
                   components={{
                     Toolbar: CustomToolbar,
                   }}
                   sx={{
-                    '& .MuiDataGrid-cell:hover': { backgroundColor: '#f5f5f5' },
-                    '& .MuiDataGrid-iconSeparator': { display: 'none' },
+                    '& .MuiDataGrid-cell:hover': {
+                      backgroundColor: '#f5f5f5',
+                    },
+                    '& .MuiDataGrid-iconSeparator': {
+                      display: 'none',
+                    },
                     '& .MuiDataGrid-columnHeaders': {
                       backgroundColor: '#fafafa',
                       borderBottom: '1px solid #e0e0e0',
                     },
-                    '& .MuiDataGrid-footerContainer': { borderTop: '1px solid #e0e0e0' },
-                    '& .MuiDataGrid-sortIcon': { color: theme.palette.secondary.main },
-                    '& .MuiTablePagination-root': { color: theme.palette.secondary.main },
+                    '& .MuiDataGrid-footerContainer': {
+                      borderTop: '1px solid #e0e0e0',
+                    },
+                    '& .MuiDataGrid-sortIcon': {
+                      color: theme.palette.secondary.main,
+                    },
+                    '& .MuiTablePagination-root': {
+                      color: theme.palette.secondary.main,
+                    },
                     '& .MuiPaginationItem-root.Mui-selected': {
                       backgroundColor: theme.palette.secondary.light,
                       color: '#fff',
@@ -171,7 +179,7 @@ export default function SalesOrder() {
                   <InputLabel>Rows per page</InputLabel>
                   <Select
                     value={pageSize}
-                    onChange={handlePageSizeChange}
+                    onChange={(e) => setPageSize(e.target.value)}
                     label="Rows per page"
                   >
                     <MenuItem value={8}>8</MenuItem>
@@ -180,7 +188,7 @@ export default function SalesOrder() {
                   </Select>
                 </FormControl>
                 <Pagination
-                  count={Math.ceil(filteredSalesOrders.length / pageSize)}
+                  count={Math.ceil(filteredPurchaseOrders.length / pageSize)}
                   page={page}
                   onChange={handlePageChange}
                   color="primary"

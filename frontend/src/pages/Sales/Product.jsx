@@ -1,85 +1,133 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import {
+ Typography,
+ Box,
+ Button,
+ Paper,
+ Grid,
+ Container,
+ CircularProgress,
+ Toolbar,
+ TextField,
+} from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
-import api from "../../api";
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import api from '../../api';
 
 export default function Product() {
-  const [products, setProducts] = useState([]);
-  const navigate = useNavigate();
+ const [products, setProducts] = useState([]);
+ const [loading, setLoading] = useState(false);
+ const [searchText, setSearchText] = useState('');
+ const [filteredProducts, setFilteredProducts] = useState([]);
+ const navigate = useNavigate();
 
-  const getProducts = () => {
-    api
-      .get("/api/sales/products/")
-      .then((res) => {
-        console.log(res.data);
-        return res.data;
-      })
-      .then((data) => {
-        setProducts(data);
-        console.log(data);
-      })
-      .catch((err) => {
-        console.log(err);
-        alert(err);
-      });
-  };
+ const getProducts = () => {
+   setLoading(true);
+   api
+     .get('/api/sales/products/')
+     .then((res) => {
+       setProducts(res.data);
+       setFilteredProducts(res.data);
+       setLoading(false);
+     })
+     .catch((err) => {
+       console.error(err);
+       setLoading(false);
+     });
+ };
 
-  useEffect(() => {
-    getProducts();
-  }, []);
+ useEffect(() => {
+   getProducts();
+ }, []);
 
-  const handleRowClick = (params) => {
-    navigate(`/sales/product/${params.row.id}`);
-  };
+ const handleRowClick = (params) => {
+   navigate(`/sales/product/${params.row.id}`);
+ };
 
-  const handleAddProduct = () => {
-    navigate(`/sales/product/new`);
-  };
+ const handleAddProduct = () => {
+   navigate('/sales/product/new');
+ };
 
-  const columns = [
-    { field: 'product_name', headerName: 'Product Name', width: 200, headerClassName: 'super-app-theme--header' },
-    { field: 'description', headerName: 'Description', width: 300, headerClassName: 'super-app-theme--header' },
-    { field: 'price', headerName: 'Price', type: 'number', width: 150, headerClassName: 'super-app-theme--header' },
-    { field: 'bom', headerName: 'BOM', width: 150, headerClassName: 'super-app-theme--header' },  // Added BOM column
-  ];
+ const handleSearchChange = (event) => {
+   const value = event.target.value;
+   setSearchText(value);
+   const filteredData = products.filter((product) =>
+     Object.values(product).some((field) =>
+       field.toString().toLowerCase().includes(value.toLowerCase())
+     )
+   );
+   setFilteredProducts(filteredData);
+ };
 
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Box component="main" sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}>
-        <Typography variant="h3" align="center" sx={{ marginTop: "55px" }}>
-          Products
-        </Typography>
-        <Button variant="contained" onClick={handleAddProduct}>
-          Add Product
-        </Button>
-        <Box sx={{
-          height: 600,
-          width: '100%',
-          '& .super-app-theme--header': {
-            backgroundColor: '#cfd8dc',
-          },
-        }}>
-          <DataGrid
-            rows={products}
-            columns={columns}
-            pageSize={8}
-            rowsPerPageOptions={[10]}
-            onRowClick={handleRowClick}
-            sx={{
-              boxShadow: 2,
-              border: 2,
-              borderColor: 'primary.light',
-              '& .MuiDataGrid-cell:hover': {
-                color: 'primary.main',
-              },
-              ".MuiDataGrid-iconButtonContainer": {
-                marginLeft: '50px !important'
-              },
-            }}
-          />
-        </Box>
-      </Box>
-    </Box>
-  );
+ const columns = [
+   { field: 'product_name', headerName: 'Product Name', width: 200 },
+   { field: 'description', headerName: 'Description', width: 300 },
+   { field: 'price', headerName: 'Price', type: 'number', width: 150 },
+   { field: 'bom', headerName: 'BOM', width: 150 },
+ ];
+
+ return (
+   <Container maxWidth="lg" sx={{ py: 3 }}>
+     <Paper sx={{ p: 3, mb: 3 }}>
+       <Toolbar>
+         <Typography variant="h6" sx={{ flexGrow: 1 }}>
+           Products
+         </Typography>
+         <TextField
+           variant="outlined"
+           size="small"
+           placeholder="Search..."
+           value={searchText}
+           onChange={handleSearchChange}
+           InputProps={{
+             startAdornment: <SearchIcon position="start" />,
+           }}
+           sx={{ marginRight: 2 }}
+         />
+         <Button
+           variant="contained"
+           color="primary"
+           onClick={handleAddProduct}
+           startIcon={<AddIcon />}
+         >
+           Add Product
+         </Button>
+       </Toolbar>
+     </Paper>
+     <Grid container spacing={2}>
+       <Grid item xs={12}>
+         {loading ? (
+           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+             <CircularProgress />
+           </Box>
+         ) : (
+           <Paper sx={{ p: 2, height: 500 }}>
+             <DataGrid
+               rows={filteredProducts}
+               columns={columns}
+               onRowClick={handleRowClick}
+               sx={{
+                 '& .MuiDataGrid-cell:hover': {
+                   backgroundColor: '#f5f5f5',
+                 },
+                 '& .MuiDataGrid-iconSeparator': {
+                   display: 'none',
+                 },
+                 '& .MuiDataGrid-columnHeaders': {
+                   backgroundColor: '#fafafa',
+                   borderBottom: '1px solid #e0e0e0',
+                 },
+                 '& .MuiDataGrid-footerContainer': {
+                   borderTop: '1px solid #e0e0e0',
+                 },
+               }}
+             />
+           </Paper>
+         )}
+       </Grid>
+     </Grid>
+   </Container>
+ );
 }

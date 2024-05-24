@@ -15,7 +15,8 @@ import {
   Grid,
   ThemeProvider,
   createTheme,
-  Stack
+  Stack,
+  Autocomplete,
 } from '@mui/material';
 
 const theme = createTheme({
@@ -50,44 +51,48 @@ const theme = createTheme({
   },
 });
 
-const ComponentForm = () => {
+const PRForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [initialValues, setInitialValues] = useState({
-    name: '',
-    description: '',
+    component: null, // Change from componentId to component
     quantity: 0,
-    reorderLevel: 0,
-    unitOfMeasure: '',
-    supplierId: '',
-    cost: 0,
+
+    notes: '',
+    priority: 'high',
   });
 
+  const [components, setComponents] = useState([]);
   const [submitAction, setSubmitAction] = useState('close');
 
   useEffect(() => {
+    const fetchComponents = async () => {
+      try {
+        const response = await api.get('/api/inventory/components/');
+        setComponents(response.data);
+      } catch (error) {
+        console.error('Error fetching components:', error);
+      }
+    };
+
+    fetchComponents();
+
     if (id) {
       api
-        .get(`/api/inventory/components/${id}/`)
+        .get(`/api/inventory/purchase-requisitions/${id}/`)
         .then((response) => {
           const {
-            name,
-            description,
+            component,
             quantity,
-            reorder_level,
-            unit_of_measure,
-            supplier_id,
-            cost,
+            notes,
+            priority,
           } = response.data;
           setInitialValues({
-            name,
-            description,
+            component,
             quantity,
-            reorderLevel: reorder_level,
-            unitOfMeasure: unit_of_measure,
-            supplierId: supplier_id,
-            cost,
+            notes,
+            priority,
           });
         })
         .catch((error) => console.error(error));
@@ -95,19 +100,13 @@ const ComponentForm = () => {
   }, [id]);
 
   const validationSchema = Yup.object({
-    name: Yup.string().required('Name is required'),
-    description: Yup.string().required('Description is required'),
+    component: Yup.object().required('Component is required'),
     quantity: Yup.number()
       .required('Quantity is required')
       .positive('Quantity must be a positive number'),
-    reorderLevel: Yup.number()
-      .required('Reorder Level is required')
-      .positive('Reorder Level must be a positive number'),
-    unitOfMeasure: Yup.string().required('Unit of Measure is required'),
-    supplierId: Yup.string(),
-    cost: Yup.number()
-      .required('Cost is required')
-      .positive('Cost must be a positive number'),
+
+    notes: Yup.string(),
+    priority: Yup.string().required('Priority is required'),
   });
 
   const handleSubmit = async (values, { setSubmitting, setFieldError, resetForm }) => {
@@ -115,43 +114,38 @@ const ComponentForm = () => {
       setSubmitting(true);
 
       const data = {
-        name: values.name,
-        description: values.description,
+        component_id: values.component.id, // Use values.component.id instead of values.componentId
         quantity: parseInt(values.quantity, 10),
-        reorder_level: parseInt(values.reorderLevel, 10),
-        unit_of_measure: values.unitOfMeasure,
-        supplier_id: values.supplierId,
-        cost: parseFloat(values.cost),
+
+        notes: values.notes,
+        priority: values.priority,
       };
 
       let response;
       if (id) {
-        response = await api.put(`/api/inventory/components/${id}/`, data);
+        response = await api.put(`/api/inventory/purchase-requisitions/${id}/`, data);
       } else {
-        response = await api.post('/api/inventory/components/', data);
+        response = await api.post('/api/inventory/purchase-requisitions/', data);
       }
 
       const { id: newId } = response.data;
 
       if (submitAction === 'close') {
-        navigate(`/inventory/components/${newId}`);
+        navigate(`/inventory/purchase-requisitions/${newId}`);
       } else {
         resetForm();
         setInitialValues({
-          name: '',
-          description: '',
+          component: null,
           quantity: 0,
-          reorderLevel: 0,
-          unitOfMeasure: '',
-          supplierId: '',
-          cost: 0,
+          notes: '',
+          priority: 'high',
         });
       }
 
       setSubmitting(false);
     } catch (error) {
       console.error(error);
-      setFieldError('general', 'Failed to create component.');
+      setFieldError('general', 'Failed to create purchase requisition.');
       setSubmitting(false);
     }
   };
@@ -160,7 +154,7 @@ const ComponentForm = () => {
     <ThemeProvider theme={theme}>
       <Box sx={{ p: 4, bgcolor: 'background.paper', boxShadow: 3, borderRadius: 2 }}>
         <Typography variant="h4" gutterBottom>
-          {id ? 'Edit Component' : 'Create Component'}
+          {id ? 'Edit Purchase Requisition' : 'Create Purchase Requisition'}
         </Typography>
         <Formik
           initialValues={initialValues}
@@ -171,33 +165,29 @@ const ComponentForm = () => {
           {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
             <form onSubmit={handleSubmit}>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Name"
-                    value={values.name}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.name && Boolean(errors.name)}
-                    helperText={touched.name && errors.name}
-                    fullWidth
-                    required
-                    name="name"
+                <Grid item xs={12}>
+                  <Autocomplete
+                    options={components}
+                    value={values.component}
+                    onChange={(event, newValue) => {
+                      handleChange({
+                        target: { name: 'component', value: newValue },
+                      });
+                    }}
+                    getOptionLabel={(option) => option.name || ''}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Component"
+                        error={touched.component && Boolean(errors.component)}
+                        helperText={touched.component && errors.component}
+                        required
+                      />
+                    )}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Description"
-                    value={values.description}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.description && Boolean(errors.description)}
-                    helperText={touched.description && errors.description}
-                    fullWidth
-                    required
-                    name="description"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12}>
                   <TextField
                     label="Quantity"
                     value={values.quantity}
@@ -211,60 +201,35 @@ const ComponentForm = () => {
                     name="quantity"
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Reorder Level"
-                    value={values.reorderLevel}
+                <Grid item xs={12}>
+
+                </Grid>
+                <Grid>
+                  <InputLabel>Priority</InputLabel>
+                  <Select
+                    value={values.priority}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    error={touched.reorderLevel && Boolean(errors.reorderLevel)}
-                    helperText={touched.reorderLevel && errors.reorderLevel}
-                    type="number"
-                    fullWidth
-                    required
-                    name="reorderLevel"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth required>
-                    <InputLabel>Unit of Measure</InputLabel>
-                    <Select
-                      value={values.unitOfMeasure}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.unitOfMeasure && Boolean(errors.unitOfMeasure)}
-                      name="unitOfMeasure"
-                    >
-                      <MenuItem value="pcs">Pieces</MenuItem>
-                      <MenuItem value="kg">Kilograms</MenuItem>
-                      <MenuItem value="l">Liters</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Supplier ID"
-                    value={values.supplierId}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.supplierId && Boolean(errors.supplierId)}
-                    helperText={touched.supplierId && errors.supplierId}
-                    fullWidth
-                    name="supplierId"
-                  />
+                    error={touched.priority && Boolean(errors.priority)}
+                    name="priority"
+                  >
+                    <MenuItem value="high">High</MenuItem>
+                    <MenuItem value="medium">Medium</MenuItem>
+                    <MenuItem value="low">Low</MenuItem>
+                  </Select>
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
-                    label="Cost"
-                    value={values.cost}
+                    label="Notes"
+                    value={values.notes}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    error={touched.cost && Boolean(errors.cost)}
-                    helperText={touched.cost && errors.cost}
-                    type="number"
+                    error={touched.notes && Boolean(errors.notes)}
+                    helperText={touched.notes && errors.notes}
                     fullWidth
-                    required
-                    name="cost"
+                    multiline
+                    rows={4}
+                    name="notes"
                   />
                 </Grid>
               </Grid>
@@ -312,4 +277,4 @@ const ComponentForm = () => {
   );
 };
 
-export default ComponentForm;
+export default PRForm;

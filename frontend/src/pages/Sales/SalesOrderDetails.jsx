@@ -26,6 +26,7 @@ const SalesOrderDetails = () => {
   const [salesOrder, setSalesOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [salesOrderItems, setSalesOrderItems] = useState([]);
+  const [bomId, setBomId] = useState(null);
 
   useEffect(() => {
     const fetchSalesOrder = async () => {
@@ -46,30 +47,38 @@ const SalesOrderDetails = () => {
     fetchSalesOrder();
   }, [id]);
 
+  const fetchBomId = async (productId) => {
+    try {
+      const response = await api.get(`/api/sales/products/${productId}/`);
+      setBomId(response.data.bom);
+      console.log(response.data.bom);
+    } catch (error) {
+      console.error('Error fetching BOM ID:', error);
+    }
+  };
+
   const createManufacturingOrder = async (salesOrderItemId) => {
     const salesOrderItem = salesOrderItems.find(item => item.id === salesOrderItemId);
 
-    console.log(salesOrderItem); // This will log the salesOrderItem object
-
     if (!salesOrderItem) return;
 
-    const manufacturingOrderData = {
-      sales_order_item_id: salesOrderItem.sales_order_item_id,
-
-      quantity: salesOrderItem.quantity,
-      product_id: salesOrderItem.product,
-    };
-
-    console.log(manufacturingOrderData);
-
     try {
+      const { data: product } = await api.get(`/api/sales/products/${salesOrderItem.product}/`);
+      const manufacturingOrderData = {
+        sales_order_item: salesOrderItem.sales_order_item_id,
+        quantity: salesOrderItem.quantity,
+        product_id: salesOrderItem.product,
+        bom: product.bom, // Include the BOM ID from the product details
+      };
+
+      console.log(manufacturingOrderData);
+
       const response = await api.post('/api/manufacturing/manufacturing-orders/', manufacturingOrderData);
       console.log(response.data);
     } catch (error) {
       console.error(error);
     }
   };
-
 
   const handleEdit = () => {
     navigate(`/salesorder/${id}`);
@@ -151,8 +160,8 @@ const SalesOrderDetails = () => {
                   <TableBody>
                     {salesOrderItems.map((item) => (
                       <TableRow key={item.product}>
-                        <TableCell>{item.sales_order_item_id}</TableCell>
-                        <TableCell>{item.product}</TableCell>
+                        <TableCell align="right">{item.sales_order_item_id}</TableCell>
+                        <TableCell align="right">{item.product_name}</TableCell>
                         <TableCell align="right">{item.quantity}</TableCell>
                         <TableCell align="right">{item.price}</TableCell>
                         <TableCell align="right">{(item.quantity * parseFloat(item.price)).toFixed(2)}</TableCell>

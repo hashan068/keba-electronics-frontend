@@ -1,18 +1,11 @@
-// routes/LoginRoutes.js
 import React from 'react';
-import { Route } from 'react-router-dom';
-import ProtectedRoute from '../components/ProtectedRoute';
-import Layout from '../components/Layout';
+import { Routes, Route } from 'react-router-dom';
 import Dashboard from '../pages/Dashboard';
 
 const DashboardRoutes = () => (
-  <ProtectedRoute>
-    <Layout>
-      <Dashboard />
-    </Layout>
-  </ProtectedRoute>
+  <Routes>
+    <Route path="/" element={<Dashboard />} />
+  </Routes>
 );
 
-export default (
-  <Route path="/" element={<DashboardRoutes />} />
-);
+export default DashboardRoutes;

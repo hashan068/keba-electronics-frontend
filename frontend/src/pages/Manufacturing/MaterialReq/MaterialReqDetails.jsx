@@ -1,62 +1,262 @@
 import React, { useState, useEffect } from 'react';
-import api from "../../../api";
-import { useParams } from 'react-router-dom';
-import { Typography, Box, Grid, Paper, Divider } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
+import api from '../../../api';
+import {
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Button,
+  CircularProgress,
+  Grid,
+  Snackbar,
+  Alert,
+  LinearProgress,
+} from '@mui/material';
+import { styled } from '@mui/system';
+import { USER_ID } from '../../../constants';
+
+const StyledBox = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+}));
+
+const CenteredBox = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '100vh',
+}));
+
+const BoldTypography = styled(Typography)(({ theme }) => ({
+  fontWeight: 'bold',
+}));
 
 const MaterialReqDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [materialReq, setMaterialReq] = useState(null);
+  const [components, setComponents] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [alert, setAlert] = useState(null);
 
   useEffect(() => {
     const fetchMaterialReq = async () => {
       try {
         const response = await api.get(`/api/manufacturing/material-requisitions/${id}/`);
         setMaterialReq(response.data);
+        await fetchComponents(response.data.items);
       } catch (error) {
         console.error('Error fetching material requisition:', error);
+        setError('Error fetching material requisition');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const fetchComponents = async (items) => {
+      const componentIds = items.map(item => item.component);
+      const uniqueComponentIds = [...new Set(componentIds)];
+
+      try {
+        const responses = await Promise.all(uniqueComponentIds.map(id => api.get(`/api/inventory/components/${id}/`)));
+        const componentsData = responses.reduce((acc, res) => {
+          acc[res.data.id] = res.data.name;
+          return acc;
+        }, {});
+        setComponents(componentsData);
+      } catch (error) {
+        console.error('Error fetching components:', error);
+        setError('Error fetching components');
       }
     };
 
     fetchMaterialReq();
   }, [id]);
 
+  const handleApproveRequisition = async () => {
+    const userId = parseInt(localStorage.getItem(USER_ID), 10);
+  
+    const payload = materialReq.items.map((item) => ({
+      material_requisition_item: item.id,
+      component_id: item.component,
+      quantity: item.quantity,
+      user_id: userId,
+    }));
+  
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/inventory/consumption-transactions/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      const responseData = await response.json();
+  
+      if (response.ok) {
+        setAlert({ severity: 'success', message: 'Material requisition approved successfully' });
+        setMaterialReq(prev => ({ ...prev, status: 'approved' }));
+      } else {
+        // Here's where you set the alert state with the error message
+        setAlert({ severity: 'error', message: responseData.error || 'Unknown error' });
+      }
+  
+    } catch (error) {
+      console.error('Error approving material requisition:', error);
+      // Here's where you set the alert state with the error message
+      setAlert({ severity: 'error', message: 'An error occurred while approving the material requisition. Please try again later.' });
+    }
+  };
+  
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'approved':
+        return 'success';
+      case 'pending':
+        return 'warning';
+      case 'rejected':
+        return 'error';
+      case 'fulfilled':
+        return 'info';
+      default:
+        return 'default';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <CenteredBox>
+        <CircularProgress />
+      </CenteredBox>
+    );
+  }
+
+  if (error) {
+    return (
+      <CenteredBox>
+        <Typography variant="h6" color="error">{error}</Typography>
+      </CenteredBox>
+    );
+  }
+
   if (!materialReq) {
-    return <div>Loading...</div>;
+    return (
+      <CenteredBox>
+        <Typography variant="h6">Material Requisition not found</Typography>
+      </CenteredBox>
+    );
   }
 
   return (
-    <Box>
+    <StyledBox>
+      <Grid container spacing={2} justifyContent="space-between" sx={{ mb: 2 }}>
+        <Grid item>
+          <Button variant="contained" onClick={() => navigate(-1)}>
+            Back
+          </Button>
+        </Grid>
+        {materialReq.status === 'pending' && (
+          <Grid item>
+            <Button variant="contained" color="primary" onClick={handleApproveRequisition}>
+              Approve
+            </Button>
+          </Grid>
+        )}
+      </Grid>
       <Typography variant="h4" gutterBottom>
         Material Requisition Details
       </Typography>
-      <Paper elevation={3}>
-        <Box p={2}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle1">Requisition ID:</Typography>
-              <Typography variant="body1">{materialReq.id}</Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle1">Status:</Typography>
-              <Typography variant="body1">{materialReq.status}</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Divider />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1">Items:</Typography>
-              <ul>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Grid container spacing={1}>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">Requisition ID:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{materialReq.id}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">Manufacturing Order ID:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{materialReq.manufacturing_order}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">BOM ID:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{materialReq.bom}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">Status:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{materialReq.status}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">Created At:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{new Date(materialReq.created_at).toLocaleString()}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <BoldTypography variant="h6">Updated At:</BoldTypography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{new Date(materialReq.updated_at).toLocaleString()}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <LinearProgress color={getStatusColor(materialReq.status)} variant="determinate" value={materialReq.status === 'approved' ? 100 : 50} />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <TableContainer component={Card}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell><BoldTypography>Item ID</BoldTypography></TableCell>
+                  <TableCell><BoldTypography>Component</BoldTypography></TableCell>
+                  <TableCell><BoldTypography>Quantity</BoldTypography></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {materialReq.items.map((item) => (
-                  <li key={item.id}>
-                    {item.component_name} ({item.quantity})
-                  </li>
+                  <TableRow key={item.id}>
+                    <TableCell>{item.id}</TableCell>
+                    <TableCell>{components[item.component] || 'Loading...'}</TableCell>
+                    <TableCell>{item.quantity}</TableCell>
+                  </TableRow>
                 ))}
-              </ul>
-            </Grid>
-          </Grid>
-        </Box>
-      </Paper>
-    </Box>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>
+      </Grid>
+      <Snackbar
+        open={!!alert}
+        autoHideDuration={6000}
+        onClose={() => setAlert(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setAlert(null)} severity={alert?.severity}>
+          {alert?.message}
+        </Alert>
+      </Snackbar>
+    </StyledBox>
   );
 };
 
