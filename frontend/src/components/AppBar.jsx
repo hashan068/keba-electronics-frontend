@@ -76,9 +76,9 @@ function ResponsiveAppBar() {
               component="img"
               src={logo}
               alt="Logo"
-              sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40 }}
+              sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 50 }}
             />
-            <Typography
+            {/* <Typography
               variant="h6"
               noWrap
               component="a"
@@ -94,7 +94,7 @@ function ResponsiveAppBar() {
               }}
             >
               KEBA
-            </Typography>
+            </Typography> */}
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
               <IconButton
                 size="large"

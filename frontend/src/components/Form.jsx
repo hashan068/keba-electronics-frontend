@@ -1,10 +1,10 @@
-// components/Form.js
-import { useState } from "react";
-import api from "../api";
+// src/components/Form.js
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
+import api from "../api";
+import { Button, TextField, Box, CircularProgress } from '@mui/material';
 import "../styles/Form.css";
-import LoadingIndicator from "./LoadingIndicator";
 
 function Form({ route, method }) {
     const [username, setUsername] = useState("");
@@ -15,8 +15,8 @@ function Form({ route, method }) {
     const name = method === "login" ? "Login" : "Register";
 
     const handleSubmit = async (e) => {
-        setLoading(true);
         e.preventDefault();
+        setLoading(true);
 
         try {
             const res = await api.post(route, { username, password });
@@ -44,27 +44,36 @@ function Form({ route, method }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="form-container">
-            <h1>{name}</h1>
-            <input
-                className="form-input"
-                type="text"
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+            <TextField
+                margin="normal"
+                fullWidth
+                label="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
+                autoComplete="username"
+                autoFocus
             />
-            <input
-                className="form-input"
+            <TextField
+                margin="normal"
+                fullWidth
+                label="Password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
+                autoComplete="current-password"
             />
-            {loading && <LoadingIndicator />}
-            <button className="form-button" type="submit">
+            {loading && <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}><CircularProgress /></Box>}
+            <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                sx={{ mt: 3, mb: 2 }}
+            >
                 {name}
-            </button>
-        </form>
+            </Button>
+        </Box>
     );
 }
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Button, Alert } from '@mui/material';
 import { useParams } from 'react-router-dom';
+import { CheckCircle, Cancel } from '@mui/icons-material';
 import api from '../../api';
 import PreviewDownloadButtons from '../../components/PreviewDownloadButtons';
 import saveAs from 'file-saver';
@@ -8,9 +9,6 @@ import saveAs from 'file-saver';
 export default function QuotationDetail() {
   const { id } = useParams();
   const [quotation, setQuotation] = useState(null);
-  // const [customer, setCustomer] = useState(null);
-  // const [product, setProduct] = useState(null);
-  // const [quantity, setQuantity] = useState(1);
   const [salesOrderItems, setSalesOrderItems] = useState([]);
   const [alert, setAlert] = useState(null);
 
@@ -27,12 +25,10 @@ export default function QuotationDetail() {
   }, [id]);
 
   const handlePreview = () => {
-    // Add your preview logic here
     console.log('Preview clicked');
   };
 
   const handleConfirm = () => {
-    // Add your confirmation logic here
     console.log('Confirm clicked');
   };
 
@@ -56,8 +52,7 @@ export default function QuotationDetail() {
   };
 
   const validateForm = () => {
-    // Add your form validation logic here
-    return true; // Replace this with your actual validation logic
+    return true;
   };
 
   const handleSubmit = async (event) => {
@@ -74,7 +69,6 @@ export default function QuotationDetail() {
         price: item.unit_price,
       })),
     };
-    
 
     console.log('Sending data:', salesOrderData);
 
@@ -93,7 +87,7 @@ export default function QuotationDetail() {
         setAlert({ severity: 'success', message: 'Sales order created successfully!' });
         setTimeout(() => {
           setAlert(null);
-        }, 3000); // Hide the alert after 3 seconds
+        }, 3000);
         setSalesOrderItems([]);
       } else {
         setAlert({ severity: 'error', message: `Error creating sales order: ${responseData.error || 'Unknown error'}` });
@@ -104,62 +98,103 @@ export default function QuotationDetail() {
     }
   };
 
+  const handleSendEmail = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/sales/quotations/${id}/send-email/`, {
+        method: 'POST',
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        setAlert({ severity: 'success', message: 'Email sent successfully!' });
+      } else {
+        setAlert({ severity: 'error', message: result.error || 'Error sending email' });
+      }
+    } catch (error) {
+      setAlert({ severity: 'error', message: 'An error occurred while sending the email. Please try again later.' });
+    }
+  };
+
   if (!quotation) {
     return <div>Loading...</div>;
   }
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Box
-        component="main"
-        sx={{ justifyContent: 'center', alignItems: 'center', height: '100%', width: '85%' }}
-      >
-        <Typography variant="h3" align="center" sx={{ marginTop: '28px' }}>
-          Quotation Details
-        </Typography>
-        <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mr: 2 }}>
-          Create Sales Order
-        </Button>
+    <Box sx={{ flexGrow: 1, padding: 3 }}>
+      <Typography variant="h3" align="center" sx={{ marginBottom: 3 }}>
+        Quotation Details
+      </Typography>
 
+      {alert && (
+        <Alert severity={alert.severity} onClose={() => setAlert(null)} sx={{ marginBottom: 2 }}>
+          {alert.message}
+        </Alert>
+      )}
 
-        {alert && (
-          <Alert severity={alert.severity} onClose={() => setAlert(null)}>
-            {alert.message}
-          </Alert>
-        )}
-
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 2 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="h6">Quotation Number:</Typography>
-            <Typography>{quotation.quotation_number}</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="h6">Customer:</Typography>
-            <Typography>{quotation.customer}</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="h6">Date:</Typography>
-            <Typography>{quotation.date}</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="h6">Expiration Date:</Typography>
-            <Typography>{quotation.expiration_date}</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="h6">Invoicing and Shipping Address:</Typography>
-            <Typography>{quotation.invoicing_and_shipping_address}</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="h6">Total Amount:</Typography>
-            <Typography>{quotation.total_amount}</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="h6">Status:</Typography>
-            <Typography>{quotation.status}</Typography>
-          </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="h6">Quotation Number:</Typography>
+          <Typography>{quotation.quotation_number}</Typography>
         </Box>
-        <PreviewDownloadButtons onPreview={handlePreview} onDownload={handleDownload} />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="h6">Customer:</Typography>
+          <Typography>{quotation.customer}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="h6">Date:</Typography>
+          <Typography>{quotation.date}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="h6">Expiration Date:</Typography>
+          <Typography>{quotation.expiration_date}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="h6">Invoicing and Shipping Address:</Typography>
+          <Typography>{quotation.invoicing_and_shipping_address}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="h6">Total Amount:</Typography>
+          <Typography>{quotation.total_amount}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="h6">Status:</Typography>
+          <Typography>{quotation.status}</Typography>
+        </Box>
       </Box>
+
+      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', marginBottom: 3 }}>
+        <Button 
+          variant="contained" 
+          color="success" 
+          startIcon={<CheckCircle />} 
+          sx={{ textTransform: 'none' }}
+          onClick={handleSubmit}
+        >
+          Approve
+        </Button>
+        <Button 
+          variant="contained" 
+          color="error" 
+          startIcon={<Cancel />} 
+          sx={{ textTransform: 'none' }}
+          onClick={() => console.log('Rejected')}
+        >
+          Reject
+        </Button>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          sx={{ textTransform: 'none' }}
+          onClick={handleSendEmail}
+        >
+          Send Quotation Email
+        </Button>
+      </Box>
+
+      <PreviewDownloadButtons 
+        onPreview={handlePreview} 
+        onDownload={handleDownload} 
+      />
     </Box>
   );
 }

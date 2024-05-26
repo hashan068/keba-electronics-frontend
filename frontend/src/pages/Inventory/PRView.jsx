@@ -7,6 +7,7 @@ const PRView = () => {
   const { id } = useParams();
   const [purchaseRequisition, setPurchaseRequisition] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState('created');
 
   useEffect(() => {
     const fetchPurchaseRequisition = async () => {
@@ -14,6 +15,7 @@ const PRView = () => {
       try {
         const response = await api.get(`/api/inventory/purchase-requisitions/${id}/`);
         setPurchaseRequisition(response.data);
+        setStatus(response.data.status);
       } catch (error) {
         console.error('Error fetching purchase requisition:', error);
       } finally {
@@ -23,52 +25,66 @@ const PRView = () => {
     fetchPurchaseRequisition();
   }, [id]);
 
-  const STATUS_CHOICES = [
-    { value: 'created', label: 'Created' },
-    { value: 'pending', label: 'Pending' },
-    { value: 'approved', label: 'Approved' },
-    { value: 'rejected', label: 'Rejected' },
-    { value: 'cancelled', label: 'Cancelled' },
-    { value: 'partially_fulfilled', label: 'Partially Fulfilled' },
-    { value: 'fulfilled', label: 'Fulfilled' },
-    { value: 'closed', label: 'Closed' },
-  ];
-
-  const getStatusStep = (status) => {
-    return STATUS_CHOICES.findIndex((choice) => choice.value === status);
+  const handleStatusUpdate = async (newStatus) => {
+    try {
+      await api.patch(`/api/inventory/purchase-requisitions/${id}/`, { status: newStatus });
+      setStatus(newStatus);
+      const response = await api.get(`/api/inventory/purchase-requisitions/${id}/`);
+      setPurchaseRequisition(response.data);
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
   };
 
   const renderStatusControls = () => {
-    const status = purchaseRequisition?.status;
-
     switch (status) {
       case 'created':
         return (
-          <Button variant="contained" color="primary" sx={{ mx: 1 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleStatusUpdate('pending')}
+          >
             Submit for Approval
           </Button>
         );
       case 'pending':
         return (
           <>
-            <Button variant="contained" color="primary" sx={{ mx: 1 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleStatusUpdate('approved')}
+            >
               Approve
             </Button>
-            <Button variant="contained" color="secondary" sx={{ mx: 1 }}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => handleStatusUpdate('rejected')}
+            >
               Reject
             </Button>
           </>
         );
       case 'approved':
         return (
-          <Button variant="contained" color="primary" sx={{ mx: 1 }}>
-            Create Purchase Order
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleStatusUpdate('fulfilled')}
+          >
+            Mark as Fulfilled
           </Button>
         );
       case 'rejected':
         return (
           <>
-            <Button variant="contained" color="primary" sx={{ mx: 1 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleStatusUpdate('created')}
+            >
               Revise and Resubmit
             </Button>
             <RejectedLogo />
@@ -76,27 +92,43 @@ const PRView = () => {
         );
       case 'cancelled':
         return (
-          <Button variant="contained" color="primary" sx={{ mx: 1 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleStatusUpdate('created')}
+          >
             Reopen
-          </Button>
-        );
-      case 'partially_fulfilled':
-        return (
-          <Button variant="contained" color="primary" sx={{ mx: 1 }}>
-            Mark as Fulfilled
           </Button>
         );
       case 'fulfilled':
         return (
-          <Button variant="contained" color="primary" sx={{ mx: 1 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleStatusUpdate('closed')}
+          >
             Close
           </Button>
         );
       case 'closed':
-        return null;
+        return <Typography variant="body1">Closed</Typography>;
       default:
-        return null;
+        return <Typography variant="body1">Unknown status</Typography>;
     }
+  };
+
+  const STATUS_CHOICES = [
+    { value: 'created', label: 'Created' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'approved', label: 'Approved' },
+
+
+    { value: 'fulfilled', label: 'Fulfilled' },
+ 
+  ];
+
+  const getStatusStep = (status) => {
+    return STATUS_CHOICES.findIndex(choice => choice.value === status);
   };
 
   return (
@@ -106,12 +138,6 @@ const PRView = () => {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Purchase Requisition Details
           </Typography>
-          <Button variant="contained" color="primary" sx={{ mx: 1 }}>
-            Edit
-          </Button>
-          <Button variant="contained" color="secondary" sx={{ mx: 1 }}>
-            Delete
-          </Button>
           {renderStatusControls()}
         </Toolbar>
       </AppBar>
@@ -144,13 +170,14 @@ const PRView = () => {
                 <Grid container spacing={2}>
                   {[
                     { label: 'Requisition ID:', value: purchaseRequisition?.id || 'N/A' },
-                    { label: 'Requester:', value: purchaseRequisition?.requester || 'N/A' },
-                    { label: 'Department:', value: purchaseRequisition?.department || 'N/A' },
-                    { label: 'Items:', value: Array.isArray(purchaseRequisition?.items) ? purchaseRequisition.items.map(item => item.name).join(', ') : 'N/A' },
+                    { label: 'Component ID:', value: purchaseRequisition?.component_id || 'N/A' },
+                    { label: 'Quantity:', value: purchaseRequisition?.quantity || 'N/A' },
+                    { label: 'Priority:', value: purchaseRequisition?.priority || 'N/A' },
                     { label: 'Status:', value: purchaseRequisition?.status || 'N/A' },
                     { label: 'Created At:', value: purchaseRequisition?.created_at ? new Date(purchaseRequisition.created_at).toLocaleString() : 'N/A' },
                     { label: 'Updated At:', value: purchaseRequisition?.updated_at ? new Date(purchaseRequisition.updated_at).toLocaleString() : 'N/A' },
                     { label: 'Notes:', value: purchaseRequisition?.notes || 'N/A' },
+                    { label: 'Expected Delivery Date:', value: purchaseRequisition?.expected_delivery_date ? new Date(purchaseRequisition.expected_delivery_date).toLocaleString() : 'N/A' },
                   ].map((item, index) => (
                     <Grid item xs={12} sm={6} key={index}>
                       <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>

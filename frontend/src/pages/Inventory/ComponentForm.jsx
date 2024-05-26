@@ -134,7 +134,7 @@ const ComponentForm = () => {
       const { id: newId } = response.data;
 
       if (submitAction === 'close') {
-        navigate(`/inventory/components/${newId}`);
+        navigate(`/inventory/component`);
       } else {
         resetForm();
         setInitialValues({

@@ -47,6 +47,9 @@ const MfgOrderDetails = () => {
       await api.post(`/api/manufacturing/material-requisitions/`, payload);
       setIsMaterialRequested(true);
       setStatus('mr_sent');
+      // Fetch the latest manufacturing order data after updating the status
+      const response = await api.get(`/api/manufacturing/manufacturing-orders/${id}/`);
+      setManufacturingOrder(response.data);
     } catch (error) {
       console.error('Error requesting material:', error);
     }
@@ -56,6 +59,9 @@ const MfgOrderDetails = () => {
     try {
       await api.patch(`/api/manufacturing/manufacturing-orders/${id}/`, { status: newStatus });
       setStatus(newStatus);
+      // Fetch the latest manufacturing order data after updating the status
+      const response = await api.get(`/api/manufacturing/manufacturing-orders/${id}/`);
+      setManufacturingOrder(response.data);
     } catch (error) {
       console.error('Error updating status:', error);
     }
@@ -118,10 +124,10 @@ const MfgOrderDetails = () => {
     { value: 'pending', label: 'Pending' },
     { value: 'mr_sent', label: 'MR Sent' },
     { value: 'mr_approved', label: 'MR Approved' },
-    { value: 'mr_rejected', label: 'MR Rejected' },
+    // { value: 'mr_rejected', label: 'MR Rejected' },
     { value: 'in_production', label: 'In Production' },
     { value: 'completed', label: 'Completed' },
-    { value: 'cancelled', label: 'Cancelled' },
+    // { value: 'cancelled', label: 'Cancelled' },
   ];
 
   const getStatusStep = (status) => {
@@ -135,12 +141,12 @@ const MfgOrderDetails = () => {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Manufacturing Order Details
           </Typography>
-          <Button variant="contained" color="primary" sx={{ mx: 1 }}>
+          {/* <Button variant="contained" color="primary" sx={{ mx: 1 }}>
             Edit
           </Button>
           <Button variant="contained" color="secondary" sx={{ mx: 1 }}>
             Delete
-          </Button>
+          </Button> */}
           {renderStatusControls()}
         </Toolbar>
       </AppBar>
