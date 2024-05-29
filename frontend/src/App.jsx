@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
+import LoginLayout from './components/LoginLayout';
 import SalesRoutes from './routes/SalesRoutes';
 import ManufacturingRoutes from './routes/ManufacturingRoutes';
 import InventoryRoutes from './routes/InventoryRoutes';
@@ -37,7 +38,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="/login" element={<Login />} />
+          {/* <Route path="/login" element={<Login />} /> */}
+          <Route path="/login" element={<LoginLayout><Login /></LoginLayout>} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/register" element={<RegisterAndLogout />} />
           <Route path="/*" element={<ProtectedRoutes />} />

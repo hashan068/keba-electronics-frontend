@@ -131,7 +131,7 @@ const PRForm = () => {
       const { id: newId } = response.data;
 
       if (submitAction === 'close') {
-        navigate(`/inventory/purchase-requisitions/${newId}`);
+        navigate(`/inventory/purchase-requisition/${newId}`);
       } else {
         resetForm();
         setInitialValues({
