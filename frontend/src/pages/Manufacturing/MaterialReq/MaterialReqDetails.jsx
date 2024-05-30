@@ -80,6 +80,29 @@ const MaterialReqDetails = () => {
     fetchMaterialReq();
   }, [id]);
 
+  const handleApproveRequisition = async () => {
+    const approvedItems = [];
+    const rejectedItems = [];
+
+    for (const item of materialReq.items) {
+      const itemApproved = await handleApproveRequisitionItem(item);
+      if (itemApproved) {
+        approvedItems.push(item);
+      } else {
+        rejectedItems.push(item);
+      }
+    }
+
+    if (approvedItems.length > 0) {
+      setAlert({ severity: 'success', message: 'Material requisition approved successfully' });
+      setMaterialReq((prev) => ({ ...prev, status: 'approved' }));
+    }
+
+    if (rejectedItems.length > 0) {
+      setAlert({ severity: 'error', message: 'Some items could not be approved due to insufficient component quantity' });
+    }
+  };
+
   const handleApproveRequisitionItem = async (item) => {
     const userId = parseInt(localStorage.getItem(USER_ID), 10);
 
@@ -88,6 +111,7 @@ const MaterialReqDetails = () => {
       component_id: item.component,
       quantity: item.quantity,
       user_id: userId,
+      status: status,
     };
 
     try {
@@ -101,23 +125,21 @@ const MaterialReqDetails = () => {
 
       if (response.ok) {
         console.log('Material requisition item approved:', item.id);
+        return true;
       } else {
-        const responseData = await response.json();
-        setAlert({ severity: 'error', message: responseData.error || 'Unknown error' });
+        const responseText = await response.text();
+        console.error('Error approving material requisition item:', responseText);
+        return false;
       }
     } catch (error) {
       console.error('Error approving material requisition item:', error);
       setAlert({ severity: 'error', message: 'An error occurred while approving the material requisition item. Please try again later.' });
+      return false;
     }
   };
 
-  const handleApproveRequisition = async () => {
-    for (const item of materialReq.items) {
-      await handleApproveRequisitionItem(item);
-    }
-
-    setAlert({ severity: 'success', message: 'Material requisition approved successfully' });
-    setMaterialReq((prev) => ({ ...prev, status: 'approved' }));
+  const handleDismissAlert = () => {
+    setAlert(null);
   };
 
   const getStatusColor = (status) => {
@@ -240,15 +262,31 @@ const MaterialReqDetails = () => {
                   <TableCell>
                     <BoldTypography>Quantity</BoldTypography>
                   </TableCell>
+                  <TableCell>
+                    <BoldTypography>Status</BoldTypography>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {materialReq.items.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell>{item.id}</TableCell>
-                    <TableCell>{components[item.component] || 'Loading...'}</TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                  </TableRow>
+                  <TableCell>{item.id}</TableCell>
+                  <TableCell>{components[item.component] || 'Loading...'}</TableCell>
+                  <TableCell>{item.quantity}</TableCell>
+                  <TableCell>
+                    <Typography
+                      color={
+                        item.status === 'approved'
+                          ? 'success.main'
+                          : item.status === 'rejected'
+                          ? 'error.main'
+                          : 'warning.main'
+                      }
+                    >
+                      {item.status}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
                 ))}
               </TableBody>
             </Table>
