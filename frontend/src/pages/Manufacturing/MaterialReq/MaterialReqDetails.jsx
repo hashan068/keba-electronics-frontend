@@ -3,39 +3,52 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../../api';
 import {
   Typography,
-  Box,
-  Card,
-  CardContent,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Button,
-  CircularProgress,
+  Container,
   Grid,
+  Card,
+  CardHeader,
+  CardContent,
+  Button,
+  AppBar,
+  Toolbar,
+  Box,
+  LinearProgress,
   Snackbar,
   Alert,
-  LinearProgress,
+  Table,
+  TableHead,
+  TableBody,
+  TableCell,
+  TableRow,
+  TableContainer,
+  Stepper,
+  Step,
+  StepLabel,
 } from '@mui/material';
-import { styled } from '@mui/system';
 import { USER_ID } from '../../../constants';
 
-const StyledBox = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-}));
+const steps = [
+  'Pending',
+  'partialy_approved',
+  'approved',
+  'fulfilled',
 
-const CenteredBox = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  height: '100vh',
-}));
+];
 
-const BoldTypography = styled(Typography)(({ theme }) => ({
-  fontWeight: 'bold',
-}));
+const getStatusStep = (status) => {
+  switch (status) {
+    case 'pending':
+      return 0;
+    case 'partialy_approved':
+      return 1;
+    case 'approved':
+      return 2;
+    case 'fulfilled':
+      return 4;
+    default:
+      return 0;
+  }
+};
 
 const MaterialReqDetails = () => {
   const { id } = useParams();
@@ -84,14 +97,23 @@ const MaterialReqDetails = () => {
     const approvedItems = [];
     const rejectedItems = [];
 
+    // Approve each item in the material requisition
     for (const item of materialReq.items) {
-      const itemApproved = await handleApproveRequisitionItem(item);
-      if (itemApproved) {
-        approvedItems.push(item);
+      // Check if the item status is pending
+      if (item.status === 'pending') {
+        // Approve the item only if its status is pending
+        const itemApproved = await handleApproveRequisitionItem(item);
+        if (itemApproved) {
+          approvedItems.push(item);
+        } else {
+          rejectedItems.push(item);
+        }
       } else {
-        rejectedItems.push(item);
+        // If the item status is not pending, skip approval
+        console.log(`Skipping approval for item ${item.id} because its status is not pending.`);
       }
     }
+
 
     if (approvedItems.length > 0) {
       setAlert({ severity: 'success', message: 'Material requisition approved successfully' });
@@ -111,7 +133,7 @@ const MaterialReqDetails = () => {
       component_id: item.component,
       quantity: item.quantity,
       user_id: userId,
-      status: status,
+      status: 'approved',
     };
 
     try {
@@ -125,12 +147,16 @@ const MaterialReqDetails = () => {
 
       if (response.ok) {
         console.log('Material requisition item approved:', item.id);
+        const response = await api.get(`/api/manufacturing/material-requisitions/${id}/`);
+        setMaterialReq(response.data);
+        // await fetchComponents(response.data.items);
         return true;
       } else {
         const responseText = await response.text();
         console.error('Error approving material requisition item:', responseText);
         return false;
       }
+      
     } catch (error) {
       console.error('Error approving material requisition item:', error);
       setAlert({ severity: 'error', message: 'An error occurred while approving the material requisition item. Please try again later.' });
@@ -142,169 +168,167 @@ const MaterialReqDetails = () => {
     setAlert(null);
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'approved':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'rejected':
-        return 'error';
-      case 'fulfilled':
-        return 'info';
-      default:
-        return 'default';
-    }
-  };
-
   if (isLoading) {
     return (
-      <CenteredBox>
-        <CircularProgress />
-      </CenteredBox>
+      <Container maxWidth="lg" sx={{ py: 4, px: 2, bgcolor: '#f5f5f5' }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant="h4" gutterBottom>
+              Loading...
+            </Typography>
+          </Grid>
+        </Grid>
+      </Container>
     );
   }
-
-  if (error) {
-    return (
-      <CenteredBox>
-        <Typography variant="h6" color="error">{error}</Typography>
-      </CenteredBox>
-    );
-  }
-
-  if (!materialReq) {
-    return (
-      <CenteredBox>
-        <Typography variant="h6">Material Requisition not found</Typography>
-      </CenteredBox>
-    );
-  }
+  
 
   return (
-    <StyledBox>
-      <Grid container spacing={2} justifyContent="space-between" sx={{ mb: 2 }}>
-        <Grid item>
+    <Container maxWidth="lg" sx={{ py: 4, px: 2, bgcolor: '#f5f5f5' }}>
+      <AppBar position="static" color="default" sx={{ mb: 4 }}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Material Requisition Details
+          </Typography>
           <Button variant="contained" onClick={() => navigate(-1)}>
             Back
           </Button>
-        </Grid>
-        {materialReq.status === 'pending' && (
-          <Grid item>
-            <Button variant="contained" color="primary" onClick={handleApproveRequisition}>
+          {(materialReq.status === 'pending' || materialReq.status === 'partialy_approved') && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleApproveRequisition}
+              sx={{ ml: 2 }}
+            >
               Approve
             </Button>
-          </Grid>
-        )}
-      </Grid>
-      <Typography variant="h4" gutterBottom>
-        Material Requisition Details
-      </Typography>
+          )}
+        </Toolbar>
+      </AppBar>
+
+      <Card sx={{ mb: 4, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+        <CardContent>
+          <Stepper activeStep={getStatusStep(materialReq.status)} alternativeLabel>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </CardContent>
+      </Card>
+
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <Card>
+          <Card sx={{ boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+            {/* <CardHeader title="Material Requisition Details" /> */}
             <CardContent>
-              <Grid container spacing={1}>
-                <Grid item xs={6}>
-                  <BoldTypography variant="h6">Requisition ID:</BoldTypography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="h6">{materialReq.id}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <BoldTypography variant="h6">Manufacturing Order ID:</BoldTypography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="h6">{materialReq.manufacturing_order}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <BoldTypography variant="h6">BOM ID:</BoldTypography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="h6">{materialReq.bom}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <BoldTypography variant="h6">Status:</BoldTypography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="h6">{materialReq.status}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <BoldTypography variant="h6">Created At:</BoldTypography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="h6">{new Date(materialReq.created_at).toLocaleString()}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <BoldTypography variant="h6">Updated At:</BoldTypography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="h6">{new Date(materialReq.updated_at).toLocaleString()}</Typography>
-                </Grid>
+              <Grid container spacing={2}>
+                {[
+                  { label: 'Order ID:', value: materialReq.id },
+                  { label: 'BOM ID:', value: materialReq.bom },
+
+                  { label: 'Created At:', value: new Date(materialReq.created_at).toLocaleString() },
+                  { label: 'Updated At:', value: new Date(materialReq.updated_at).toLocaleString() },
+                ].map((item, index) => (
+                  <React.Fragment key={index}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
+                        {item.label}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="body1" gutterBottom sx={{ color: '#666' }}>
+                        {item.value}
+                      </Typography>
+                    </Grid>
+                  </React.Fragment>
+                ))}
                 <Grid item xs={12}>
-                  <LinearProgress color={getStatusColor(materialReq.status)} variant="determinate" value={materialReq.status === 'approved' ? 100 : 50} />
+                  <LinearProgress
+                    color={materialReq.status === 'approved' ? 'success' : 'warning'}
+                    variant="determinate"
+                    value={materialReq.status === 'approved' ? 100 : 50}
+                  />
                 </Grid>
               </Grid>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12}>
-          <TableContainer component={Card}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    <BoldTypography>Item ID</BoldTypography>
-                  </TableCell>
-                  <TableCell>
-                    <BoldTypography>Component</BoldTypography>
-                  </TableCell>
-                  <TableCell>
-                    <BoldTypography>Quantity</BoldTypography>
-                  </TableCell>
-                  <TableCell>
-                    <BoldTypography>Status</BoldTypography>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {materialReq.items.map((item) => (
-                  <TableRow key={item.id}>
-                  <TableCell>{item.id}</TableCell>
-                  <TableCell>{components[item.component] || 'Loading...'}</TableCell>
-                  <TableCell>{item.quantity}</TableCell>
-                  <TableCell>
-                    <Typography
-                      color={
-                        item.status === 'approved'
-                          ? 'success.main'
-                          : item.status === 'rejected'
-                          ? 'error.main'
-                          : 'warning.main'
-                      }
-                    >
-                      {item.status}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <Card sx={{ boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+            <CardHeader title="Items" />
+            <CardContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>
+                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                              Item ID
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                              Component
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                              Quantity
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                              Status
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {materialReq.items.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell>{item.id}</TableCell>
+                            <TableCell>{components[item.component] || 'Loading...'}</TableCell>
+                            <TableCell>{item.quantity}</TableCell>
+                            <TableCell>
+                              <Typography
+                                color={
+                                  item.status === 'approved'
+                                    ? 'success.main'
+                                    : item.status === 'rejected'
+                                      ? 'error.main'
+                                      : 'warning.main'
+                                }
+                              >
+                                {item.status}
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
       <Snackbar
         open={!!alert}
         autoHideDuration={6000}
-        onClose={() => setAlert(null)}
+        onClose={handleDismissAlert}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert onClose={() => setAlert(null)} severity={alert?.severity}>
+        <Alert onClose={handleDismissAlert} severity={alert?.severity}>
           {alert?.message}
         </Alert>
       </Snackbar>
-    </StyledBox>
+    </Container>
   );
-};
+}
 
 export default MaterialReqDetails;

@@ -1,4 +1,3 @@
-// components/PermanentDrawerLeft.jsx
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -12,7 +11,14 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import ResponsiveAppBar from './AppBar';
+import DescriptionIcon from '@mui/icons-material/Description';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import BuildIcon from '@mui/icons-material/Build';
+import WidgetsIcon from '@mui/icons-material/Widgets';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 240;
@@ -27,21 +33,6 @@ export default function PermanentDrawerLeft() {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      {/* <AppBar
-        position="fixed"
-        sx={{
-          width: `calc(100% - ${drawerWidth}px)`,
-          ml: `${drawerWidth}px`,
-        }}
-      >
-        <Toolbar>
-          <Typography variant="h6" noWrap component="div">
-            KEBA ELECTRONICS
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <ResponsiveAppBar /> */}
-
       <Drawer
         sx={{
           width: drawerWidth,
@@ -57,7 +48,6 @@ export default function PermanentDrawerLeft() {
         <Toolbar />
         <Divider />
         <List>
-
           <ListItem disablePadding onClick={() => handleNavigate('/')}>
             <ListItemButton
               sx={{
@@ -81,7 +71,9 @@ export default function PermanentDrawerLeft() {
                 backgroundColor: '#f5f5f5',
               }}
             >
-              <ListItemIcon></ListItemIcon>
+              <ListItemIcon>
+                <DescriptionIcon />
+              </ListItemIcon>
               <ListItemText primary="Quotations" />
             </ListItemButton>
           </ListItem>
@@ -94,7 +86,9 @@ export default function PermanentDrawerLeft() {
                 backgroundColor: '#f5f5f5',
               }}
             >
-              <ListItemIcon></ListItemIcon>
+              <ListItemIcon>
+                <InventoryIcon />
+              </ListItemIcon>
               <ListItemText primary="Product" />
             </ListItemButton>
           </ListItem>
@@ -107,7 +101,9 @@ export default function PermanentDrawerLeft() {
                 backgroundColor: '#f5f5f5',
               }}
             >
-              <ListItemIcon></ListItemIcon>
+              <ListItemIcon>
+                <ShoppingCartIcon />
+              </ListItemIcon>
               <ListItemText primary="Sales Order" />
             </ListItemButton>
           </ListItem>
@@ -120,7 +116,9 @@ export default function PermanentDrawerLeft() {
                 backgroundColor: '#f5f5f5',
               }}
             >
-              <ListItemIcon></ListItemIcon>
+              <ListItemIcon>
+                <BuildIcon />
+              </ListItemIcon>
               <ListItemText primary="Manufacturing Order" />
             </ListItemButton>
           </ListItem>
@@ -133,7 +131,9 @@ export default function PermanentDrawerLeft() {
                 backgroundColor: '#f5f5f5',
               }}
             >
-              <ListItemIcon></ListItemIcon>
+              <ListItemIcon>
+                <AccountTreeIcon />
+              </ListItemIcon>
               <ListItemText primary="BOM" />
             </ListItemButton>
           </ListItem>
@@ -146,7 +146,9 @@ export default function PermanentDrawerLeft() {
                 backgroundColor: '#f5f5f5',
               }}
             >
-              <ListItemIcon></ListItemIcon>
+              <ListItemIcon>
+                <AssignmentIcon />
+              </ListItemIcon>
               <ListItemText primary="Material Requisition" />
             </ListItemButton>
           </ListItem>
@@ -159,10 +161,13 @@ export default function PermanentDrawerLeft() {
                 backgroundColor: '#f5f5f5',
               }}
             >
-              <ListItemIcon></ListItemIcon>
+              <ListItemIcon>
+                <WidgetsIcon />
+              </ListItemIcon>
               <ListItemText primary="Components" />
             </ListItemButton>
           </ListItem>
+
           <ListItem disablePadding onClick={() => handleNavigate('/inventory/purchas-req')}>
             <ListItemButton
               sx={{
@@ -171,10 +176,13 @@ export default function PermanentDrawerLeft() {
                 backgroundColor: '#f5f5f5',
               }}
             >
-              <ListItemIcon></ListItemIcon>
+              <ListItemIcon>
+                <LocalShippingIcon />
+              </ListItemIcon>
               <ListItemText primary="Purchase Requisitions" />
             </ListItemButton>
           </ListItem>
+
           <ListItem disablePadding onClick={() => handleNavigate('/inventory/po')}>
             <ListItemButton
               sx={{
@@ -183,11 +191,12 @@ export default function PermanentDrawerLeft() {
                 backgroundColor: '#f5f5f5',
               }}
             >
-              <ListItemIcon></ListItemIcon>
+              <ListItemIcon>
+                <ShoppingCartIcon />
+              </ListItemIcon>
               <ListItemText primary="Purchase Order" />
             </ListItemButton>
           </ListItem>
-
         </List>
         <Divider />
       </Drawer>
