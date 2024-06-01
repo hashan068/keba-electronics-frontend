@@ -40,23 +40,27 @@ export default function PermanentDrawerLeft() {
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
+            backgroundColor: '#263238', // Dark background color for the drawer
+            color: '#ffffff', // Text color for the drawer items
           },
         }}
         variant="permanent"
         anchor="left"
       >
         <Toolbar />
-        <Divider />
+        <Divider sx={{ bgcolor: '#333333' }} />
         <List>
           <ListItem disablePadding onClick={() => handleNavigate('/')}>
             <ListItemButton
               sx={{
                 minHeight: '50px',
                 justifyContent: 'center',
-                backgroundColor: '#f5f5f5',
+                '&:hover': {
+                  backgroundColor: '#333333',
+                },
               }}
             >
-              <ListItemIcon sx={{ justifyContent: 'center' }}>
+              <ListItemIcon sx={{ color: '#ffffff' }}>
                 <DashboardIcon />
               </ListItemIcon>
               <ListItemText primary="Dashboard" />
@@ -68,10 +72,12 @@ export default function PermanentDrawerLeft() {
               sx={{
                 minHeight: '50px',
                 justifyContent: 'center',
-                backgroundColor: '#f5f5f5',
+                '&:hover': {
+                  backgroundColor: '#333333',
+                },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ color: '#ffffff' }}>
                 <DescriptionIcon />
               </ListItemIcon>
               <ListItemText primary="Quotations" />
@@ -83,10 +89,12 @@ export default function PermanentDrawerLeft() {
               sx={{
                 minHeight: '50px',
                 justifyContent: 'center',
-                backgroundColor: '#f5f5f5',
+                '&:hover': {
+                  backgroundColor: '#333333',
+                },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ color: '#ffffff' }}>
                 <InventoryIcon />
               </ListItemIcon>
               <ListItemText primary="Product" />
@@ -98,10 +106,12 @@ export default function PermanentDrawerLeft() {
               sx={{
                 minHeight: '50px',
                 justifyContent: 'center',
-                backgroundColor: '#f5f5f5',
+                '&:hover': {
+                  backgroundColor: '#333333',
+                },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ color: '#ffffff' }}>
                 <ShoppingCartIcon />
               </ListItemIcon>
               <ListItemText primary="Sales Order" />
@@ -113,10 +123,12 @@ export default function PermanentDrawerLeft() {
               sx={{
                 minHeight: '50px',
                 justifyContent: 'center',
-                backgroundColor: '#f5f5f5',
+                '&:hover': {
+                  backgroundColor: '#333333',
+                },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ color: '#ffffff' }}>
                 <BuildIcon />
               </ListItemIcon>
               <ListItemText primary="Manufacturing Order" />
@@ -128,10 +140,12 @@ export default function PermanentDrawerLeft() {
               sx={{
                 minHeight: '50px',
                 justifyContent: 'center',
-                backgroundColor: '#f5f5f5',
+                '&:hover': {
+                  backgroundColor: '#333333',
+                },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ color: '#ffffff' }}>
                 <AccountTreeIcon />
               </ListItemIcon>
               <ListItemText primary="BOM" />
@@ -143,10 +157,12 @@ export default function PermanentDrawerLeft() {
               sx={{
                 minHeight: '50px',
                 justifyContent: 'center',
-                backgroundColor: '#f5f5f5',
+                '&:hover': {
+                  backgroundColor: '#333333',
+                },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ color: '#ffffff' }}>
                 <AssignmentIcon />
               </ListItemIcon>
               <ListItemText primary="Material Requisition" />
@@ -158,25 +174,29 @@ export default function PermanentDrawerLeft() {
               sx={{
                 minHeight: '50px',
                 justifyContent: 'center',
-                backgroundColor: '#f5f5f5',
+                '&:hover': {
+                  backgroundColor: '#333333',
+                },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ color: '#ffffff' }}>
                 <WidgetsIcon />
               </ListItemIcon>
               <ListItemText primary="Components" />
             </ListItemButton>
           </ListItem>
 
-          <ListItem disablePadding onClick={() => handleNavigate('/inventory/purchas-req')}>
+          <ListItem disablePadding onClick={() => handleNavigate('/inventory/purchase-req')}>
             <ListItemButton
               sx={{
                 minHeight: '50px',
                 justifyContent: 'center',
-                backgroundColor: '#f5f5f5',
+                '&:hover': {
+                  backgroundColor: '#333333',
+                },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ color: '#ffffff' }}>
                 <LocalShippingIcon />
               </ListItemIcon>
               <ListItemText primary="Purchase Requisitions" />
@@ -188,17 +208,19 @@ export default function PermanentDrawerLeft() {
               sx={{
                 minHeight: '50px',
                 justifyContent: 'center',
-                backgroundColor: '#f5f5f5',
+                '&:hover': {
+                  backgroundColor: '#333333',
+                },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ color: '#ffffff' }}>
                 <ShoppingCartIcon />
               </ListItemIcon>
               <ListItemText primary="Purchase Order" />
             </ListItemButton>
           </ListItem>
         </List>
-        <Divider />
+        <Divider sx={{ bgcolor: '#333333' }} />
       </Drawer>
     </Box>
   );

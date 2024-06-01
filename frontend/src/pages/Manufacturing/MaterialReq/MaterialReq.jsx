@@ -21,7 +21,7 @@ const STATUS_CHOICES = {
   pending: { label: 'Pending', color: 'warning' },
   approved: { label: 'Approved', color: 'success' },
   rejected: { label: 'Rejected', color: 'error' },
-  partially_approved: { label: 'Partially Approved', color: 'info' },
+  partialy_approved: { label: 'Partially Approved', color: 'info' },
   fulfilled: { label: 'Fulfilled', color: 'success' },
 };
 

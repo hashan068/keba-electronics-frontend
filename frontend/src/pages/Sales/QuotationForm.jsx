@@ -10,7 +10,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  FormLabel,
   TextField,
   Grid,
   Container,
@@ -26,12 +25,6 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   borderRadius: theme.shape.borderRadius,
   boxShadow: theme.shadows[2],
-}));
-
-const StyledForm = styled('form')(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing(3),
 }));
 
 const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
@@ -95,6 +88,8 @@ const QuotationForm = () => {
       expirationDate: '',
       invoicingAndShippingAddress: '',
       quotationItems: [],
+      newProduct: null,
+      newQuantity: '',
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -137,7 +132,7 @@ const QuotationForm = () => {
     },
   });
 
-return (
+  return (
     <StyledContainer maxWidth="lg">
       <Typography variant="h4" gutterBottom>
         Quotation Form
@@ -147,145 +142,145 @@ return (
       </div>
       <FormikProvider value={formik}>
         <Form>
-          <StyledForm>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Autocomplete
-                  options={customers}
-                  value={formik.values.customer}
-                  onChange={(event, newValue) => formik.setFieldValue('customer', newValue)}
-                  getOptionLabel={(option) => option.name}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Customer"
-                      error={Boolean(formik.touched.customer && formik.errors.customer)}
-                      helperText={formik.touched.customer && formik.errors.customer}
-                      fullWidth
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  type="date"
-                  label="Date"
-                  value={formik.values.date}
-                  onChange={formik.handleChange('date')}
-                  error={Boolean(formik.touched.date && formik.errors.date)}
-                  helperText={formik.touched.date && formik.errors.date}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  type="date"
-                  label="Expiration Date"
-                  value={formik.values.expirationDate}
-                  onChange={formik.handleChange('expirationDate')}
-                  error={Boolean(formik.touched.expirationDate && formik.errors.expirationDate)}
-                  helperText={formik.touched.expirationDate && formik.errors.expirationDate}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Invoicing and Shipping Address"
-                  value={formik.values.invoicingAndShippingAddress}
-                  onChange={formik.handleChange('invoicingAndShippingAddress')}
-                  error={Boolean(formik.touched.invoicingAndShippingAddress && formik.errors.invoicingAndShippingAddress)}
-                  helperText={formik.touched.invoicingAndShippingAddress && formik.errors.invoicingAndShippingAddress}
-                  fullWidth
-                  multiline
-                  rows={4}
-                />
-              </Grid>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Autocomplete
+                options={customers}
+                value={formik.values.customer}
+                onChange={(event, newValue) => formik.setFieldValue('customer', newValue)}
+                getOptionLabel={(option) => option.name}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Customer"
+                    error={Boolean(formik.touched.customer && formik.errors.customer)}
+                    helperText={formik.touched.customer && formik.errors.customer}
+                    fullWidth
+                  />
+                )}
+              />
             </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                type="date"
+                label="Date"
+                InputLabelProps={{ shrink: true }}
+                value={formik.values.date}
+                onChange={formik.handleChange('date')}
+                error={Boolean(formik.touched.date && formik.errors.date)}
+                helperText={formik.touched.date && formik.errors.date}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                type="date"
+                label="Expiration Date"
+                InputLabelProps={{ shrink: true }}
+                value={formik.values.expirationDate}
+                onChange={formik.handleChange('expirationDate')}
+                error={Boolean(formik.touched.expirationDate && formik.errors.expirationDate)}
+                helperText={formik.touched.expirationDate && formik.errors.expirationDate}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Invoicing and Shipping Address"
+                value={formik.values.invoicingAndShippingAddress}
+                onChange={formik.handleChange('invoicingAndShippingAddress')}
+                error={Boolean(formik.touched.invoicingAndShippingAddress && formik.errors.invoicingAndShippingAddress)}
+                helperText={formik.touched.invoicingAndShippingAddress && formik.errors.invoicingAndShippingAddress}
+                fullWidth
+                multiline
+                rows={4}
+              />
+            </Grid>
+          </Grid>
 
-            <StyledTableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Product</TableCell>
-                    <TableCell align="right">Quantity</TableCell>
-                    <TableCell align="right">Price</TableCell>
-                    <TableCell align="right">Total</TableCell>
-                    <TableCell align="right">Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <FieldArray name="quotationItems">
-                    {({ push, remove }) => (
-                      <>
-                        {formik.values.quotationItems.map((item, index) => (
-                          <TableRow key={index}>
-                            <TableCell>{item.product?.name}</TableCell>
-                            <TableCell align="right">{item.quantity}</TableCell>
-                            <TableCell align="right">{item.product?.price}</TableCell>
-                            <TableCell align="right">{item.quantity * item.product?.price}</TableCell>
-                            <TableCell align="right">
-                              <Button variant="contained" color="error" onClick={() => remove(index)}>
-                                Delete
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        <TableRow>
-                          <TableCell>
-                            <Autocomplete
-                              options={products}
-                              value={formik.values.newProduct}
-                              onChange={(event, newValue) => formik.setFieldValue('newProduct', newValue)}
-                              getOptionLabel={(option) => option.name}
-                              renderOption={(props, option) => (
-                                <li {...props} key={option.id}>
-                                  {option.name}
-                                </li>
-                              )}
-                              renderInput={(params) => <TextField {...params} label="Product" margin="normal" />}
-                              sx={{ width: '50%' }}
-                            />
-                          </TableCell>
+          <StyledTableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Product</TableCell>
+                  <TableCell align="right">Quantity</TableCell>
+                  <TableCell align="right">Price</TableCell>
+                  <TableCell align="right">Total</TableCell>
+                  <TableCell align="right">Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <FieldArray name="quotationItems">
+                  {({ push, remove }) => (
+                    <>
+                      {formik.values.quotationItems.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{item.product?.name}</TableCell>
+                          <TableCell align="right">{item.quantity}</TableCell>
+                          <TableCell align="right">{item.product?.price}</TableCell>
+                          <TableCell align="right">{item.quantity * item.product?.price}</TableCell>
                           <TableCell align="right">
-                            <TextField
-                              type="number"
-                              value={formik.values.newQuantity}
-                              onChange={formik.handleChange('newQuantity')}
-                              label="Quantity"
-                              fullWidth
-                            />
-                          </TableCell>
-                          <TableCell align="right">
-                            <Button
-                              variant="contained"
-                              onClick={() => {
-                                formik.setFieldValue('quotationItems', [
-                                  ...formik.values.quotationItems,
-                                  {
-                                    product: formik.values.newProduct,
-                                    quantity: formik.values.newQuantity,
-                                  },
-                                ]);
-                                formik.setFieldValue('newProduct', null);
-                                formik.setFieldValue('newQuantity', '');
-                              }}
-                              fullWidth
-                            >
-                              Add Item
+                            <Button variant="contained" color="error" onClick={() => remove(index)}>
+                              Delete
                             </Button>
                           </TableCell>
                         </TableRow>
-                      </>
-                    )}
-                  </FieldArray>
-                </TableBody>
-              </Table>
-            </StyledTableContainer>
+                      ))}
+                      <TableRow>
+                        <TableCell>
+                          <Autocomplete
+                            options={products}
+                            value={formik.values.newProduct}
+                            onChange={(event, newValue) => formik.setFieldValue('newProduct', newValue)}
+                            getOptionLabel={(option) => option.name}
+                            renderOption={(props, option) => (
+                              <li {...props} key={option.id}>
+                                {option.name}
+                              </li>
+                            )}
+                            renderInput={(params) => <TextField {...params} label="Product" margin="normal" />}
+                            sx={{ width: '50%' }}
+                          />
+                        </TableCell>
+                        <TableCell align="right">
+                          <TextField
+                            type="number"
+                            value={formik.values.newQuantity}
+                            onChange={formik.handleChange('newQuantity')}
+                            label="Quantity"
+                            fullWidth
+                          />
+                        </TableCell>
+                        <TableCell align="right">
+                          <Button
+                            variant="contained"
+                            onClick={() => {
+                              formik.setFieldValue('quotationItems', [
+                                ...formik.values.quotationItems,
+                                {
+                                  product: formik.values.newProduct,
+                                  quantity: formik.values.newQuantity,
+                                },
+                              ]);
+                              formik.setFieldValue('newProduct', null);
+                              formik.setFieldValue('newQuantity', '');
+                            }}
+                            fullWidth
+                          >
+                            Add Item
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    </>
+                  )}
+                </FieldArray>
+              </TableBody>
+            </Table>
+          </StyledTableContainer>
 
-            <StyledButton type="submit" variant="contained" color="primary">
-              Submit Quotation
-            </StyledButton>
-          </StyledForm>
+          <StyledButton type="submit" variant="contained" color="primary">
+            Submit Quotation
+          </StyledButton>
         </Form>
       </FormikProvider>
     </StyledContainer>

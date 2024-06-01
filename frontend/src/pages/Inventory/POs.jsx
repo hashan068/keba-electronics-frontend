@@ -25,11 +25,13 @@ import SearchIcon from '@mui/icons-material/Search';
 import api from '../../api';
 
 const STATUS_CHOICES = {
-  created: { label: 'Created', color: 'default' },
-  pending: { label: 'Pending', color: 'warning' },
+  draft: { label: 'Draft', color: 'default' },
+  open_order: { label: 'Open Order', color: 'info' },
   approved: { label: 'Approved', color: 'success' },
-  rejected: { label: 'Rejected', color: 'error' },
+  received: { label: 'Received', color: 'primary' },
+  invoiced: { label: 'Invoiced', color: 'secondary' },
   cancelled: { label: 'Cancelled', color: 'default' },
+  rejected: { label: 'Rejected', color: 'error' },
 };
 
 const renderStatusChip = (params) => {
