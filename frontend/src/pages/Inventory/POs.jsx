@@ -16,12 +16,34 @@ import {
   useTheme,
   useMediaQuery,
   Pagination,
+  Chip,
 } from '@mui/material';
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import api from '../../api';
+
+const STATUS_CHOICES = {
+  created: { label: 'Created', color: 'default' },
+  pending: { label: 'Pending', color: 'warning' },
+  approved: { label: 'Approved', color: 'success' },
+  rejected: { label: 'Rejected', color: 'error' },
+  cancelled: { label: 'Cancelled', color: 'default' },
+};
+
+const renderStatusChip = (params) => {
+  const status = params.value;
+  const statusConfig = STATUS_CHOICES[status] || {};
+  return (
+    <Chip
+      label={statusConfig.label}
+      color={statusConfig.color}
+      variant="outlined"
+      size="small"
+    />
+  );
+};
 
 export default function POs() {
   const [purchaseOrders, setPurchaseOrders] = useState([]);
@@ -83,7 +105,7 @@ export default function POs() {
     { field: 'purchase_requisition_details', headerName: 'Purchase Requisition', width: 300 },
     { field: 'supplier_id', headerName: 'Supplier', width: 150 },
     { field: 'purchase_manager_approval', headerName: 'Manager Approval', type: 'boolean', width: 150 },
-    { field: 'status', headerName: 'Status', width: 150 },
+    { field: 'status', headerName: 'Status', width: 150, renderCell: renderStatusChip },
     { field: 'notes', headerName: 'Notes', width: 300 },
     { field: 'created_at', headerName: 'Created At', width: 200 },
   ];

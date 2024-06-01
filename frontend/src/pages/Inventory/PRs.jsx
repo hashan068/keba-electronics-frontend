@@ -9,6 +9,7 @@ import {
   CircularProgress,
   Toolbar,
   TextField,
+  Chip,
   Select,
   MenuItem,
   FormControl,
@@ -22,6 +23,46 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import api from '../../api';
+
+const STATUS_CHOICES = {
+  pending: { label: 'Pending', color: 'warning' },
+  approved: { label: 'Approved', color: 'success' },
+  rejected: { label: 'Rejected', color: 'error' },
+  cancelled: { label: 'Cancelled', color: 'default' },
+  fulfilled: { label: 'Fulfilled', color: 'success' },
+};
+
+const PRIORITY_CHOICES = {
+  high: { label: 'High', color: 'error' },
+  medium: { label: 'Medium', color: 'warning' },
+  low: { label: 'Low', color: 'success' },
+};
+
+const renderStatusChip = (params) => {
+  const status = params.value;
+  const statusConfig = STATUS_CHOICES[status] || {};
+  return (
+    <Chip
+      label={statusConfig.label}
+      color={statusConfig.color}
+      variant="outlined"
+      size="small"
+    />
+  );
+};
+
+const renderPriorityChip = (params) => {
+  const priority = params.value;
+  const priorityConfig = PRIORITY_CHOICES[priority] || {};
+  return (
+    <Chip
+      label={priorityConfig.label}
+      color={priorityConfig.color}
+      variant="outlined"
+      size="small"
+    />
+  );
+};
 
 export default function PRs() {
   const [purchaseRequisitions, setPurchaseRequisitions] = useState([]);
@@ -80,9 +121,10 @@ export default function PRs() {
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 100 },
-    { field: 'component_name', headerName: 'Component Name', width: 200 },
+    { field: 'component_id', headerName: 'Component ID', width: 150 },
     { field: 'quantity', headerName: 'Quantity', type: 'number', width: 100 },
-    { field: 'status', headerName: 'Status', width: 150 },
+    { field: 'status', headerName: 'Status', width: 150, renderCell: renderStatusChip },
+    { field: 'priority', headerName: 'Priority', width: 150, renderCell: renderPriorityChip },
     { field: 'notes', headerName: 'Notes', width: 300 },
     { field: 'created_at', headerName: 'Created At', width: 200 },
   ];
