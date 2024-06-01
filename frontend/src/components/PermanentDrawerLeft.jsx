@@ -100,6 +100,23 @@ export default function PermanentDrawerLeft() {
               <ListItemText primary="Product" />
             </ListItemButton>
           </ListItem>
+          
+          <ListItem disablePadding onClick={() => handleNavigate('/sales/customer')}>
+            <ListItemButton
+              sx={{
+                minHeight: '50px',
+                justifyContent: 'center',
+                '&:hover': {
+                  backgroundColor: '#333333',
+                },
+              }}
+            >
+              <ListItemIcon sx={{ color: '#ffffff' }}>
+                <InventoryIcon />
+              </ListItemIcon>
+              <ListItemText primary="Customer" />
+            </ListItemButton>
+          </ListItem>
 
           <ListItem disablePadding onClick={() => handleNavigate('/sales/salesorder')}>
             <ListItemButton

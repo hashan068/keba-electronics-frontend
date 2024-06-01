@@ -125,7 +125,6 @@ export default function PRs() {
     { field: 'quantity', headerName: 'Quantity', type: 'number', width: 100 },
     { field: 'status', headerName: 'Status', width: 150, renderCell: renderStatusChip },
     { field: 'priority', headerName: 'Priority', width: 150, renderCell: renderPriorityChip },
-    { field: 'notes', headerName: 'Notes', width: 300 },
     { field: 'created_at', headerName: 'Created At', width: 200 },
   ];
 
