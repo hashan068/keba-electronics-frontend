@@ -2,11 +2,11 @@ import { Routes, Route } from 'react-router-dom';
 import Product from '../pages/Sales/Product';
 import ProductDetails from '../pages/ProductDetails';
 import SalesOrder from '../pages/Sales/SalesOrder';
-import SalesOrderForm from '../components/SalesOrderForm';
+import SalesOrderForm from '../pages/Sales/SalesOrderForm';
 import SalesOrderDetails from '../pages/Sales/SalesOrderDetails';
 import Quotations from '../pages/Sales/Quotations';
 import QuotationDetail from '../pages/Sales/QuotationDetail';
-import QuotationForm from '../components/QuotationForm';
+import QuotationForm from '../pages/Sales/QuotationForm';
 
 const SalesRoutes = () => (
   <Routes>
