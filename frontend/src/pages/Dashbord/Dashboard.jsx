@@ -3,6 +3,7 @@ import { Typography, Grid, Container } from '@mui/material';
 import SalesChart from './SalesChart';
 import TopSellingProducts from './TopSellingProducts';
 import TopCustomers from './TopCustomers';
+import StatisticsDashboard from './StatisticsDashboard';
 
 export default function SalesDashboard() {
   return (
@@ -11,6 +12,9 @@ export default function SalesDashboard() {
         Sales Dashboard
       </Typography>
       <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <StatisticsDashboard />
+        </Grid>
         <Grid item xs={12} md={6}>
           <SalesChart />
         </Grid>

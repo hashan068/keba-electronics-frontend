@@ -188,12 +188,14 @@ const MfgOrderDetails = () => {
                     { label: 'Sales Order Item:', value: manufacturingOrder?.sales_order_item || 'N/A' },
                   ].map((item, index) => (
                     <Grid item xs={12} sm={6} key={index}>
-                      <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
-                        {item.label}
-                      </Typography>
-                      <Typography variant="body1" gutterBottom sx={{ color: '#666' }}>
-                        {item.value}
-                      </Typography>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold', marginRight: '0.5rem' }}>
+                          {item.label}
+                        </Typography>
+                        <Typography variant="body1" gutterBottom sx={{ color: '#666' }}>
+                          {item.value}
+                        </Typography>
+                      </div>
                     </Grid>
                   ))}
                 </Grid>

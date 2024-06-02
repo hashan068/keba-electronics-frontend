@@ -15,10 +15,14 @@ import {
   Container,
   Alert,
 } from '@mui/material';
+import { IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 import { Autocomplete } from '@mui/material';
 import { styled } from '@mui/system';
 import { useFormik, FormikProvider, Form, FieldArray } from 'formik';
 import * as Yup from 'yup';
+
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -71,6 +75,10 @@ const QuotationForm = () => {
     date: Yup.string().required('Please enter a date.'),
     expirationDate: Yup.string().required('Please enter an expiration date.'),
     invoicingAndShippingAddress: Yup.string().required('Please enter an invoicing and shipping address.'),
+    newProduct: Yup.object().nullable().required('Please select a product.'),
+    newQuantity: Yup.number()
+      .min(1, 'Quantity must be greater than 0')
+      .required('Please enter a quantity.'),
     quotationItems: Yup.array()
       .of(
         Yup.object().shape({
@@ -186,7 +194,7 @@ const QuotationForm = () => {
             </Grid>
             <Grid item xs={12}>
               <TextField
-                label="Invoicing and Shipping Address"
+                label="Invoicing  Address"
                 value={formik.values.invoicingAndShippingAddress}
                 onChange={formik.handleChange('invoicingAndShippingAddress')}
                 error={Boolean(formik.touched.invoicingAndShippingAddress && formik.errors.invoicingAndShippingAddress)}
@@ -220,9 +228,13 @@ const QuotationForm = () => {
                           <TableCell align="right">{item.product?.price}</TableCell>
                           <TableCell align="right">{item.quantity * item.product?.price}</TableCell>
                           <TableCell align="right">
-                            <Button variant="contained" color="error" onClick={() => remove(index)}>
-                              Delete
-                            </Button>
+                            <IconButton
+                              aria-label="delete"
+                              color="error"
+                              onClick={() => remove(index)}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -239,7 +251,7 @@ const QuotationForm = () => {
                               </li>
                             )}
                             renderInput={(params) => <TextField {...params} label="Product" margin="normal" />}
-                            sx={{ width: '50%' }}
+                            sx={{ width: '100%', marginLeft: 4 }}
                           />
                         </TableCell>
                         <TableCell align="right">
@@ -249,21 +261,33 @@ const QuotationForm = () => {
                             onChange={formik.handleChange('newQuantity')}
                             label="Quantity"
                             fullWidth
+                            error={Boolean(formik.touched.newQuantity && formik.errors.newQuantity)}
+                            helperText={formik.touched.newQuantity && formik.errors.newQuantity}
+                            InputProps={{
+                              inputProps: {
+                                min: 1,
+                              },
+                            }}
                           />
                         </TableCell>
+
                         <TableCell align="right">
                           <Button
                             variant="contained"
                             onClick={() => {
-                              formik.setFieldValue('quotationItems', [
-                                ...formik.values.quotationItems,
-                                {
-                                  product: formik.values.newProduct,
-                                  quantity: formik.values.newQuantity,
-                                },
-                              ]);
-                              formik.setFieldValue('newProduct', null);
-                              formik.setFieldValue('newQuantity', '');
+                              if (formik.values.newProduct) {
+                                formik.setFieldValue('quotationItems', [
+                                  ...formik.values.quotationItems,
+                                  {
+                                    product: formik.values.newProduct,
+                                    quantity: formik.values.newQuantity,
+                                  },
+                                ]);
+                                formik.setFieldValue('newProduct', null);
+                                formik.setFieldValue('newQuantity', '');
+                              } else {
+                                formik.setFieldTouched('newProduct', true, true);
+                              }
                             }}
                             fullWidth
                           >
@@ -283,7 +307,7 @@ const QuotationForm = () => {
           </StyledButton>
         </Form>
       </FormikProvider>
-    </StyledContainer>
+    </StyledContainer >
   );
 };
 

@@ -90,28 +90,18 @@ const PRView = () => {
             <RejectedLogo />
           </>
         );
-      case 'cancelled':
-        return (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleStatusUpdate('created')}
-          >
-            Reopen
-          </Button>
-        );
+      // case 'cancelled':
+      //   return (
+      //     <Button
+      //       variant="contained"
+      //       color="primary"
+      //       onClick={() => handleStatusUpdate('created')}
+      //     >
+      //       Reopen
+      //     </Button>
+      //   );
       case 'fulfilled':
-        return (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleStatusUpdate('closed')}
-          >
-            Close
-          </Button>
-        );
-      case 'closed':
-        return <Typography variant="body1">Closed</Typography>;
+        return <Typography variant="body1">Fulfield</Typography>;
       default:
         return <Typography variant="body1">Unknown status</Typography>;
     }
@@ -121,10 +111,7 @@ const PRView = () => {
     { value: 'created', label: 'Created' },
     { value: 'pending', label: 'Pending' },
     { value: 'approved', label: 'Approved' },
-
-
     { value: 'fulfilled', label: 'Fulfilled' },
- 
   ];
 
   const getStatusStep = (status) => {
@@ -132,8 +119,8 @@ const PRView = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4, px: 2, bgcolor: '#f5f5f5' }}>
-      <AppBar position="static" color="default" sx={{ mb: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 2, px: 2, bgcolor: '#f5f5f5' }}>
+      <AppBar position="static" color="default" sx={{ mb: 3 }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Purchase Requisition Details
@@ -153,7 +140,7 @@ const PRView = () => {
       ) : (
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Box sx={{ width: '100%', mb: 4 }}>
+            <Box sx={{ width: '100%', mb: 1 }}>
               <Stepper activeStep={getStatusStep(purchaseRequisition?.status)} alternativeLabel>
                 {STATUS_CHOICES.map((choice) => (
                   <Step key={choice.value}>
@@ -163,6 +150,7 @@ const PRView = () => {
               </Stepper>
             </Box>
           </Grid>
+
           <Grid item xs={12}>
             <Card sx={{ boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
               <CardHeader title="Purchase Requisition Details" />
@@ -180,18 +168,21 @@ const PRView = () => {
                     { label: 'Expected Delivery Date:', value: purchaseRequisition?.expected_delivery_date ? new Date(purchaseRequisition.expected_delivery_date).toLocaleString() : 'N/A' },
                   ].map((item, index) => (
                     <Grid item xs={12} sm={6} key={index}>
-                      <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
-                        {item.label}
-                      </Typography>
-                      <Typography variant="body1" gutterBottom sx={{ color: '#666' }}>
-                        {item.value}
-                      </Typography>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold', marginRight: '0.5rem' }}>
+                          {item.label}
+                        </Typography>
+                        <Typography variant="body1" gutterBottom sx={{ color: '#666' }}>
+                          {item.value}
+                        </Typography>
+                      </div>
                     </Grid>
                   ))}
                 </Grid>
               </CardContent>
             </Card>
           </Grid>
+
         </Grid>
       )}
     </Container>

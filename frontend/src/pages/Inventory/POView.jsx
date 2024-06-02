@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Typography, Container, Grid, Card, CardHeader, CardContent, Button, AppBar, Toolbar, Box, Stepper, Step, StepLabel, Skeleton, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { Typography, Container, Grid, Card, CardHeader, CardContent, Button, AppBar, Toolbar, Box, Stepper, Step, StepLabel, Skeleton, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material';
 import { Assignment, Edit, Delete, CheckCircle, Cancel, ArrowBack, Warning, Business, PriorityHigh, Receipt, LocalShipping, Send } from '@mui/icons-material';
+
 import api from '../../api';
 
 const STATUS_CHOICES = [
@@ -35,7 +37,14 @@ const getStatusChip = (status) => {
 const POView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [purchaseOrder, setPurchaseOrder] = useState(null);
+  const [purchaseOrder, setPurchaseOrder] = useState({
+    price_per_unit: '',
+    total_price: '',
+  });
+  const [editedValues, setEditedValues] = useState({
+    price_per_unit: '',
+    total_price: '',
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -47,7 +56,11 @@ const POView = () => {
       setError(null);
       try {
         const response = await api.get(`/api/inventory/purchase-orders/${id}/`);
-        setPurchaseOrder(response.data);
+        setPurchaseOrder({
+          ...response.data,
+          price_per_unit: response.data.price_per_unit || '',
+          total_price: response.data.total_price || '',
+        });
       } catch (error) {
         console.error('Error fetching purchase order:', error);
         setError(error.message || 'An error occurred while fetching the purchase order.');
@@ -60,7 +73,12 @@ const POView = () => {
 
   const handleApprove = async () => {
     try {
-      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, { status: 'approved', purchase_manager_approval: true });
+      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, {
+        status: 'approved',
+        purchase_manager_approval: true,
+        price_per_unit: purchaseOrder.price_per_unit,
+        total_price: purchaseOrder.total_price,
+      });
       setPurchaseOrder(response.data);
     } catch (error) {
       console.error('Error approving purchase order:', error);
@@ -74,7 +92,12 @@ const POView = () => {
 
   const confirmReject = async () => {
     try {
-      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, { status: 'rejected', notes: rejectionReason });
+      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, {
+        status: 'rejected',
+        notes: rejectionReason,
+        price_per_unit: purchaseOrder.price_per_unit,
+        total_price: purchaseOrder.total_price,
+      });
       setPurchaseOrder(response.data);
       setOpenDialog(false);
     } catch (error) {
@@ -83,22 +106,53 @@ const POView = () => {
     }
   };
 
+  const handleInputChange = (e) => {
+    setEditedValues({
+      ...editedValues,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   const handleSend = async () => {
     try {
-      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, { status: 'open_order' });
+      const updatedValues = {
+        ...purchaseOrder,
+        price_per_unit: editedValues.price_per_unit || purchaseOrder.price_per_unit,
+        total_price: editedValues.total_price || purchaseOrder.total_price,
+        status: 'open_order',
+      };
+      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, updatedValues);
       setPurchaseOrder(response.data);
+      setEditedValues({
+        price_per_unit: '',
+        total_price: '',
+      });
     } catch (error) {
       console.error('Error sending purchase order:', error);
       setError('Failed to send the purchase order. Please try again.');
     }
   };
 
+  const handleOrderReceived = async () => {
+    try {
+      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, {
+        status: 'received',
+        price_per_unit: purchaseOrder.price_per_unit,
+        total_price: purchaseOrder.total_price,
+      });
+      setPurchaseOrder(response.data);
+    } catch (error) {
+      console.error('Error updating purchase order status:', error);
+      setError('Failed to update purchase order status. Please try again.');
+    }
+  };
+
   const handleEdit = () => {
-    navigate(`/purchase-order/edit/${id}`);
+    navigate(`/inventory/purchase-order/edit/${id}`);
   };
 
   const handleViewSupplierDetails = () => {
-    navigate(`/suppliers/${order.supplier.id}`);
+    navigate(`/suppliers/${purchaseOrder.supplier?.id}`);
   };
 
   const handleViewAllRequisitions = () => {
@@ -114,7 +168,6 @@ const POView = () => {
       setError('Failed to cancel order.');
     }
   };
-
   return (
     <Container maxWidth="lg" sx={{ py: 4, px: 2, bgcolor: '#f5f5f5' }}>
       <AppBar position="static" color="default" sx={{ mb: 4 }}>
@@ -128,6 +181,7 @@ const POView = () => {
               Send
             </Button>
           )}
+
           {!isLoading && purchaseOrder?.status === 'open_order' && (
             <>
               <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={handleApprove} sx={{ mx: 1 }}>
@@ -137,6 +191,12 @@ const POView = () => {
                 Reject
               </Button>
             </>
+          )}
+
+          {!isLoading && purchaseOrder?.status === 'approved' && (
+            <Button variant="contained" color="primary" startIcon={<LocalShipping />} onClick={handleOrderReceived} sx={{ mx: 1 }}>
+              Order Received
+            </Button>
           )}
         </Toolbar>
       </AppBar>
@@ -167,8 +227,8 @@ const POView = () => {
           </Grid>
           <Grid item xs={12} md={8}>
             <Card sx={{ boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-              <CardHeader 
-                title="Purchase Order Details" 
+              <CardHeader
+                title="Purchase Order Details"
                 action={getStatusChip(purchaseOrder.status)}
               />
               <CardContent>
@@ -182,11 +242,11 @@ const POView = () => {
                         <Grid item xs={6}><Typography><strong>Quantity:</strong> {purchaseOrder.purchase_requisition?.quantity || 'N/A'}</Typography></Grid>
                         <Grid item xs={6}>
                           <Typography><strong>Priority:</strong> </Typography>
-                          <Chip 
-                            icon={<PriorityHigh />} 
-                            label={purchaseOrder.purchase_requisition?.priority || 'N/A'} 
-                            color={purchaseOrder.purchase_requisition?.priority === 'high' ? 'error' : 'primary'} 
-                            size="small" 
+                          <Chip
+                            icon={<PriorityHigh />}
+                            label={purchaseOrder.purchase_requisition?.priority || 'N/A'}
+                            color={purchaseOrder.purchase_requisition?.priority === 'high' ? 'error' : 'primary'}
+                            size="small"
                           />
                         </Grid>
                         <Grid item xs={12}><Typography><strong>Notes:</strong> {purchaseOrder.purchase_requisition?.notes || 'N/A'}</Typography></Grid>
@@ -194,16 +254,47 @@ const POView = () => {
                     </Box>
                   </Grid>
                   <Grid item xs={6}><Typography><strong>Supplier ID:</strong> {purchaseOrder.supplier_id || 'N/A'}</Typography></Grid>
-                  <Grid item xs={6}>
-                    <Typography><strong>Manager Approval:</strong> </Typography>
-                    {purchaseOrder.purchase_manager_approval ? (
-                      <Chip icon={<CheckCircle />} label="Approved" color="success" size="small" />
-                    ) : (
-                      <Chip icon={<Warning />} label="Not Approved" color="error" size="small" />
-                    )}
-                  </Grid>
                   <Grid item xs={6}><Typography><strong>Created By:</strong> User {purchaseOrder.creator_id || 'N/A'}</Typography></Grid>
                   <Grid item xs={6}><Typography><strong>Updated At:</strong> {purchaseOrder.updated_at ? new Date(purchaseOrder.updated_at).toLocaleString() : 'N/A'}</Typography></Grid>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Field</TableCell>
+                          <TableCell>Value</TableCell>
+                          {purchaseOrder.status === 'draft' && <TableCell>Edit</TableCell>}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Price Per Unit</TableCell>
+                          <TableCell>{purchaseOrder.price_per_unit || 'N/A'}</TableCell>
+                          {purchaseOrder.status === 'draft' && (
+                            <TableCell>
+                              <TextField
+                                name="price_per_unit"
+                                value={editedValues.price_per_unit}
+                                onChange={handleInputChange}
+                              />
+                            </TableCell>
+                          )}
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Total Price</TableCell>
+                          <TableCell>{purchaseOrder.total_price || 'N/A'}</TableCell>
+                          {purchaseOrder.status === 'draft' && (
+                            <TableCell>
+                              <TextField
+                                name="total_price"
+                                value={editedValues.total_price}
+                                onChange={handleInputChange}
+                              />
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                   <Grid item xs={12}>
                     <Typography><strong>Notes:</strong> </Typography>
                     <Box sx={{ p: 1, bgcolor: '#f0f0f0', borderRadius: 1 }}>{purchaseOrder.notes || 'N/A'}</Box>
@@ -234,15 +325,19 @@ const POView = () => {
                 >
                   View All Requisitions
                 </Button>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  startIcon={<Edit />}
-                  sx={{ mb: 2 }}
-                  onClick={handleEdit}
-                >
-                  Edit Order
-                </Button>
+
+                {!isLoading && purchaseOrder?.status === 'draft' && (
+                  <Link to={`/inventory/purchase-order/edit/${id}`}>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      startIcon={<Edit />}
+                      sx={{ mb: 2 }}
+                    >
+                      Edit Order
+                    </Button>
+                  </Link>
+                )}
                 <Button
                   fullWidth
                   variant="outlined"
