@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { Typography, Container, Grid, Card, CardHeader, CardContent, Button, AppBar, Toolbar, Box, Stepper, Step, StepLabel, Skeleton, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material';
-import { Assignment, Edit, Delete, CheckCircle, Cancel, ArrowBack, Warning, Business, PriorityHigh, Receipt, LocalShipping, Send } from '@mui/icons-material';
+import {
+  Typography, Container, Grid, Card, CardHeader, CardContent, Button,
+  AppBar, Toolbar, Box, Stepper, Step, StepLabel, Skeleton, Chip, Dialog,
+  DialogTitle, DialogContent, DialogActions, TextField, Alert, TableContainer,
+  Table, TableHead, TableRow, TableCell, TableBody, Paper
+} from '@mui/material';
+import {
+  Assignment, Edit, Delete, CheckCircle, Cancel, ArrowBack, Warning, Business,
+  PriorityHigh, Receipt, LocalShipping, Send
+} from '@mui/icons-material';
 
 import api from '../../api';
 
@@ -12,14 +20,35 @@ const STATUS_CHOICES = [
   { value: 'approved', label: 'Approved', icon: <CheckCircle /> },
   { value: 'received', label: 'Received', icon: <LocalShipping /> },
   { value: 'invoiced', label: 'Invoiced', icon: <Receipt /> },
-  { value: 'cancelled', label: 'Cancelled', icon: <Cancel /> },
-  { value: 'rejected', label: 'Rejected', icon: <Delete /> },
-  { value: 'unknown', label: 'Unknown', icon: <Warning /> }, // Fallback
+
 ];
+
+function ccyFormat(num) {
+  return `${num.toFixed(2)}`;
+}
+
+function priceRow(qty, unit) {
+  return qty * unit;
+}
+
+function createRow(desc, qty, unit) {
+  const price = priceRow(qty, unit);
+  return { desc, qty, unit, price };
+}
+
+function subtotal(items) {
+  return items.map(({ price }) => price).reduce((sum, i) => sum + i, 0);
+}
+
+const rows = [
+  createRow('Paperclips (Box)', 100, 1.15),
+];
+
+const invoiceSubtotal = subtotal(rows);
 
 const getStatusStep = (status) => {
   const index = STATUS_CHOICES.findIndex((choice) => choice.value === status);
-  return index === -1 ? 0 : index; // Default to 'draft' if not found
+  return index === -1 ? 0 : index;
 };
 
 const getStatusChip = (status) => {
@@ -49,6 +78,7 @@ const POView = () => {
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [editedPrice, setEditedPrice] = useState(rows[0].price);
 
   useEffect(() => {
     const fetchPurchaseOrder = async () => {
@@ -147,27 +177,10 @@ const POView = () => {
     }
   };
 
-  const handleEdit = () => {
-    navigate(`/inventory/purchase-order/edit/${id}`);
+  const handlePriceChange = (e) => {
+    setEditedPrice(e.target.value);
   };
 
-  const handleViewSupplierDetails = () => {
-    navigate(`/suppliers/${purchaseOrder.supplier?.id}`);
-  };
-
-  const handleViewAllRequisitions = () => {
-    navigate('/requisitions');
-  };
-
-  const handleCancelOrder = async () => {
-    try {
-      await api.delete(`/api/inventory/purchase-orders/${id}/`);
-      navigate('/purchase-orders');
-    } catch (error) {
-      console.error(error);
-      setError('Failed to cancel order.');
-    }
-  };
   return (
     <Container maxWidth="lg" sx={{ py: 4, px: 2, bgcolor: '#f5f5f5' }}>
       <AppBar position="static" color="default" sx={{ mb: 4 }}>
@@ -178,10 +191,9 @@ const POView = () => {
           </Typography>
           {!isLoading && purchaseOrder?.status === 'draft' && (
             <Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSend} sx={{ mx: 1 }}>
-              Send
+              Send PO by Email
             </Button>
           )}
-
           {!isLoading && purchaseOrder?.status === 'open_order' && (
             <>
               <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={handleApprove} sx={{ mx: 1 }}>
@@ -192,7 +204,6 @@ const POView = () => {
               </Button>
             </>
           )}
-
           {!isLoading && purchaseOrder?.status === 'approved' && (
             <Button variant="contained" color="primary" startIcon={<LocalShipping />} onClick={handleOrderReceived} sx={{ mx: 1 }}>
               Order Received
@@ -225,7 +236,8 @@ const POView = () => {
               </Stepper>
             </Box>
           </Grid>
-          <Grid item xs={12} md={8}>
+
+          <Grid item xs={12} md={12}>
             <Card sx={{ boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
               <CardHeader
                 title="Purchase Order Details"
@@ -249,104 +261,60 @@ const POView = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={12}><Typography><strong>Notes:</strong> {purchaseOrder.purchase_requisition?.notes || 'N/A'}</Typography></Grid>
+                        <Grid item xs={6}><Typography><strong>Supplier ID:</strong> {purchaseOrder.supplier_id || 'N/A'}</Typography></Grid>
+                        <Grid item xs={6}><Typography><strong>Created By:</strong> User {purchaseOrder.creator_id || 'N/A'}</Typography></Grid>
+                        <Grid item xs={6}><Typography><strong>Updated At:</strong> {purchaseOrder.updated_at ? new Date(purchaseOrder.updated_at).toLocaleString() : 'N/A'}</Typography></Grid>
                       </Grid>
                     </Box>
                   </Grid>
-                  <Grid item xs={6}><Typography><strong>Supplier ID:</strong> {purchaseOrder.supplier_id || 'N/A'}</Typography></Grid>
-                  <Grid item xs={6}><Typography><strong>Created By:</strong> User {purchaseOrder.creator_id || 'N/A'}</Typography></Grid>
-                  <Grid item xs={6}><Typography><strong>Updated At:</strong> {purchaseOrder.updated_at ? new Date(purchaseOrder.updated_at).toLocaleString() : 'N/A'}</Typography></Grid>
+
                   <TableContainer component={Paper}>
-                    <Table>
+                    <Table sx={{ minWidth: 700 }} aria-label="spanning table">
                       <TableHead>
                         <TableRow>
-                          <TableCell>Field</TableCell>
-                          <TableCell>Value</TableCell>
-                          {purchaseOrder.status === 'draft' && <TableCell>Edit</TableCell>}
+                          <TableCell align="center" colSpan={3}>
+                            Details
+                          </TableCell>
+                          <TableCell align="right">Price</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Desc</TableCell>
+                          <TableCell align="right">Qty.</TableCell>
+                          <TableCell align="right">Unit</TableCell>
+                          <TableCell align="right">Sum</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        <TableRow>
-                          <TableCell>Price Per Unit</TableCell>
-                          <TableCell>{purchaseOrder.price_per_unit || 'N/A'}</TableCell>
-                          {purchaseOrder.status === 'draft' && (
-                            <TableCell>
+                        {rows.map((row) => (
+                          <TableRow key={row.desc}>
+                            <TableCell>{row.desc}</TableCell>
+                            <TableCell align="right">{row.qty}</TableCell>
+                            <TableCell align="right">{row.unit}</TableCell>
+                            <TableCell align="right">
                               <TextField
-                                name="price_per_unit"
-                                value={editedValues.price_per_unit}
-                                onChange={handleInputChange}
+                                value={editedPrice}
+                                onChange={handlePriceChange}
+                                type="number"
+                                inputProps={{ min: 0, step: 0.01 }}
+                                variant="outlined"
+                                size="small"
                               />
                             </TableCell>
-                          )}
-                        </TableRow>
+                          </TableRow>
+                        ))}
                         <TableRow>
-                          <TableCell>Total Price</TableCell>
-                          <TableCell>{purchaseOrder.total_price || 'N/A'}</TableCell>
-                          {purchaseOrder.status === 'draft' && (
-                            <TableCell>
-                              <TextField
-                                name="total_price"
-                                value={editedValues.total_price}
-                                onChange={handleInputChange}
-                              />
-                            </TableCell>
-                          )}
+                          <TableCell colSpan={3}>Total</TableCell>
+                          <TableCell align="right">{ccyFormat(invoiceSubtotal)}</TableCell>
                         </TableRow>
                       </TableBody>
                     </Table>
                   </TableContainer>
+
                   <Grid item xs={12}>
                     <Typography><strong>Notes:</strong> </Typography>
                     <Box sx={{ p: 1, bgcolor: '#f0f0f0', borderRadius: 1 }}>{purchaseOrder.notes || 'N/A'}</Box>
                   </Grid>
                 </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-              <CardHeader title="Actions" />
-              <CardContent>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  startIcon={<Business />}
-                  sx={{ mb: 2 }}
-                  onClick={handleViewSupplierDetails}
-                >
-                  View Supplier Details
-                </Button>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  startIcon={<Assignment />}
-                  sx={{ mb: 2 }}
-                  onClick={handleViewAllRequisitions}
-                >
-                  View All Requisitions
-                </Button>
-
-                {!isLoading && purchaseOrder?.status === 'draft' && (
-                  <Link to={`/inventory/purchase-order/edit/${id}`}>
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      startIcon={<Edit />}
-                      sx={{ mb: 2 }}
-                    >
-                      Edit Order
-                    </Button>
-                  </Link>
-                )}
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  color="error"
-                  startIcon={<Delete />}
-                  onClick={handleCancelOrder}
-                >
-                  Cancel Order
-                </Button>
               </CardContent>
             </Card>
           </Grid>

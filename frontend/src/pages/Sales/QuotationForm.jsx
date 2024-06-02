@@ -62,6 +62,9 @@ const QuotationForm = () => {
           price: parseFloat(product.price),
           bom: product.bom
         })));
+        if (formik.values.customer) {
+          formik.setFieldValue('invoicingAndShippingAddress', getCustomerAddress(formik.values.customer.id));
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -70,15 +73,24 @@ const QuotationForm = () => {
     fetchData();
   }, []);
 
+  // get customer addres from customersData when given customer id
+  const getCustomerAddress = (customerId) => {
+    const customer = customers.find((customer) => customer.id === customerId);
+    return customer ? customer.address : '';
+  };
+  const addItemValidationSchema = Yup.object({
+    newProduct: Yup.object().nullable().required('Please select a product.'),
+    newQuantity: Yup.number()
+      .min(1, 'Quantity must be greater than 0')
+      .required('Please enter a quantity.')
+  });
+
   const validationSchema = Yup.object({
     customer: Yup.object().nullable().required('Please select a customer.'),
     date: Yup.string().required('Please enter a date.'),
     expirationDate: Yup.string().required('Please enter an expiration date.'),
     invoicingAndShippingAddress: Yup.string().required('Please enter an invoicing and shipping address.'),
-    newProduct: Yup.object().nullable().required('Please select a product.'),
-    newQuantity: Yup.number()
-      .min(1, 'Quantity must be greater than 0')
-      .required('Please enter a quantity.'),
+
     quotationItems: Yup.array()
       .of(
         Yup.object().shape({
@@ -154,19 +166,16 @@ const QuotationForm = () => {
             <Grid item xs={12} md={6}>
               <Autocomplete
                 options={customers}
-                value={formik.values.customer}
-                onChange={(event, newValue) => formik.setFieldValue('customer', newValue)}
                 getOptionLabel={(option) => option.name}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Customer"
-                    error={Boolean(formik.touched.customer && formik.errors.customer)}
-                    helperText={formik.touched.customer && formik.errors.customer}
-                    fullWidth
-                  />
-                )}
+                value={formik.values.customer}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('customer', newValue);
+                  formik.setFieldValue('invoicingAndShippingAddress', getCustomerAddress(newValue.id));
+                }}
+                renderInput={(params) => <TextField {...params} label="Customer" />}
               />
+
+
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
@@ -276,15 +285,25 @@ const QuotationForm = () => {
                             variant="contained"
                             onClick={() => {
                               if (formik.values.newProduct) {
-                                formik.setFieldValue('quotationItems', [
-                                  ...formik.values.quotationItems,
-                                  {
-                                    product: formik.values.newProduct,
-                                    quantity: formik.values.newQuantity,
-                                  },
-                                ]);
-                                formik.setFieldValue('newProduct', null);
-                                formik.setFieldValue('newQuantity', '');
+                                addItemValidationSchema.validate({
+                                  newProduct: formik.values.newProduct,
+                                  newQuantity: formik.values.newQuantity,
+                                }).then(() => {
+                                  formik.setFieldValue('quotationItems', [
+                                    ...formik.values.quotationItems,
+                                    {
+                                      product: formik.values.newProduct,
+                                      quantity: formik.values.newQuantity,
+                                    },
+                                  ]);
+                                  formik.setFieldValue('newProduct', null);
+                                  formik.setFieldValue('newQuantity', '');
+                                  // Reset the touched state for newProduct and newQuantity
+                                  formik.setFieldTouched('newProduct', false);
+                                  formik.setFieldTouched('newQuantity', false); // Reset touched state
+                                }).catch((error) => {
+                                  console.log(error.errors); // Handle validation errors
+                                });
                               } else {
                                 formik.setFieldTouched('newProduct', true, true);
                               }
@@ -293,6 +312,7 @@ const QuotationForm = () => {
                           >
                             Add Item
                           </Button>
+
                         </TableCell>
                       </TableRow>
                     </>
