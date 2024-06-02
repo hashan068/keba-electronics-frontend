@@ -57,7 +57,7 @@ const PRForm = () => {
 
   const [initialValues, setInitialValues] = useState({
     component: null, // Change from componentId to component
-    quantity: 0,
+    quantity: '',
 
     notes: '',
     priority: 'high',

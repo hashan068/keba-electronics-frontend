@@ -16,7 +16,6 @@ import {
   ThemeProvider,
   createTheme,
   Stack,
-  Autocomplete,
 } from '@mui/material';
 
 const theme = createTheme({
@@ -61,25 +60,12 @@ const ComponentForm = () => {
     quantity: 0,
     reorderLevel: 0,
     unitOfMeasure: '',
-    supplier: null,
     cost: 0,
   });
 
-  const [suppliers, setSuppliers] = useState([]);
   const [submitAction, setSubmitAction] = useState('close');
 
   useEffect(() => {
-    const fetchSuppliers = async () => {
-      try {
-        const response = await api.get('/api/inventory/suppliers/');
-        setSuppliers(response.data);
-      } catch (error) {
-        console.error('Error fetching suppliers:', error);
-      }
-    };
-
-    fetchSuppliers();
-
     if (id) {
       api
         .get(`/api/inventory/components/${id}/`)
@@ -90,7 +76,6 @@ const ComponentForm = () => {
             quantity,
             reorder_level,
             unit_of_measure,
-            supplier,
             cost,
           } = response.data;
           setInitialValues({
@@ -99,7 +84,6 @@ const ComponentForm = () => {
             quantity,
             reorderLevel: reorder_level,
             unitOfMeasure: unit_of_measure,
-            supplier,
             cost,
           });
         })
@@ -117,7 +101,6 @@ const ComponentForm = () => {
       .required('Reorder Level is required')
       .positive('Reorder Level must be a positive number'),
     unitOfMeasure: Yup.string().required('Unit of Measure is required'),
-    supplier: Yup.object().nullable().required('Supplier is required'),
     cost: Yup.number()
       .required('Cost is required')
       .positive('Cost must be a positive number'),
@@ -133,7 +116,6 @@ const ComponentForm = () => {
         quantity: parseInt(values.quantity, 10),
         reorder_level: parseInt(values.reorderLevel, 10),
         unit_of_measure: values.unitOfMeasure,
-        supplier_id: values.supplier.id,
         cost: parseFloat(values.cost),
       };
 
@@ -156,7 +138,6 @@ const ComponentForm = () => {
           quantity: 0,
           reorderLevel: 0,
           unitOfMeasure: '',
-          supplier: null,
           cost: 0,
         });
       }
@@ -181,7 +162,7 @@ const ComponentForm = () => {
           enableReinitialize
           onSubmit={handleSubmit}
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, setFieldValue }) => (
+          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
             <form onSubmit={handleSubmit}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
@@ -253,26 +234,6 @@ const ComponentForm = () => {
                       <MenuItem value="l">Liters</MenuItem>
                     </Select>
                   </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Autocomplete
-                    options={suppliers}
-                    value={values.supplier}
-                    onChange={(event, newValue) => {
-                      setFieldValue('supplier', newValue);
-                    }}
-                    getOptionLabel={(option) => option.name || ''}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Supplier"
-                        error={touched.supplier && Boolean(errors.supplier)}
-                        helperText={touched.supplier && errors.supplier}
-                        required
-                      />
-                    )}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                  />
                 </Grid>
                 <Grid item xs={12}>
                   <TextField

@@ -1,9 +1,12 @@
+// TopCustomers.jsx
 import React, { useState, useEffect } from 'react';
-import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel } from '@mui/material';
 import api from '../../api';
 
 const TopCustomers = () => {
   const [topCustomers, setTopCustomers] = useState([]);
+  const [order, setOrder] = useState('desc');
+  const [orderBy, setOrderBy] = useState('total_amount');
 
   useEffect(() => {
     const fetchTopCustomers = async () => {
@@ -21,7 +24,12 @@ const TopCustomers = () => {
           return counts;
         }, {});
 
-        const sortedCustomers = Object.values(customerCounts).sort((a, b) => b.total_amount - a.total_amount);
+        const sortedCustomers = Object.values(customerCounts).sort((a, b) => {
+          const orderMultiplier = order === 'asc' ? 1 : -1;
+          if (a[orderBy] < b[orderBy]) return -1 * orderMultiplier;
+          if (a[orderBy] > b[orderBy]) return 1 * orderMultiplier;
+          return 0;
+        });
         setTopCustomers(sortedCustomers.slice(0, 5));
       } catch (error) {
         console.error('Error fetching top customers:', error);
@@ -29,7 +37,13 @@ const TopCustomers = () => {
     };
 
     fetchTopCustomers();
-  }, []);
+  }, [order, orderBy]);
+
+  const handleSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
 
   return (
     <Paper sx={{ p: 3 }}>
@@ -40,8 +54,24 @@ const TopCustomers = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Customer</TableCell>
-              <TableCell align="right">Total Sales</TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={orderBy === 'customer_name'}
+                  direction={orderBy === 'customer_name' ? order : 'asc'}
+                  onClick={() => handleSort('customer_name')}
+                >
+                  Customer
+                </TableSortLabel>
+              </TableCell>
+              <TableCell align="right">
+                <TableSortLabel
+                  active={orderBy === 'total_amount'}
+                  direction={orderBy === 'total_amount' ? order : 'asc'}
+                  onClick={() => handleSort('total_amount')}
+                >
+                  Total Sales
+                </TableSortLabel>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

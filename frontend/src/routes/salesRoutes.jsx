@@ -1,16 +1,25 @@
 import { Routes, Route } from 'react-router-dom';
 import Product from '../pages/Sales/Product';
-import ProductDetails from '../pages/ProductDetails';
+import ProductDetails from '../pages/Sales/ProductDetails';
 import SalesOrder from '../pages/Sales/SalesOrder';
-import SalesOrderForm from '../components/SalesOrderForm';
+import SalesOrderForm from '../pages/Sales/SalesOrderForm';
 import SalesOrderDetails from '../pages/Sales/SalesOrderDetails';
 import Quotations from '../pages/Sales/Quotations';
 import QuotationDetail from '../pages/Sales/QuotationDetail';
-import QuotationForm from '../components/QuotationForm';
+import QuotationForm from '../pages/Sales/QuotationForm';
+import Customers from '../pages/Sales/Customers';
+import CustomerForm from '../pages/Sales/CustomerForm';
+import CustomerDetail from '../pages/Sales/CustomerDetail';
 
 const SalesRoutes = () => (
   <Routes>
     <Route path="product" element={<Product />} />
+
+    <Route path="customer" element={<Customers />} />
+    <Route path="/customer/:id" element={<CustomerDetail />} />
+    {/* <Route path="/customer/new" element={<CustomerDetail />} /> */}
+    <Route path="customer/new" element={<CustomerForm />} />
+
     <Route path="product/new" element={<ProductDetails />} />
     <Route path="product/:id" element={<ProductDetails />} />
     <Route path="quotations" element={<Quotations />} />

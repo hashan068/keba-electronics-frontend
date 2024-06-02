@@ -16,4 +16,4 @@ const useStyles = makeStyles({
   },
 });
 
-export { useStyles }; // Exporting useStyles without default
+export { useStyles };

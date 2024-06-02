@@ -1,4 +1,3 @@
-// SalesChart.jsx
 import React, { useState, useEffect } from 'react';
 import { Paper, Typography, Box, CircularProgress } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -19,7 +18,19 @@ const SalesChart = () => {
             sales: parseFloat(item.price) * item.quantity,
           }))
         );
-        setSalesData(transformedData);
+
+        // Group data by date and sum sales for each day
+        const groupedData = transformedData.reduce((acc, current) => {
+          const existingDate = acc.find((item) => item.date === current.date);
+          if (existingDate) {
+            existingDate.sales += current.sales;
+          } else {
+            acc.push(current);
+          }
+          return acc;
+        }, []);
+
+        setSalesData(groupedData);
         setLoading(false);
       })
       .catch((err) => {

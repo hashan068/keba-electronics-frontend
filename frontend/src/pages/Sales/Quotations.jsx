@@ -25,7 +25,8 @@ const STATUS_CHOICES = {
   accepted: { label: 'Accepted', color: 'success' },
   rejected: { label: 'Rejected', color: 'error' },
   cancelled: { label: 'Cancelled', color: 'warning' },
-  expired: { label: 'Expired', color: 'default' }
+  expired: { label: 'Expired', color: 'default' },
+  pending: { label: 'Pending', color: 'warning' },
 };
 
 export default function Quotations() {

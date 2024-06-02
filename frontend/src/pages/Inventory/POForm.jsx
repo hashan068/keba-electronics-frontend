@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../api';
-import { Formik } from 'formik';
+import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import {
   Box,
@@ -15,128 +15,136 @@ import {
   Grid,
   ThemeProvider,
   createTheme,
-  Stack
+  Stack,
+  Autocomplete,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
+import { Assignment, Edit, CheckCircle, Cancel, ArrowBack, Warning, Business, PriorityHigh, Receipt, LocalShipping } from '@mui/icons-material';
 
 const theme = createTheme({
   palette: {
-    primary: {
-      main: '#6200ea',
-    },
-    secondary: {
-      main: '#03dac6',
-    },
+    primary: { main: '#6200ea' },
+    secondary: { main: '#03dac6' },
+    warning: { main: '#ffa000' },
+    error: { main: '#d32f2f' },
+    success: { main: '#43a047' },
   },
-  typography: {
-    h4: {
-      fontWeight: 600,
-    },
-  },
+  typography: { h4: { fontWeight: 600 } },
   components: {
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-        },
-      },
-    },
+    MuiTextField: { styleOverrides: { root: { borderRadius: 8 } } },
+    MuiButton: { styleOverrides: { root: { borderRadius: 8 } } },
   },
 });
+
+const STATUS_CHOICES = [
+  { value: 'draft', label: 'Draft', icon: <Edit /> },
+  { value: 'open_order', label: 'Open Order', icon: <Assignment /> },
+  { value: 'approved', label: 'Approved', icon: <CheckCircle /> },
+  { value: 'received', label: 'Received', icon: <LocalShipping /> },
+  { value: 'invoiced', label: 'Invoiced', icon: <Receipt /> },
+  { value: 'cancelled', label: 'Cancelled', icon: <Cancel /> },
+  { value: 'rejected', label: 'Rejected', icon: <Cancel /> },
+];
 
 const POForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-
-  const [initialValues, setInitialValues] = useState({
-    purchaseRequisitionId: '',
-    supplierId: '',
-    purchaseManagerApproval: false,
-    status: '',
-    notes: '',
-  });
-
-  const [submitAction, setSubmitAction] = useState('close');
+  const [purchaseOrder, setPurchaseOrder] = useState(null);
+  const [suppliers, setSuppliers] = useState([]);
+  const [requisitions, setRequisitions] = useState([]);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, title: '', content: '', onConfirm: null });
 
   useEffect(() => {
-    if (id) {
-      api
-        .get(`/api/inventory/purchase-orders/${id}/`)
-        .then((response) => {
-          const {
-            purchase_requisition_id,
-            supplier_id,
-            purchase_manager_approval,
-            status,
-            notes,
-          } = response.data;
-          setInitialValues({
-            purchaseRequisitionId: purchase_requisition_id,
-            supplierId: supplier_id,
-            purchaseManagerApproval: purchase_manager_approval,
-            status,
-            notes,
-          });
-        })
-        .catch((error) => console.error(error));
-    }
+    const fetchData = async () => {
+      try {
+        const [suppliersRes, requisitionsRes] = await Promise.all([
+          api.get('/api/inventory/suppliers/'),
+          api.get('/api/inventory/purchase-requisitions/?status=created'),
+        ]);
+        setSuppliers(suppliersRes.data);
+        setRequisitions(requisitionsRes.data);
+
+        if (id) {
+          const orderRes = await api.get(`/api/inventory/purchase-orders/${id}/`);
+          setPurchaseOrder(orderRes.data);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
   }, [id]);
 
+  const initialValues = {
+    purchaseRequisitionId: purchaseOrder?.purchase_requisition_id || '1',
+    supplierId: purchaseOrder?.supplier_id || '',
+    status: purchaseOrder?.status || 'draft',
+    notes: purchaseOrder?.notes || '',
+    price_per_unit: purchaseOrder?.price_per_unit || '',
+    total_price: purchaseOrder?.total_price || '',
+  };
+
   const validationSchema = Yup.object({
-    purchaseRequisitionId: Yup.string().required('Purchase Requisition is required'),
-    supplierId: Yup.string().required('Supplier is required'),
-    purchaseManagerApproval: Yup.boolean().required('Manager Approval is required'),
+    purchaseRequisitionId: Yup.number().required('Purchase Requisition is required'),
+    supplierId: Yup.number().required('Supplier is required'),
     status: Yup.string().required('Status is required'),
     notes: Yup.string(),
+    price_per_unit: Yup.number().required('Price Per Unit is required').min(0, 'Price Per Unit must be a positive number'),
   });
 
-  const handleSubmit = async (values, { setSubmitting, setFieldError, resetForm }) => {
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      setSubmitting(true);
-
       const data = {
         purchase_requisition_id: values.purchaseRequisitionId,
         supplier_id: values.supplierId,
-        purchase_manager_approval: values.purchaseManagerApproval,
         status: values.status,
         notes: values.notes,
+        price_per_unit: values.price_per_unit,
       };
 
-      let response;
       if (id) {
-        response = await api.put(`/api/inventory/purchase-orders/${id}/`, data);
+        if (purchaseOrder.status !== 'draft') {
+          setConfirmDialog({
+            open: true,
+            title: 'Cannot Edit Order',
+            content: `This order is in '${purchaseOrder.status}' status and cannot be edited.`,
+            onConfirm: () => setConfirmDialog({ open: false }),
+          });
+          return;
+        }
+        await api.patch(`/api/inventory/purchase-orders/${id}/`, data);
       } else {
-        response = await api.post('/api/inventory/purchase-orders/', data);
-      }
-
-      const { id: newId } = response.data;
-
-      if (submitAction === 'close') {
-        navigate(`/inventory/purchase-orders/${newId}`);
-      } else {
+        await api.post('/api/inventory/purchase-orders/', data);
         resetForm();
-        setInitialValues({
-          purchaseRequisitionId: '',
-          supplierId: '',
-          purchaseManagerApproval: false,
-          status: '',
-          notes: '',
-        });
       }
-
-      setSubmitting(false);
+      navigate('/inventory/purchase-orders');
     } catch (error) {
-      console.error(error);
-      setFieldError('general', 'Failed to create purchase order.');
+      console.error('Error submitting purchase order:', error);
+    } finally {
       setSubmitting(false);
     }
   };
+
+  if (id && purchaseOrder && purchaseOrder.status !== 'draft') {
+    return (
+      <ThemeProvider theme={theme}>
+        <Box sx={{ p: 4, bgcolor: 'background.paper', boxShadow: 3, borderRadius: 2 }}>
+          <Typography variant="h4" gutterBottom>Cannot Edit Purchase Order</Typography>
+          <Typography variant="body1" gutterBottom>
+            This purchase order is in '{purchaseOrder.status}' status and cannot be edited.
+          </Typography>
+          <Button variant="contained" color="primary" onClick={() => navigate(-1)} startIcon={<ArrowBack />}>
+            Go Back
+          </Button>
+        </Box>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -150,71 +158,88 @@ const POForm = () => {
           enableReinitialize
           onSubmit={handleSubmit}
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
-            <form onSubmit={handleSubmit}>
-              <Grid container spacing={2}>
+          {({ values, errors, touched, handleChange, handleBlur, isSubmitting, setFieldValue }) => (
+            <Form>
+              <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <TextField
-                    label="Purchase Requisition ID"
-                    value={values.purchaseRequisitionId}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.purchaseRequisitionId && Boolean(errors.purchaseRequisitionId)}
-                    helperText={touched.purchaseRequisitionId && errors.purchaseRequisitionId}
-                    fullWidth
-                    required
+                  <Field
                     name="purchaseRequisitionId"
+                    render={({ field }) => (
+                      <Autocomplete
+                        {...field}
+                        options={requisitions}
+                        getOptionLabel={(option) => `${option.id} - ${option.component_id} (Qty: ${option.quantity})`}
+                        onChange={(_, value) => setFieldValue(field.name, value ? value.id : '')}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Purchase Requisition"
+                            variant="outlined"
+                            error={touched.purchaseRequisitionId && Boolean(errors.purchaseRequisitionId)}
+                            helperText={touched.purchaseRequisitionId && errors.purchaseRequisitionId}
+                            required
+                          />
+                        )}
+                        renderOption={(props, option) => (
+                          <Box component="li" {...props}>
+                            <Grid container alignItems="center">
+                              <Grid item xs={6}><Typography>{option.id} - {option.component_id}</Typography></Grid>
+                              <Grid item xs={3}><Typography>Qty: {option.quantity}</Typography></Grid>
+                              <Grid item xs={3}>
+                                <Chip icon={<PriorityHigh />} label={option.priority} color={option.priority === 'high' ? 'error' : 'primary'} size="small" />
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        )}
+                      />
+                    )}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField
-                    label="Supplier ID"
-                    value={values.supplierId}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.supplierId && Boolean(errors.supplierId)}
-                    helperText={touched.supplierId && errors.supplierId}
-                    fullWidth
-                    required
+                  <Field
                     name="supplierId"
+                    render={({ field }) => (
+                      <Autocomplete
+                        {...field}
+                        options={suppliers}
+                        getOptionLabel={(option) => `${option.id} - ${option.name}`}
+                        onChange={(_, value) => setFieldValue(field.name, value ? value.id : '')}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Supplier"
+                            variant="outlined"
+                            error={touched.supplierId && Boolean(errors.supplierId)}
+                            helperText={touched.supplierId && errors.supplierId}
+                            required
+                          />
+                        )}
+                      />
+                    )}
                   />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControl fullWidth required>
-                    <InputLabel>Purchase Manager Approval</InputLabel>
-                    <Select
-                      value={values.purchaseManagerApproval}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.purchaseManagerApproval && Boolean(errors.purchaseManagerApproval)}
-                      name="purchaseManagerApproval"
-                    >
-                      <MenuItem value={true}>Approved</MenuItem>
-                      <MenuItem value={false}>Not Approved</MenuItem>
-                    </Select>
-                  </FormControl>
                 </Grid>
                 <Grid item xs={12}>
                   <FormControl fullWidth required>
                     <InputLabel>Status</InputLabel>
                     <Select
+                      name="status"
                       value={values.status}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       error={touched.status && Boolean(errors.status)}
-                      name="status"
                     >
-                      <MenuItem value="created">Created</MenuItem>
-                      <MenuItem value="pending">Pending</MenuItem>
-                      <MenuItem value="approved">Approved</MenuItem>
-                      <MenuItem value="rejected">Rejected</MenuItem>
-                      <MenuItem value="cancelled">Cancelled</MenuItem>
+                      {STATUS_CHOICES.map((choice) => (
+                        <MenuItem key={choice.value} value={choice.value}>
+                          {choice.icon} {choice.label}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
                     label="Notes"
+                    name="notes"
                     value={values.notes}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -223,7 +248,37 @@ const POForm = () => {
                     fullWidth
                     multiline
                     rows={4}
-                    name="notes"
+                    placeholder="Any additional information or comments..."
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Field
+                    name="price_per_unit"
+                    render={({ field, form }) => (
+                      <TextField
+                        {...field}
+                        label="Price Per Unit"
+                        variant="outlined"
+                        type="number"
+                        InputProps={{ inputProps: { min: 0 } }}
+                        error={form.touched.price_per_unit && Boolean(form.errors.price_per_unit)}
+                        helperText={form.touched.price_per_unit && form.errors.price_per_unit}
+                        required
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Field
+                    name="total_price"
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Total Price"
+                        variant="outlined"
+                        disabled
+                      />
+                    )}
                   />
                 </Grid>
               </Grid>
@@ -232,42 +287,36 @@ const POForm = () => {
                   variant="contained"
                   color="secondary"
                   onClick={() => navigate(-1)}
-                  sx={{ flexGrow: 1 }}
+                  startIcon={<ArrowBack />}
                 >
                   Back
                 </Button>
                 <Button
-                  type="button"
+                  type="submit"
                   variant="contained"
                   color="primary"
                   disabled={isSubmitting}
-                  onClick={() => {
-                    setSubmitAction('close');
-                    handleSubmit();
-                  }}
-                  sx={{ flexGrow: 22 }}
+                  startIcon={id ? <Edit /> : <Assignment />}
+                  sx={{ flexGrow: 1 }}
                 >
-                  {id ? 'Update and Close' : 'Create and Close'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="contained"
-                  color="primary"
-                  disabled={isSubmitting}
-                  onClick={() => {
-                    setSubmitAction('addNew');
-                    handleSubmit();
-                  }}
-                  sx={{ flexGrow: 2 }}
-                >
-                  {id ? 'Update and Add New' : 'Create and Add New'}
+                  {id ? 'Update Order' : 'Create Order'}
                 </Button>
               </Stack>
-            </form>
+            </Form>
           )}
         </Formik>
       </Box>
+      <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({ open: false })}>
+        <DialogTitle>{confirmDialog.title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{confirmDialog.content}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialog({ open: false })} color="primary">OK</Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 };
+
 export default POForm;

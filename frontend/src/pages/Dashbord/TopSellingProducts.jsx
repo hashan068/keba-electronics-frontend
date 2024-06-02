@@ -1,9 +1,12 @@
+// TopSellingProducts.jsx
 import React, { useState, useEffect } from 'react';
-import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel } from '@mui/material';
 import api from '../../api';
 
 const TopSellingProducts = () => {
   const [topProducts, setTopProducts] = useState([]);
+  const [order, setOrder] = useState('desc');
+  const [orderBy, setOrderBy] = useState('quantity');
 
   useEffect(() => {
     const fetchTopProducts = async () => {
@@ -21,15 +24,26 @@ const TopSellingProducts = () => {
           return counts;
         }, {});
 
-        const sortedProducts = Object.values(productCounts).sort((a, b) => b.quantity - a.quantity);
-        setTopProducts(sortedProducts.slice(0, 5));
+        const sortedProducts = Object.values(productCounts).sort((a, b) => {
+          const orderMultiplier = order === 'asc' ? 1 : -1;
+          if (a[orderBy] < b[orderBy]) return -1 * orderMultiplier;
+          if (a[orderBy] > b[orderBy]) return 1 * orderMultiplier;
+          return 0;
+        });
+        setTopProducts(sortedProducts);
       } catch (error) {
         console.error('Error fetching top-selling products:', error);
       }
     };
 
     fetchTopProducts();
-  }, []);
+  }, [order, orderBy]);
+
+  const handleSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
 
   return (
     <Paper sx={{ p: 3 }}>
@@ -40,8 +54,24 @@ const TopSellingProducts = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Product</TableCell>
-              <TableCell align="right">Total Quantity</TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={orderBy === 'product_name'}
+                  direction={orderBy === 'product_name' ? order : 'asc'}
+                  onClick={() => handleSort('product_name')}
+                >
+                  Product
+                </TableSortLabel>
+              </TableCell>
+              <TableCell align="right">
+                <TableSortLabel
+                  active={orderBy === 'quantity'}
+                  direction={orderBy === 'quantity' ? order : 'asc'}
+                  onClick={() => handleSort('quantity')}
+                >
+                  Total Quantity
+                </TableSortLabel>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

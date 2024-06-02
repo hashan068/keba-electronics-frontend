@@ -16,12 +16,36 @@ import {
   useTheme,
   useMediaQuery,
   Pagination,
+  Chip,
 } from '@mui/material';
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import api from '../../api';
+
+const STATUS_CHOICES = {
+  draft: { label: 'Draft', color: 'default' },
+  open_order: { label: 'Open Order', color: 'info' },
+  approved: { label: 'Approved', color: 'success' },
+  received: { label: 'Received', color: 'primary' },
+  invoiced: { label: 'Invoiced', color: 'secondary' },
+  cancelled: { label: 'Cancelled', color: 'default' },
+  rejected: { label: 'Rejected', color: 'error' },
+};
+
+const renderStatusChip = (params) => {
+  const status = params.value;
+  const statusConfig = STATUS_CHOICES[status] || {};
+  return (
+    <Chip
+      label={statusConfig.label}
+      color={statusConfig.color}
+      variant="outlined"
+      size="small"
+    />
+  );
+};
 
 export default function POs() {
   const [purchaseOrders, setPurchaseOrders] = useState([]);
@@ -58,9 +82,9 @@ export default function POs() {
     navigate(`/inventory/purchase-order/${params.row.id}`);
   };
 
-  const handleAddPurchaseOrder = () => {
-    navigate('/inventory/purchase-order/new');
-  };
+  // const handleAddPurchaseOrder = () => {
+  //   navigate('/inventory/purchase-order/new');
+  // };
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
@@ -82,10 +106,11 @@ export default function POs() {
     { field: 'id', headerName: 'ID', width: 100 },
     { field: 'purchase_requisition_details', headerName: 'Purchase Requisition', width: 300 },
     { field: 'supplier_id', headerName: 'Supplier', width: 150 },
-    { field: 'purchase_manager_approval', headerName: 'Manager Approval', type: 'boolean', width: 150 },
-    { field: 'status', headerName: 'Status', width: 150 },
-    { field: 'notes', headerName: 'Notes', width: 300 },
+    { field: 'status', headerName: 'Status', width: 150, renderCell: renderStatusChip },
+  
     { field: 'created_at', headerName: 'Created At', width: 200 },
+    { field: 'price_per_unit', headerName: 'Price Per Unit', width: 150 },
+    { field: 'total_price', headerName: 'Total Price', width: 150 },
   ];
 
   const CustomToolbar = () => (
@@ -112,7 +137,7 @@ export default function POs() {
             }}
             sx={{ marginRight: 2 }}
           />
-          <Button
+          {/* <Button
             variant="contained"
             color="primary"
             onClick={handleAddPurchaseOrder}
@@ -125,7 +150,7 @@ export default function POs() {
             }}
           >
             Add Purchase Order
-          </Button>
+          </Button> */}
         </Toolbar>
       </Paper>
       <Grid container spacing={2}>

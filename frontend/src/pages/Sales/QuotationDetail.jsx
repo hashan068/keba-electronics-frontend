@@ -51,6 +51,8 @@ export default function QuotationDetail() {
       });
   };
 
+  
+
   const validateForm = () => {
     return true;
   };

@@ -1,4 +1,3 @@
-// components/Layout.jsx
 import React, { useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 import PermanentDrawerLeft from './PermanentDrawerLeft';
@@ -22,55 +21,24 @@ const Layout = ({ children }) => {
       case 'Salesperson':
         return (
           <SalespersonLayout>
-            <Box component="main" sx={{ flexGrow: 1, p: 1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
               <ResponsiveAppBar />
-              {children}
+              <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
+                {children}
+              </Box>
             </Box>
           </SalespersonLayout>
         );
-      // case 'ProductionManager':
-      //   return (
-      //     <ProductionManagerLayout>
-      //       <Box component="main" sx={{ flexGrow: 1, p: 1 }}>
-      //         <ResponsiveAppBar />
-      //         {children}
-      //       </Box>
-      //     </ProductionManagerLayout>
-      //   );
-      // case 'GenaralManager':
-      //   return (
-      //     <GenaralManagerLayout>
-      //       <Box component="main" sx={{ flexGrow: 1, p: 1 }}>
-      //         <ResponsiveAppBar />
-      //         {children}
-      //       </Box>
-      //     </GenaralManagerLayout>
-      //   );
-      // case 'InventoryManager':
-      //   return (
-      //     <InventoryManagerLayout>
-      //       <Box component="main" sx={{ flexGrow: 1, p: 1 }}>
-      //         <ResponsiveAppBar />
-      //         {children}
-      //       </Box>
-      //     </InventoryManagerLayout>
-      //   );
-      // case 'Purchasing Manager':
-      //   return (
-      //     <PurchasingManagerLayout>
-      //       <Box component="main" sx={{ flexGrow: 1, p: 1 }}>
-      //         <ResponsiveAppBar />
-      //         {children}
-      //       </Box>
-      //     </PurchasingManagerLayout>
-      //   );
+      // Add other user roles and their respective layouts here
       default:
         return (
-          <Box sx={{ display: 'flex' }}>
+          <Box sx={{ display: 'flex', height: '100vh' }}>
             <PermanentDrawerLeft />
-            <Box component="main" sx={{ flexGrow: 1, p: 1 }}>
+            <Box component="main" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
               <ResponsiveAppBar />
-              {children}
+              <Box sx={{ flexGrow: 1, p: 2 }}>
+                {children}
+              </Box>
             </Box>
           </Box>
         );
@@ -81,25 +49,3 @@ const Layout = ({ children }) => {
 };
 
 export default Layout;
-
-
-
-// // components/Layout.jsx
-// import React from 'react';
-// import { Box } from '@mui/material';
-// import PermanentDrawerLeft from './PermanentDrawerLeft';
-// import ResponsiveAppBar from './AppBar';
-
-// const Layout = ({ children }) => {
-//   return (
-//     <Box sx={{ display: 'flex' }}>
-//       <PermanentDrawerLeft />
-//       <Box component="main" sx={{ flexGrow: 1, p: 1 }}>
-//         <ResponsiveAppBar />
-//         {children}
-//       </Box>
-//     </Box>
-//   );
-// };
-
-// export default Layout;

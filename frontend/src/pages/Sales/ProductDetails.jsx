@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, TextField, Button, Container, Paper, Grid, CircularProgress } from '@mui/material';
-import api from '../api';
+import api from '../../api';
 
 const ProductDetails = () => {
   const { id } = useParams();
