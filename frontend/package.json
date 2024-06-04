@@ -21,6 +21,7 @@
     "@mui/styled-engine-sc": "6.0.0-alpha.18",
     "@mui/x-data-grid": "^7.1.1",
     "@mui/x-date-pickers": "^7.3.2",
+    "@stoddabr/react-tableau-embed-live": "^0.3.29",
     "axios": "^1.6.8",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.11",

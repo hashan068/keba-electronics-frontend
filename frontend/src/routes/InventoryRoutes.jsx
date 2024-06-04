@@ -9,6 +9,7 @@ import POForm from '../pages/Inventory/POForm';
 import POEdit from '../pages/Inventory/POEdit';
 import PRView from '../pages/Inventory/PRView';
 import POView from '../pages/Inventory/POView';
+import InventoryReport from '../pages/Reports/InventoryReport';
 
 const InventoryRoutes = () => (
   <Routes>
@@ -25,6 +26,8 @@ const InventoryRoutes = () => (
 
     <Route path="/purchase-order/edit/:id" element={<POEdit />} />
     <Route path="/purchase-order/:id" element={<POView />} />
+
+    <Route path="/inventory-reports" element={<InventoryReport />} />
   </Routes>
 );
 

@@ -5,6 +5,7 @@ import MaterialReq from '../pages/Manufacturing/MaterialReq/MaterialReq';
 import MaterialReqDetails from '../pages/Manufacturing/MaterialReq/MaterialReqDetails';
 import BOMs from '../pages/Manufacturing/BOMS/BOMs';
 import AddBOMForm from '../pages/Manufacturing/BOMS/AddBOMForm';
+import ManufacturingReport from '../pages/Reports/ManufacturingReport';
 
 const ManufacturingRoutes = () => (
   <Routes>
@@ -14,6 +15,8 @@ const ManufacturingRoutes = () => (
     <Route path="/bom/new" element={<AddBOMForm />} />
     <Route path="/materialreq" element={<MaterialReq />} />
     <Route path="/materialreq/:id" element={<MaterialReqDetails />} />
+    <Route path="/mfg-reports" element={<ManufacturingReport />} />
+    
   </Routes>
 );
 

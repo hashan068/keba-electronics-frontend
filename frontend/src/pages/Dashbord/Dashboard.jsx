@@ -1,30 +1,23 @@
-import React from 'react';
-import { Typography, Grid, Container } from '@mui/material';
-import SalesChart from './SalesChart';
-import TopSellingProducts from './TopSellingProducts';
-import TopCustomers from './TopCustomers';
-import StatisticsDashboard from './StatisticsDashboard';
+import React, { useEffect, useState } from 'react';
+import { Typography, Container } from '@mui/material';
+import SalesDashboard from './SalesDashboard';
 
-export default function SalesDashboard() {
+const Dashboard = () => {
+  const [userRole, setUserRole] = useState('');
+
+  useEffect(() => {
+    const storedUserRole = localStorage.getItem('userrole');
+    setUserRole(storedUserRole);
+  }, []);
+
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      <Typography variant="h4" align="center" gutterBottom>
-        Sales Dashboard
-      </Typography>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <StatisticsDashboard />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <SalesChart />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <TopSellingProducts />
-        </Grid>
-        <Grid item xs={12}>
-          <TopCustomers />
-        </Grid>
-      </Grid>
+      {/* <Typography variant="h3" align="center" gutterBottom>
+        Dashboard
+      </Typography> */}
+      {userRole.includes('Admin') && <SalesDashboard />}
     </Container>
   );
-}
+};
+
+export default Dashboard;

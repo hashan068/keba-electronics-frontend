@@ -9,7 +9,8 @@ const validationSchema = Yup.object({
   name: Yup.string().required('Name is required'),
   email: Yup.string().email('Invalid email address').required('Email is required'),
   phone: Yup.string().required('Phone number is required'),
-  address: Yup.string().required('Address is required'),
+  street_address: Yup.string().required('Street address is required'),
+  city: Yup.string().required('City is required'),
 });
 
 const CustomerForm = () => {
@@ -23,7 +24,8 @@ const CustomerForm = () => {
       name: '',
       email: '',
       phone: '',
-      address: '',
+      street_address: '',
+      city: '',
     },
     validationSchema: validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -123,13 +125,26 @@ const CustomerForm = () => {
             </Grid>
             <Grid item xs={12}>
               <TextField
-                label="Address"
-                name="address"
-                value={formik.values.address}
+                label="Street Address"
+                name="street_address"
+                value={formik.values.street_address}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                error={formik.touched.address && Boolean(formik.errors.address)}
-                helperText={formik.touched.address && formik.errors.address}
+                error={formik.touched.street_address && Boolean(formik.errors.street_address)}
+                helperText={formik.touched.street_address && formik.errors.street_address}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="City"
+                name="city"
+                value={formik.values.city}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.city && Boolean(formik.errors.city)}
+                helperText={formik.touched.city && formik.errors.city}
                 fullWidth
                 required
               />
