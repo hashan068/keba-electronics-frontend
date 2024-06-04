@@ -11,15 +11,18 @@ import Customers from '../pages/Sales/Customers';
 import CustomerForm from '../pages/Sales/CustomerForm';
 import CustomerDetail from '../pages/Sales/CustomerDetail';
 import SalesReport from '../pages/Reports/SalesReport';
+import ProductForm from '../pages/Sales/ProductForm';
 
 const SalesRoutes = () => (
   <Routes>
     <Route path="product" element={<Product />} />
+    <Route path="product/new" element={<ProductForm />} />
+    <Route path="product/:id" element={<ProductDetails />} />
+
     <Route path="customer" element={<Customers />} />
     <Route path="/customer/:id" element={<CustomerDetail />} />
     <Route path="customer/new" element={<CustomerForm />} />
-    <Route path="product/new" element={<ProductDetails />} />
-    <Route path="product/:id" element={<ProductDetails />} />
+
     <Route path="quotations" element={<Quotations />} />
     <Route path="quotations/new" element={<QuotationForm />} />
     <Route path="quotation/:id" element={<QuotationDetail />} />

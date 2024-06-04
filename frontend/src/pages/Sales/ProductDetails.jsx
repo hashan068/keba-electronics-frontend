@@ -1,98 +1,232 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, TextField, Button, Container, Paper, Grid, CircularProgress } from '@mui/material';
+import {
+  Typography,
+  Box,
+  Button,
+  Paper,
+  Grid,
+  Container,
+  CircularProgress,
+  TextField,
+  Select,
+  MenuItem,
+  Toolbar,
+} from '@mui/material';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../api';
+import pageAppbarStyles from '../../styles/pageAppbarStyles';
 
-const ProductDetails = () => {
+export default function ProductDetails() {
   const { id } = useParams();
+  const [product, setProduct] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const [product, setProduct] = useState({ product_name: '', description: '', price: '' });
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      if (id) {
-        setIsLoading(true);
-        try {
-          const response = await api.get(`/api/sales/products/${id}/`);
-          setProduct(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-    fetchProduct();
-  }, [id]);
+    getProductDetails();
+  }, []);
 
-  const handleSave = async () => {
-    try {
-      if (id) {
-        await api.put(`/api/sales/products/${id}/`, product);
-      } else {
-        await api.post('/api/sales/products/', product);
-      }
-      navigate('/product');
-    } catch (error) {
-      console.error(error);
-    }
+  const getProductDetails = () => {
+    setLoading(true);
+    api
+      .get(`/api/sales/products/${id}/`)
+      .then((res) => {
+        setProduct(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
   };
 
-  if (isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const handleUpdateProduct = () => {
+    setLoading(true);
+    const updatedProduct = {
+      ...product,
+      name: `${product.inverter_type} ${product.power_rating}W ${product.frequency}Hz`,
+      model_number: `INV-${product.inverter_type.substring(
+        0,
+        3
+      ).toUpperCase()}-${product.power_rating}-${Math.round(product.frequency)}`,
+    };
+    api
+      .patch(`/api/sales/products/${id}/`, updatedProduct)
+      .then((res) => {
+        setProduct(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setErrors(err.response.data);
+        setLoading(false);
+      });
+  };
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setProduct((prevProduct) => ({
+      ...prevProduct,
+      [name]: value,
+    }));
+  };
+
+  const handleSelectChange = (event) => {
+    const { name, value } = event.target;
+    setProduct((prevProduct) => ({
+      ...prevProduct,
+      [name]: value,
+    }));
+  };
 
   return (
-    <Container maxWidth="md">
-      <Paper elevation={3} sx={{ p: 4, mt: 4, borderRadius: 2 }}>
-        <Typography variant="h4" gutterBottom align="center">
-          {id ? 'Product Details' : 'New Product'}
-        </Typography>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <TextField
-              label="Product Name"
-              value={product.product_name}
-              onChange={(e) => setProduct({ ...product, product_name: e.target.value })}
-              fullWidth
-              required
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Description"
-              value={product.description}
-              onChange={(e) => setProduct({ ...product, description: e.target.value })}
-              fullWidth
-              multiline
-              rows={4}
-              required
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Price"
-              value={product.price}
-              onChange={(e) => setProduct({ ...product, price: e.target.value })}
-              type="number"
-              fullWidth
-              required
-            />
-          </Grid>
-          <Grid item xs={12} align="center">
-            <Button variant="contained" color="primary" onClick={handleSave}>
-              {id ? 'Update' : 'Create'}
-            </Button>
-          </Grid>
-        </Grid>
+    <Container maxWidth="lg" sx={pageAppbarStyles.container}>
+      <Paper sx={pageAppbarStyles.paper}>
+        <Toolbar>
+          <Typography variant="h6" sx={pageAppbarStyles.toolbar}>
+            Product Details
+          </Typography>
+        </Toolbar>
       </Paper>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          {loading ? (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                mt: 4,
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Paper sx={{ p: 2, height: 500 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Product Name"
+                    name="product_name"
+                    value={`${product.inverter_type} ${product.power_rating}W ${product.frequency}Hz`}
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Description"
+                    name="description"
+                    value={product.description}
+                    onChange={handleInputChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Price"
+                    name="price"
+                    value={product.price}
+                    onChange={handleInputChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <Select
+                    label="Inverter Type"
+                    name="inverter_type"
+                    value={product.inverter_type}
+                    onChange={handleSelectChange}
+                    fullWidth
+                  >
+                    <MenuItem value="Square Wave">Square Wave</MenuItem>
+                    <MenuItem value="Sine Wave">Sine Wave</MenuItem>
+                  </Select>
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Power Rating"
+                    name="power_rating"
+                    value={product.power_rating}
+                    onChange={handleInputChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Frequency"
+                    name="frequency"
+                    value={product.frequency}
+                    onChange={handleInputChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Efficiency"
+                    name="efficiency"
+                    value={product.efficiency}
+                    onChange={handleInputChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Surge Power"
+                    name="surge_power"
+                    value={product.surge_power}
+                    onChange={handleInputChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Warranty Years"
+                    name="warranty_years"
+                    value={product.warranty_years}
+                    onChange={handleInputChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Input Voltage"
+                    name="input_voltage"
+                    value={product.input_voltage}
+                    onChange={handleInputChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Output Voltage"
+                    name="output_voltage"
+                    value={product.output_voltage}
+                    onChange={handleInputChange}
+                    fullWidth
+                  />
+                </Grid>
+              </Grid>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleUpdateProduct}
+              >
+                Update Product
+              </Button>
+              {errors && (
+                <Typography color="error">
+                  {Object.keys(errors).map((key) => (
+                    <div key={key}>{errors[key]}</div>
+                  ))}
+                </Typography>
+              )}
+            </Paper>
+          )}
+        </Grid>
+      </Grid>
     </Container>
   );
-};
-
-export default ProductDetails;
+}
