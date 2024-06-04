@@ -1,4 +1,3 @@
-// src/components/Customers.jsx
 import React, { useState, useEffect } from 'react';
 import {
   Typography,
@@ -67,7 +66,8 @@ export default function Customers() {
     { field: 'name', headerName: 'Name', width: 200 },
     { field: 'email', headerName: 'Email', width: 200 },
     { field: 'phone', headerName: 'Phone', width: 150 },
-    { field: 'address', headerName: 'Address', width: 300 },
+    { field: 'street_address', headerName: 'Street Address', width: 200 },
+    { field: 'city', headerName: 'City', width: 150 },
   ];
 
   return (

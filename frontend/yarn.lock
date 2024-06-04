@@ -1367,6 +1367,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@stoddabr/react-tableau-embed-live@npm:^0.3.29":
+  version: 0.3.29
+  resolution: "@stoddabr/react-tableau-embed-live@npm:0.3.29"
+  dependencies:
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+  peerDependencies:
+    react: ^18.2.0
+    react-dom: ^18.2.0
+  checksum: 7e8ddcbb665708c41e3cf190f6a4067981781fbc109942457dd6da288d6522fed4292b64b3be98ae33733268005fd462342e64a4c2b6db3d074215a6564bdf16
+  languageName: node
+  linkType: hard
+
 "@types/babel__core@npm:^7.20.5":
   version: 7.20.5
   resolution: "@types/babel__core@npm:7.20.5"
@@ -2931,6 +2944,7 @@ __metadata:
     "@mui/styled-engine-sc": "npm:6.0.0-alpha.18"
     "@mui/x-data-grid": "npm:^7.1.1"
     "@mui/x-date-pickers": "npm:^7.3.2"
+    "@stoddabr/react-tableau-embed-live": "npm:^0.3.29"
     "@types/react": "npm:^18.2.66"
     "@types/react-dom": "npm:^18.2.22"
     "@vitejs/plugin-react": "npm:^4.2.1"

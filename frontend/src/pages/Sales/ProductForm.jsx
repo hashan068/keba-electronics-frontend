@@ -1,18 +1,42 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, Alert, Container, Paper, Grid, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  Container,
+  Paper,
+  Grid,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
 // Validation schema using Yup
 const validationSchema = Yup.object({
-  name: Yup.string().required('Name is required'),
-  email: Yup.string().email('Invalid email address').required('Email is required'),
-  phone: Yup.string().required('Phone number is required'),
-  address: Yup.string().required('Address is required'),
+  description: Yup.string().required('Description is required'),
+  price: Yup.number().required('Price is required').min(0, 'Price must be a positive value'),
+  inverter_type: Yup.string().required('Inverter type is required'),
+  power_rating: Yup.number().required('Power rating is required').min(1, 'Power rating must be greater than 0'),
+  frequency: Yup.number().required('Frequency is required').min(0, 'Frequency must be a positive value'),
+  efficiency: Yup.number().required('Efficiency is required').min(0, 'Efficiency must be a positive value').max(100, 'Efficiency must be less than or equal to 100'),
+  surge_power: Yup.number().required('Surge power is required').min(1, 'Surge power must be greater than 0'),
+  warranty_years: Yup.number().required('Warranty years is required').min(0, 'Warranty years must be a non-negative value'),
+  input_voltage: Yup.number().required('Input voltage is required').min(0, 'Input voltage must be a positive value'),
+  output_voltage: Yup.number().required('Output voltage is required').min(0, 'Output voltage must be a positive value'),
 });
 
-const CustomerForm = () => {
+const ProductForm = () => {
   const navigate = useNavigate();
   const [alert, setAlert] = useState(null);
   const [open, setOpen] = useState(false);
@@ -20,16 +44,22 @@ const CustomerForm = () => {
 
   const formik = useFormik({
     initialValues: {
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
+      description: '',
+      price: '',
+      inverter_type: '',
+      power_rating: '',
+      frequency: '',
+      efficiency: '',
+      surge_power: '',
+      warranty_years: '',
+      input_voltage: '',
+      output_voltage: '',
     },
     validationSchema: validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      setOpen(false);  // Close confirmation dialog
+      setOpen(false); // Close confirmation dialog
       try {
-        const response = await fetch('http://localhost:8000/api/sales/customers/', {
+        const response = await fetch('http://localhost:8000/api/sales/products/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -41,20 +71,20 @@ const CustomerForm = () => {
         console.log('Received data:', responseData);
 
         if (response.ok) {
-          setAlert({ severity: 'success', message: 'Customer created successfully.' });
+          setAlert({ severity: 'success', message: 'Product created successfully.' });
           formik.resetForm();
           setAlertDialogOpen(true);
           setTimeout(() => {
             setAlertDialogOpen(false);
-            navigate('/sales/product');  // Redirect to product page after 3 seconds
+            navigate('/sales/product'); // Redirect to product page after 3 seconds
           }, 3000);
         } else {
-          setAlert({ severity: 'error', message: `Error creating customer: ${JSON.stringify(responseData)}` });
+          setAlert({ severity: 'error', message: `Error creating product: ${JSON.stringify(responseData)}` });
           setAlertDialogOpen(true);
         }
       } catch (error) {
         console.error('Fetch Error:', error);
-        setAlert({ severity: 'error', message: 'An error occurred while creating the customer.' });
+        setAlert({ severity: 'error', message: 'An error occurred while creating the product.' });
         setAlertDialogOpen(true);
       } finally {
         setSubmitting(false);
@@ -73,63 +103,160 @@ const CustomerForm = () => {
   const handleAlertDialogClose = () => {
     setAlertDialogOpen(false);
   };
-
   return (
     <Container maxWidth="md">
       <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
         <Typography variant="h4" gutterBottom align="center">
-          Customer Form
+          Product Form
         </Typography>
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+          <Grid item xs={12}>
               <TextField
-                label="Name"
-                name="name"
-                value={formik.values.name}
+                label="Description"
+                name="description"
+                value={formik.values.description}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
+                error={formik.touched.description && Boolean(formik.errors.description)}
+                helperText={formik.touched.description && formik.errors.description}
                 fullWidth
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                label="Email"
-                name="email"
-                value={formik.values.email}
+                label="Price"
+                name="price"
+                type="number"
+                value={formik.values.price}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
+                error={formik.touched.price && Boolean(formik.errors.price)}
+                helperText={formik.touched.price && formik.errors.price}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel id="inverter-type-label">Inverter Type</InputLabel>
+                <Select
+                  labelId="inverter-type-label"
+                  id="inverter-type"
+                  name="inverter_type"
+                  value={formik.values.inverter_type}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.inverter_type && Boolean(formik.errors.inverter_type)}
+                >
+                  <MenuItem value="">Select Inverter Type</MenuItem>
+                  <MenuItem value="Pure Sine Wave">Pure Sine Wave</MenuItem>
+                  <MenuItem value="Modified Sine Wave">Modified Sine Wave</MenuItem>
+                  <MenuItem value="Square Wave">Square Wave</MenuItem>
+                </Select>
+                {formik.touched.inverter_type && formik.errors.inverter_type && (
+                  <Typography variant="caption" color="error">
+                    {formik.errors.inverter_type}
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Power Rating (W)"
+                name="power_rating"
+                type="number"
+                value={formik.values.power_rating}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.power_rating && Boolean(formik.errors.power_rating)}
+                helperText={formik.touched.power_rating && formik.errors.power_rating}
                 fullWidth
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                label="Phone"
-                name="phone"
-                value={formik.values.phone}
+                label="Frequency (Hz)"
+                name="frequency"
+                type="number"
+                value={formik.values.frequency}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                error={formik.touched.phone && Boolean(formik.errors.phone)}
-                helperText={formik.touched.phone && formik.errors.phone}
+                error={formik.touched.frequency && Boolean(formik.errors.frequency)}
+                helperText={formik.touched.frequency && formik.errors.frequency}
+                fullWidth
+                required
+              />
+            </Grid>
+  
+            <Grid item xs={12}>
+              <TextField
+                label="Efficiency (%)"
+                name="efficiency"
+                type="number"
+                value={formik.values.efficiency}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.efficiency && Boolean(formik.errors.efficiency)}
+                helperText={formik.touched.efficiency && formik.errors.efficiency}
                 fullWidth
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                label="Address"
-                name="address"
-                value={formik.values.address}
+                label="Surge Power (W)"
+                name="surge_power"
+                type="number"
+                value={formik.values.surge_power}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                error={formik.touched.address && Boolean(formik.errors.address)}
-                helperText={formik.touched.address && formik.errors.address}
+                error={formik.touched.surge_power && Boolean(formik.errors.surge_power)}
+                helperText={formik.touched.surge_power && formik.errors.surge_power}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Warranty Years"
+                name="warranty_years"
+                type="number"
+                value={formik.values.warranty_years}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.warranty_years && Boolean(formik.errors.warranty_years)}
+                helperText={formik.touched.warranty_years && formik.errors.warranty_years}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Input Voltage (V)"
+                name="input_voltage"
+                type="number"
+                value={formik.values.input_voltage}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.input_voltage && Boolean(formik.errors.input_voltage)}
+                helperText={formik.touched.input_voltage && formik.errors.input_voltage}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Output Voltage (V)"
+                name="output_voltage"
+                type="number"
+                value={formik.values.output_voltage}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.output_voltage && Boolean(formik.errors.output_voltage)}
+                helperText={formik.touched.output_voltage && formik.errors.output_voltage}
                 fullWidth
                 required
               />
@@ -141,7 +268,7 @@ const CustomerForm = () => {
             </Grid>
           </Grid>
         </form>
-
+  
         <Dialog
           open={open}
           onClose={handleDialogClose}
@@ -163,7 +290,7 @@ const CustomerForm = () => {
             </Button>
           </DialogActions>
         </Dialog>
-
+  
         <Dialog
           open={alertDialogOpen}
           onClose={handleAlertDialogClose}
@@ -185,6 +312,6 @@ const CustomerForm = () => {
       </Paper>
     </Container>
   );
-};
-
-export default CustomerForm;
+  };
+  
+  export default ProductForm;

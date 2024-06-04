@@ -1,4 +1,3 @@
-// src/components/CustomerDetail.jsx
 import React, { useState, useEffect } from 'react';
 import {
   Typography,
@@ -104,9 +103,18 @@ export default function CustomerDetail() {
               margin="normal"
             />
             <TextField
-              label="Address"
-              name="address"
-              value={customer.address}
+              label="Street Address"
+              name="street_address"
+              value={customer.street_address}
+              onChange={handleChange}
+              disabled={!isEditing}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="City"
+              name="city"
+              value={customer.city}
               onChange={handleChange}
               disabled={!isEditing}
               fullWidth
