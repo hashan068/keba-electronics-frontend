@@ -1,4 +1,3 @@
-// src/components/StatisticsDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { Grid, Paper, Typography, Box, CircularProgress } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -9,10 +8,10 @@ import api from '../../api';
 
 const StatisticsDashboard = () => {
   const [data, setData] = useState([
-    { label: 'Pending Quotations', value: 0, icon: <ReceiptIcon />, color: '#4caf50', percentage: '10%' },
-    { label: 'Pending Sales Orders', value: 0, icon: <ShoppingCartIcon />, color: '#ff9800', percentage: '-5%' },
+    { label: 'Quotations', value: 0, icon: <ReceiptIcon />, color: '#4caf50', percentage: '10%' },
+    { label: 'Sales Orders', value: 0, icon: <ShoppingCartIcon />, color: '#ff9800', percentage: '-5%' },
     { label: 'Customers', value: 0, icon: <PeopleIcon />, color: '#2196f3', percentage: '0%' },
-    { label: 'Products', value: 557, icon: <InventoryIcon />, color: '#9c27b0', percentage: '25%' },
+    { label: 'Products', value: 0, icon: <InventoryIcon />, color: '#9c27b0', percentage: '25%' },
   ]);
 
   const [loading, setLoading] = useState(true);
@@ -21,17 +20,20 @@ const StatisticsDashboard = () => {
     const fetchCustomers = api.get('/api/sales/customers/');
     const fetchOrders = api.get('/api/sales/orders/');
     const fetchQuotations = api.get('/api/sales/quotations/');
+    const fetchProducts = api.get('/api/sales/products/');
 
-    Promise.all([fetchCustomers, fetchOrders])
-      .then(([customersResponse, ordersResponse]) => {
+    Promise.all([fetchCustomers, fetchOrders, fetchQuotations, fetchProducts])
+      .then(([customersResponse, ordersResponse, quotationsResponse, productsResponse]) => {
         const customers = customersResponse.data.length;
-        const pendingQuotations = ordersResponse.data.filter(order => order.status === 'pending').length;
+        const pendingQuotations = quotationsResponse.data.filter(quotation => quotation.status === 'pending').length;
         const pendingOrders = ordersResponse.data.filter(order => order.status === 'pending').length;
+        const products = productsResponse.data.length;
 
         setData(prevData => prevData.map(item => {
           if (item.label === 'Customers') return { ...item, value: customers };
-          if (item.label === 'Pending Sales Orders') return { ...item, value: pendingOrders };
-          if (item.label === 'Pending Quotations') return { ...item, value: pendingQuotations };
+          if (item.label === 'Sales Orders') return { ...item, value: pendingOrders };
+          if (item.label === 'Quotations') return { ...item, value: pendingQuotations };
+          if (item.label === 'Products') return { ...item, value: products };
           return item;
         }));
         setLoading(false);
@@ -52,7 +54,6 @@ const StatisticsDashboard = () => {
         {data.map((item, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <Paper elevation={3} sx={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: item.color }}>
-
               <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                 <Box sx={{ marginRight: '10px' }}>{item.icon}</Box>
                 <Typography variant="h4">{item.value}</Typography>
@@ -62,7 +63,6 @@ const StatisticsDashboard = () => {
               <Typography variant="subtitle2" sx={{ marginTop: '10px', color: item.percentage.includes('-') ? 'red' : 'green' }}>
                 {item.percentage} from last month
               </Typography>
-
             </Paper>
           </Grid>
         ))}
