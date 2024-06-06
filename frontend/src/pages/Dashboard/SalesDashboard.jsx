@@ -8,20 +8,20 @@ import StatisticsDashboard from './StatisticsDashboard';
 export default function SalesDashboard() {
   return (
     <Container maxWidth="lg" sx={{ py: 1 }}>
-      <Typography variant="h4" align="center" gutterBottom>
+      <Typography variant="h5" align="center" gutterBottom>
         Sales Dashboard
       </Typography>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <StatisticsDashboard />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} >
           <SalesChart />
         </Grid>
         <Grid item xs={12} md={6}>
           <TopSellingProducts />
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <TopCustomers />
         </Grid>
       </Grid>

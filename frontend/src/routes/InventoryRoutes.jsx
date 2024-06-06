@@ -8,7 +8,7 @@ import PRForm from '../pages/Inventory/PRForm';
 import POForm from '../pages/Inventory/POForm';
 import POEdit from '../pages/Inventory/POEdit';
 import PRView from '../pages/Inventory/PRView';
-import POView from '../pages/Inventory/POView';
+import POView from '../pages/Inventory/PurchaseOrder/POView';
 import InventoryReport from '../pages/Reports/InventoryReport';
 
 const InventoryRoutes = () => (
