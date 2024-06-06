@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "../src/pages/Dashboard/Dashboard"
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 import LoginLayout from './components/LoginLayout';
 import SalesRoutes from './routes/SalesRoutes';
@@ -51,17 +52,17 @@ function App() {
 }
 
 function ProtectedRoutes() {
-  const userRole = localStorage.getItem('userrole');
-
   return (
-    <Layout userRole={userRole}>
-      <Routes>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="sales/*" element={<SalesRoutes />} />
-        <Route path="mfg/*" element={<ManufacturingRoutes />} />
-        <Route path="inventory/*" element={<InventoryRoutes />} />
-      </Routes>
-    </Layout>
+    <ProtectedRoute>
+      <Layout>
+        <Routes>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="sales/*" element={<SalesRoutes />} />
+          <Route path="mfg/*" element={<ManufacturingRoutes />} />
+          <Route path="inventory/*" element={<InventoryRoutes />} />
+        </Routes>
+      </Layout>
+    </ProtectedRoute>
   );
 }
 
