@@ -120,12 +120,12 @@ export default function PRs() {
   };
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'id', headerName: 'PR ID', width: 100 },
     { field: 'component_id', headerName: 'Component ID', width: 150 },
     { field: 'quantity', headerName: 'Quantity', type: 'number', width: 100 },
     { field: 'status', headerName: 'Status', width: 150, renderCell: renderStatusChip },
     { field: 'priority', headerName: 'Priority', width: 150, renderCell: renderPriorityChip },
-    { field: 'created_at', headerName: 'Created At', width: 200 },
+    { field: 'created_at_date', headerName: 'Created Date', width: 200 },
   ];
 
   const CustomToolbar = () => (
