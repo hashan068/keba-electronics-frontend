@@ -31,8 +31,32 @@ const PRView = () => {
       setStatus(newStatus);
       const response = await api.get(`/api/inventory/purchase-requisitions/${id}/`);
       setPurchaseRequisition(response.data);
+
+      // If the new status is "fulfilled", create a replenish transaction
+      if (newStatus === 'fulfilled') {
+        await createReplenishTransaction(purchaseRequisition);
+      }
     } catch (error) {
       console.error('Error updating status:', error);
+    }
+  };
+
+  const createReplenishTransaction = async (purchaseRequisition) => {
+    try {
+      const userId = localStorage.getItem('user_id');
+  
+      const replenishTransactionData = {
+        purchase_requisition: purchaseRequisition.id,
+        component: purchaseRequisition.component_id,
+        quantity: purchaseRequisition.quantity,
+        user: userId, // Retrieve user ID from local storage
+      };
+  
+      // Make the API call to create the replenish transaction
+      const response = await api.post('/api/inventory/replenish-transactions/', replenishTransactionData);
+      console.log('Replenish transaction created successfully:', response.data);
+    } catch (error) {
+      console.error('Error creating replenish transaction:', error);
     }
   };
 
@@ -90,16 +114,7 @@ const PRView = () => {
             <RejectedLogo />
           </>
         );
-      // case 'cancelled':
-      //   return (
-      //     <Button
-      //       variant="contained"
-      //       color="primary"
-      //       onClick={() => handleStatusUpdate('created')}
-      //     >
-      //       Reopen
-      //     </Button>
-      //   );
+
       case 'fulfilled':
         return <Typography variant="body1">Fulfield</Typography>;
       default:

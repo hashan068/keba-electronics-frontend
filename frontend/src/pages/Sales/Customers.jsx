@@ -9,8 +9,13 @@ import {
   CircularProgress,
   Toolbar,
   TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Pagination,
 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
@@ -20,6 +25,8 @@ import pageAppbarStyles from '../../styles/pageAppbarStyles';
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pageSize, setPageSize] = useState(8);
+  const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState('');
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const navigate = useNavigate();
@@ -60,6 +67,16 @@ export default function Customers() {
       )
     );
     setFilteredCustomers(filteredData);
+    setPage(1); // Reset to the first page whenever the search text changes
+  };
+
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (event) => {
+    setPageSize(event.target.value);
+    setPage(1); // Reset to the first page whenever the page size changes
   };
 
   const columns = [
@@ -105,14 +122,42 @@ export default function Customers() {
               <CircularProgress />
             </Box>
           ) : (
-            <Paper sx={{ p: 2, height: 500 }}>
-              <DataGrid
-                rows={filteredCustomers}
-                columns={columns}
-                onRowClick={handleRowClick}
-                sx={pageAppbarStyles.dataGrid}
-              />
-            </Paper>
+            <>
+              <Paper sx={{ p: 2, height: 500 }}>
+                <DataGrid
+                  rows={filteredCustomers.slice((page - 1) * pageSize, page * pageSize)}
+                  columns={columns}
+                  pageSize={pageSize}
+                  rowCount={filteredCustomers.length}
+                  paginationMode="server"
+                  onRowClick={handleRowClick}
+                  slots={{
+                    toolbar: GridToolbar,
+                  }}
+                  sx={pageAppbarStyles.dataGrid}
+                />
+              </Paper>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel>Rows per page</InputLabel>
+                  <Select
+                    value={pageSize}
+                    onChange={handlePageSizeChange}
+                    label="Rows per page"
+                  >
+                    <MenuItem value={8}>8</MenuItem>
+                    <MenuItem value={16}>16</MenuItem>
+                    <MenuItem value={24}>24</MenuItem>
+                  </Select>
+                </FormControl>
+                <Pagination
+                  count={Math.ceil(filteredCustomers.length / pageSize)}
+                  page={page}
+                  onChange={handlePageChange}
+                  color="primary"
+                />
+              </Box>
+            </>
           )}
         </Grid>
       </Grid>

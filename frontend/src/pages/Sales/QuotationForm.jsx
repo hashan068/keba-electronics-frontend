@@ -74,10 +74,20 @@ const QuotationForm = () => {
   }, []);
 
   // get customer addres from customersData when given customer id
+  // const getCustomerAddress = (customerId) => {
+  //   const customer = customers.find((customer) => customer.id === customerId);
+  //   return customer ? customer.address : '';
+  // };
   const getCustomerAddress = (customerId) => {
     const customer = customers.find((customer) => customer.id === customerId);
-    return customer ? customer.address : '';
+    if (customer) {
+      return `${customer.street_address}, ${customer.city}`;
+    } else {
+      return '';
+    }
   };
+  
+
   const addItemValidationSchema = Yup.object({
     newProduct: Yup.object().nullable().required('Please select a product.'),
     newQuantity: Yup.number()
@@ -88,7 +98,13 @@ const QuotationForm = () => {
   const validationSchema = Yup.object({
     customer: Yup.object().nullable().required('Please select a customer.'),
     date: Yup.string().required('Please enter a date.'),
-    expirationDate: Yup.string().required('Please enter an expiration date.'),
+  
+    expirationDate: Yup.string()
+    .required('Please enter an expiration date.')
+    .test('is-greater', 'Expiration date must be later than the date', function (value) {
+      const { date } = this.parent;
+      return date && value && new Date(value) > new Date(date);
+    }),
     invoicingAndShippingAddress: Yup.string().required('Please enter an invoicing and shipping address.'),
 
     quotationItems: Yup.array()

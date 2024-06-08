@@ -48,7 +48,7 @@ const CustomerForm = () => {
           setAlertDialogOpen(true);
           setTimeout(() => {
             setAlertDialogOpen(false);
-            navigate('/sales/product');  // Redirect to product page after 3 seconds
+            navigate('/sales/customer');  // Redirect to product page after 3 seconds
           }, 3000);
         } else {
           setAlert({ severity: 'error', message: `Error creating customer: ${JSON.stringify(responseData)}` });

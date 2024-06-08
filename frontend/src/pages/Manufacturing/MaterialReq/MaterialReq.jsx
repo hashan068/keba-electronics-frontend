@@ -10,6 +10,11 @@ import {
   Toolbar,
   TextField,
   Chip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Pagination,
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
@@ -43,6 +48,9 @@ const MaterialReq = () => {
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filteredMaterialReqs, setFilteredMaterialReqs] = useState([]);
+  const [pageSize, setPageSize] = useState(8);
+  const [page, setPage] = useState(1);
+
   const navigate = useNavigate();
 
   const fetchMaterialReqs = async () => {
@@ -79,6 +87,16 @@ const MaterialReq = () => {
       )
     );
     setFilteredMaterialReqs(filteredData);
+    setPage(1); // Reset to the first page whenever the search text changes
+  };
+
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (event) => {
+    setPageSize(event.target.value);
+    setPage(1); // Reset to the first page whenever the page size changes
   };
 
   const columns = [
@@ -90,18 +108,22 @@ const MaterialReq = () => {
       renderCell: renderStatusChip
     },
     {
-      field: 'items',
-      headerName: 'Items',
+      field: 'created_at_date',
+      headerName: 'Created Date',
       width: 300,
-      renderCell: (params) => (
-        <ul>
-          {params.value.map((item) => (
-            <li key={item.id}>
-              {item.component} ({item.quantity})
-            </li>
-          ))}
-        </ul>
-      ),
+
+    },
+    {
+      field: 'bom',
+      headerName: 'BOM ID',
+      width: 300,
+
+    },
+    {
+      field: 'manufacturing_order',
+      headerName: 'MO ID',
+      width: 300,
+
     },
   ];
 
@@ -140,28 +162,53 @@ const MaterialReq = () => {
               <CircularProgress />
             </Box>
           ) : (
-            <Paper sx={{ p: 2, height: 500 }}>
-              <DataGrid
-                rows={filteredMaterialReqs}
-                columns={columns}
-                onRowClick={handleRowClick}
-                sx={{
-                  '& .MuiDataGrid-cell:hover': {
-                    backgroundColor: '#f5f5f5',
-                  },
-                  '& .MuiDataGrid-iconSeparator': {
-                    display: 'none',
-                  },
-                  '& .MuiDataGrid-columnHeaders': {
-                    backgroundColor: '#fafafa',
-                    borderBottom: '1px solid #e0e0e0',
-                  },
-                  '& .MuiDataGrid-footerContainer': {
-                    borderTop: '1px solid #e0e0e0',
-                  },
-                }}
-              />
-            </Paper>
+            <>
+              <Paper sx={{ p: 2, height: 500 }}>
+                <DataGrid
+                  rows={filteredMaterialReqs.slice((page - 1) * pageSize, page * pageSize)}
+                  columns={columns}
+                  pageSize={pageSize}
+                  rowCount={filteredMaterialReqs.length}
+                  paginationMode="server"
+                  onRowClick={handleRowClick}
+                  sx={{
+                    '& .MuiDataGrid-cell:hover': {
+                      backgroundColor: '#f5f5f5',
+                    },
+                    '& .MuiDataGrid-iconSeparator': {
+                      display: 'none',
+                    },
+                    '& .MuiDataGrid-columnHeaders': {
+                      backgroundColor: '#fafafa',
+                      borderBottom: '1px solid #e0e0e0',
+                    },
+                    '& .MuiDataGrid-footerContainer': {
+                      borderTop: '1px solid #e0e0e0',
+                    },
+                  }}
+                />
+              </Paper>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel>Rows per page</InputLabel>
+                  <Select
+                    value={pageSize}
+                    onChange={handlePageSizeChange}
+                    label="Rows per page"
+                  >
+                    <MenuItem value={8}>8</MenuItem>
+                    <MenuItem value={16}>16</MenuItem>
+                    <MenuItem value={24}>24</MenuItem>
+                  </Select>
+                </FormControl>
+                <Pagination
+                  count={Math.ceil(filteredMaterialReqs.length / pageSize)}
+                  page={page}
+                  onChange={handlePageChange}
+                  color="primary"
+                />
+              </Box>
+            </>
           )}
         </Grid>
       </Grid>

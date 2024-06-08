@@ -18,18 +18,18 @@ const Layout = ({ children }) => {
 
   const renderLayout = () => {
     switch (userRole) {
-      case 'Salesperson':
-        return (
-          <SalespersonLayout>
-            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-              <ResponsiveAppBar />
-              <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
-                {children}
-              </Box>
-            </Box>
-          </SalespersonLayout>
-        );
-      // Add other user roles and their respective layouts here
+      // case 'Salesperson':
+      //   return (
+      //     <SalespersonLayout>
+      //       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      //         <ResponsiveAppBar />
+      //         <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
+      //           {children}
+      //         </Box>
+      //       </Box>
+      //     </SalespersonLayout>
+      //   );
+      // // Add other user roles and their respective layouts here
       default:
         return (
           <Box sx={{ display: 'flex', height: '100vh' }}>

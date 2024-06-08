@@ -4,15 +4,15 @@ import { Link } from 'react-router-dom';
 import {
   Typography, Container, Grid, Card, CardHeader, CardContent, Button,
   AppBar, Toolbar, Box, Stepper, Step, StepLabel, Skeleton, Chip, Dialog,
-  DialogTitle, DialogContent, DialogActions, TextField, Alert, TableContainer,
-  Table, TableHead, TableRow, TableCell, TableBody, Paper
+  DialogTitle, DialogContent, DialogActions, TextField, Alert
 } from '@mui/material';
 import {
   Assignment, Edit, Delete, CheckCircle, Cancel, ArrowBack, Warning, Business,
   PriorityHigh, Receipt, LocalShipping, Send
 } from '@mui/icons-material';
-
-import api from '../../api';
+import api from '../../../api';
+import InvoiceTable from './InvoiceTable';
+import { createRow } from './utils';
 
 const STATUS_CHOICES = [
   { value: 'draft', label: 'Draft', icon: <Edit /> },
@@ -20,31 +20,11 @@ const STATUS_CHOICES = [
   { value: 'approved', label: 'Approved', icon: <CheckCircle /> },
   { value: 'received', label: 'Received', icon: <LocalShipping /> },
   { value: 'invoiced', label: 'Invoiced', icon: <Receipt /> },
-
 ];
-
-function ccyFormat(num) {
-  return `${num.toFixed(2)}`;
-}
-
-function priceRow(qty, unit) {
-  return qty * unit;
-}
-
-function createRow(desc, qty, unit) {
-  const price = priceRow(qty, unit);
-  return { desc, qty, unit, price };
-}
-
-function subtotal(items) {
-  return items.map(({ price }) => price).reduce((sum, i) => sum + i, 0);
-}
 
 const rows = [
   createRow('Paperclips (Box)', 100, 1.15),
 ];
-
-const invoiceSubtotal = subtotal(rows);
 
 const getStatusStep = (status) => {
   const index = STATUS_CHOICES.findIndex((choice) => choice.value === status);
@@ -177,10 +157,23 @@ const POView = () => {
     }
   };
 
-  const handlePriceChange = (e) => {
-    setEditedPrice(e.target.value);
+  const handlePriceChange = (newPrice) => {
+    setEditedPrice(newPrice);
+    handlePriceUpdate(newPrice);
   };
 
+  const handlePriceUpdate = async (newPrice) => {
+    try {
+      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, {
+        price_per_unit: newPrice,
+        total_price: newPrice * purchaseOrder.purchase_requisition?.quantity, // Update total_price based on the new price and quantity
+      });
+      setPurchaseOrder(response.data);
+    } catch (error) {
+      console.error('Error updating purchase order price:', error);
+      setError('Failed to update the purchase order price. Please try again.');
+    }
+  };
   return (
     <Container maxWidth="lg" sx={{ py: 4, px: 2, bgcolor: '#f5f5f5' }}>
       <AppBar position="static" color="default" sx={{ mb: 4 }}>
@@ -211,13 +204,13 @@ const POView = () => {
           )}
         </Toolbar>
       </AppBar>
-
+  
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
-
+  
       {isLoading ? (
         <Grid container spacing={2}>
           <Grid item xs={12}><Skeleton variant="rectangular" height={60} /></Grid>
@@ -236,7 +229,7 @@ const POView = () => {
               </Stepper>
             </Box>
           </Grid>
-
+  
           <Grid item xs={12} md={12}>
             <Card sx={{ boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
               <CardHeader
@@ -267,49 +260,13 @@ const POView = () => {
                       </Grid>
                     </Box>
                   </Grid>
-
-                  <TableContainer component={Paper}>
-                    <Table sx={{ minWidth: 700 }} aria-label="spanning table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell align="center" colSpan={3}>
-                            Details
-                          </TableCell>
-                          <TableCell align="right">Price</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Desc</TableCell>
-                          <TableCell align="right">Qty.</TableCell>
-                          <TableCell align="right">Unit</TableCell>
-                          <TableCell align="right">Sum</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {rows.map((row) => (
-                          <TableRow key={row.desc}>
-                            <TableCell>{row.desc}</TableCell>
-                            <TableCell align="right">{row.qty}</TableCell>
-                            <TableCell align="right">{row.unit}</TableCell>
-                            <TableCell align="right">
-                              <TextField
-                                value={editedPrice}
-                                onChange={handlePriceChange}
-                                type="number"
-                                inputProps={{ min: 0, step: 0.01 }}
-                                variant="outlined"
-                                size="small"
-                              />
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        <TableRow>
-                          <TableCell colSpan={3}>Total</TableCell>
-                          <TableCell align="right">{ccyFormat(invoiceSubtotal)}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-
+  
+                  <InvoiceTable
+                    rows={rows}
+                    editable={purchaseOrder.status === 'open_order'}
+                    onPriceChange={handlePriceChange}
+                  />
+  
                   <Grid item xs={12}>
                     <Typography><strong>Notes:</strong> </Typography>
                     <Box sx={{ p: 1, bgcolor: '#f0f0f0', borderRadius: 1 }}>{purchaseOrder.notes || 'N/A'}</Box>
@@ -322,7 +279,7 @@ const POView = () => {
       ) : (
         <Typography>No purchase order found or an error occurred.</Typography>
       )}
-
+  
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Reject Purchase Order</DialogTitle>
         <DialogContent>
@@ -345,6 +302,5 @@ const POView = () => {
       </Dialog>
     </Container>
   );
-};
-
+}
 export default POView;

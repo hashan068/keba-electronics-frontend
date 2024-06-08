@@ -23,7 +23,7 @@ import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded';
 
 import { useNavigate } from 'react-router-dom';
 
-const drawerWidth = 280;
+const drawerWidth = 260;
 
 export default function PermanentDrawerLeft() {
   const navigate = useNavigate();
