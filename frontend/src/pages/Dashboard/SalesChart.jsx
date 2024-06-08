@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 const SalesChart = () => {
   const [salesData, setSalesData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filterOption, setFilterOption] = useState('all');
+  const [filterOption, setFilterOption] = useState('last30Days');
 
   const formatDate = (date) => dayjs(date).format('MM-DD');
 
@@ -25,7 +25,7 @@ const SalesChart = () => {
           end: today.format('YYYY-MM-DD'),
         };
       default:
-        return undefined; // Return undefined for the 'all' case
+        return undefined;
     }
   };
 
@@ -35,20 +35,19 @@ const SalesChart = () => {
       const dateRange = getDateRange(filterOption);
       const params = dateRange
         ? {
-            params: {
-              start_date: dateRange.start,
-              end_date: dateRange.end,
-            },
+            start_date: dateRange.start,
+            end_date: dateRange.end,
           }
         : {};
 
-      const res = await api.get('/api/sales/orders/', params);
+      const res = await api.get('/api/sales/orders/', { params });
       const transformedData = res.data.flatMap((order) =>
         order.order_items.map((item) => ({
           date: formatDate(dayjs(order.created_at_date).toDate()),
           sales: parseFloat(item.price) * item.quantity,
         }))
       );
+
       // Group data by date and sum sales for each day
       const groupedData = transformedData.reduce((acc, current) => {
         const existingDate = acc.find((item) => item.date === current.date);
@@ -59,6 +58,7 @@ const SalesChart = () => {
         }
         return acc;
       }, []);
+
       // Sort data by date
       const sortedData = groupedData.sort((a, b) => dayjs(a.date, 'MM-DD').diff(dayjs(b.date, 'MM-DD')));
       setSalesData(sortedData);
@@ -88,9 +88,8 @@ const SalesChart = () => {
             onChange={(e) => setFilterOption(e.target.value)}
             label="Filter"
           >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="last7Days">Last 7 Days</MenuItem>
             <MenuItem value="last30Days">Last 30 Days</MenuItem>
+            <MenuItem value="last7Days">Last 7 Days</MenuItem>
           </Select>
         </FormControl>
       </Box>
