@@ -20,13 +20,65 @@ import WidgetsIcon from '@mui/icons-material/Widgets';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded';
-
+import logo from '../assets/logo.png';
+import '../styles/drawer.css';
 import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 260;
 
+// Salesperson, Production Manager, General Manager, Inventory Manager, Purchasing Manager, Admin
+
+const menuItems = [
+  { text: 'Dashboard', icon: <DashboardIcon />, path: '/', roles: ['Admin', 'Production Manager', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
+  {
+    section: 'Sales',
+    items: [
+      { text: 'Quotations', icon: <DescriptionIcon />, path: '/sales/quotations', roles: ['Admin', 'Salesperson', 'General Manager'] },
+      { text: 'Products', icon: <InventoryIcon />, path: '/sales/product', roles: ['Admin', 'Salesperson', 'General Manager'] },
+      { text: 'Customers', icon: <InventoryIcon />, path: '/sales/customer', roles: ['Admin', 'Salesperson', 'General Manager'] },
+      { text: 'Sales Orders', icon: <ShoppingCartIcon />, path: '/sales/salesorder', roles: ['Admin', 'Salesperson', 'General Manager','Production Manager'] },
+    ],
+  },
+  {
+    section: 'Manufacturing',
+    items: [
+      { text: 'Manufacturing Orders', icon: <BuildIcon />, path: '/mfg/mfgorder', roles: ['Admin', 'General Manager', 'Salesperson','Production Manager'] },
+      { text: 'BOM', icon: <AccountTreeIcon />, path: '/mfg/bom', roles: ['Admin', 'General Manager', 'mfg','Production Manager'] },
+    ],
+  },
+  {
+    section: 'Inventory',
+    items: [
+      { text: 'Material Requisitions', icon: <AssignmentIcon />, path: '/mfg/materialreq', roles: ['Admin', 'General Manager', 'Inventory Manager','Production Manager'] },
+      { text: 'Components', icon: <WidgetsIcon />, path: '/inventory/component', roles: ['Admin', 'Inventory Manager', 'Purchasing Manager'] },
+      { text: 'Purchase Requisitions', icon: <LocalShippingIcon />, path: '/inventory/purchase-req', roles: ['Admin', 'General Manager', 'inventory', 'Purchasing Manager'] },
+      { text: 'Purchase Orders', icon: <ShoppingCartIcon />, path: '/inventory/po', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
+    ],
+  },
+  {
+    section: 'Notifications',
+    items: [
+      { text: 'Notifications', icon: <AssessmentRoundedIcon />, path: '/sales/sales-reports', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
+    ],
+  },
+  {
+    section: 'Reports',
+    items: [
+      { text: 'Sales Report', icon: <AssessmentRoundedIcon />, path: '/sales/sales-reports', roles: ['Admin', 'General Manager', 'sales'] },
+      { text: 'Manufacturing Report', icon: <AssessmentRoundedIcon />, path: '/inventory/mfg-reports', roles: ['Admin', 'General Manager','Production Manager'] },
+      { text: 'Inventory Report', icon: <AssessmentRoundedIcon />, path: '/inventory/inventory-reports', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
+    ],
+  },
+];
+
 export default function PermanentDrawerLeft() {
   const navigate = useNavigate();
+  const [role, setRole] = React.useState(null);
+
+  React.useEffect(() => {
+    const userRole = localStorage.getItem('userrole');
+    setRole(userRole);
+  }, []);
 
   const handleNavigate = (path) => {
     navigate(path);
@@ -49,292 +101,65 @@ export default function PermanentDrawerLeft() {
         variant="permanent"
         anchor="left"
       >
-        <Toolbar />
+        {/* Logo Container */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', py: 2, px: 3}}>
+          <img src={logo} alt="Logo" style={{ maxHeight: '50px', maxWidth: '100%' }} />
+        </Box>
         <Divider sx={{ bgcolor: '#333333' }} />
         <List>
-          <ListItem disablePadding onClick={() => handleNavigate('/')}>
-            <ListItemButton
-              sx={{
-                minHeight: '50px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <DashboardIcon />
-              </ListItemIcon>
-              <ListItemText primary="Dashboard" />
-            </ListItemButton>
-          </ListItem>
-          <Toolbar>
-            <Typography variant="h8" noWrap component="div">
-              Sales
-            </Typography>
-          </Toolbar>
-          <Divider sx={{ bgcolor: '#333333' }} />
-
-          <ListItem disablePadding onClick={() => handleNavigate('/sales/quotations')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <DescriptionIcon />
-              </ListItemIcon>
-              <ListItemText primary="Quotations" />
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding onClick={() => handleNavigate('/sales/product')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <InventoryIcon />
-              </ListItemIcon>
-              <ListItemText primary="Products" />
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding onClick={() => handleNavigate('/sales/customer')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <InventoryIcon />
-              </ListItemIcon>
-              <ListItemText primary="Customers" />
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding onClick={() => handleNavigate('/sales/salesorder')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <ShoppingCartIcon />
-              </ListItemIcon>
-              <ListItemText primary="Sales Orders" />
-            </ListItemButton>
-          </ListItem>
-          <Toolbar>
-            <Typography variant="h8" noWrap component="div">
-              Manufacturing
-            </Typography>
-          </Toolbar>
-          <Divider sx={{ bgcolor: '#333333' }} />
-
-          <ListItem disablePadding onClick={() => handleNavigate('/mfg/mfgorder')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <BuildIcon />
-              </ListItemIcon>
-              <ListItemText primary="Manufacturing Orders" />
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding onClick={() => handleNavigate('/mfg/bom')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <AccountTreeIcon />
-              </ListItemIcon>
-              <ListItemText primary="BOM" />
-            </ListItemButton>
-          </ListItem>
-          <Toolbar>
-            <Typography variant="h8" noWrap component="div">
-              Inventory
-            </Typography>
-          </Toolbar>
-          <Divider sx={{ bgcolor: '#333333' }} />
-          <ListItem disablePadding onClick={() => handleNavigate('/mfg/materialreq')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <AssignmentIcon />
-              </ListItemIcon>
-              <ListItemText primary="Material Requisitions" />
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding onClick={() => handleNavigate('/inventory/component')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <WidgetsIcon />
-              </ListItemIcon>
-              <ListItemText primary="Components" />
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding onClick={() => handleNavigate('/inventory/purchase-req')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <LocalShippingIcon />
-              </ListItemIcon>
-              <ListItemText primary="Purchase Requisitions" />
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding onClick={() => handleNavigate('/inventory/po')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <ShoppingCartIcon />
-              </ListItemIcon>
-              <ListItemText primary="Purchase Orders" />
-            </ListItemButton>
-          </ListItem>
-          <Toolbar>
-            <Typography variant="h8" noWrap component="div">
-              Notifications
-            </Typography>
-          </Toolbar>
-          <Divider sx={{ bgcolor: '#333333' }} />
-
-          <ListItem disablePadding onClick={() => handleNavigate('/sales/sales-reports')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <AssessmentRoundedIcon />
-              </ListItemIcon>
-              <ListItemText primary="Notifications" />
-            </ListItemButton>
-
-          </ListItem>
-          <Toolbar>
-            <Typography variant="h8" noWrap component="div">
-              Reports
-            </Typography>
-          </Toolbar>
-          <Divider sx={{ bgcolor: '#333333' }} />
-
-          <ListItem disablePadding onClick={() => handleNavigate('/sales/sales-reports')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <AssessmentRoundedIcon />
-              </ListItemIcon>
-              <ListItemText primary="Sales Report" />
-            </ListItemButton>
-
-          </ListItem>
-          <ListItem disablePadding onClick={() => handleNavigate('/inventory/mfg-reports')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <AssessmentRoundedIcon />
-              </ListItemIcon>
-              <ListItemText primary="Manufacturing Report" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding onClick={() => handleNavigate('/inventory/inventory-reports')}>
-            <ListItemButton
-              sx={{
-                minHeight: '30px',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: '#ffffff' }}>
-                <AssessmentRoundedIcon />
-              </ListItemIcon>
-              <ListItemText primary="Inventory Report" />
-            </ListItemButton>
-          </ListItem>
+          {menuItems.map((item, index) => {
+            if (item.section) {
+              const visibleItems = item.items.filter(subItem => subItem.roles.includes(role));
+              if (visibleItems.length > 0) {
+                return (
+                  <React.Fragment key={index}>
+                    <Toolbar>
+                      <Typography variant="h8" noWrap component="div">
+                        {item.section}
+                      </Typography>
+                    </Toolbar>
+                    <Divider sx={{ bgcolor: '#333333' }} />
+                    {visibleItems.map((subItem, subIndex) => (
+                      <ListItem key={subIndex} disablePadding onClick={() => handleNavigate(subItem.path)}>
+                        <ListItemButton
+                          sx={{
+                            minHeight: '30px',
+                            justifyContent: 'center',
+                            '&:hover': {
+                              backgroundColor: '#333333',
+                            },
+                          }}
+                        >
+                          <ListItemIcon sx={{ color: '#ffffff' }}>{subItem.icon}</ListItemIcon>
+                          <ListItemText primary={subItem.text} />
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </React.Fragment>
+                );
+              }
+              return null;
+            }
+            if (item.roles.includes(role)) {
+              return (
+                <ListItem key={index} disablePadding onClick={() => handleNavigate(item.path)}>
+                  <ListItemButton
+                    sx={{
+                      minHeight: '50px',
+                      justifyContent: 'center',
+                      '&:hover': {
+                        backgroundColor: '#333333',
+                      },
+                    }}
+                  >
+                    <ListItemIcon sx={{ color: '#ffffff' }}>{item.icon}</ListItemIcon>
+                    <ListItemText primary={item.text} />
+                  </ListItemButton>
+                </ListItem>
+              );
+            }
+            return null;
+          })}
         </List>
         <Divider sx={{ bgcolor: '#333333' }} />
       </Drawer>

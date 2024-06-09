@@ -24,7 +24,7 @@ import {
   DialogContentText,
   DialogActions,
 } from '@mui/material';
-import { Assignment, Edit, CheckCircle, Cancel, ArrowBack, Warning, Business, PriorityHigh, Receipt, LocalShipping } from '@mui/icons-material';
+import { Assignment, Edit, CheckCircle, Cancel, ArrowBack, PriorityHigh, Receipt, LocalShipping } from '@mui/icons-material';
 
 const theme = createTheme({
   palette: {
@@ -57,6 +57,14 @@ const POForm = () => {
   const [purchaseOrder, setPurchaseOrder] = useState(null);
   const [suppliers, setSuppliers] = useState([]);
   const [requisitions, setRequisitions] = useState([]);
+  const [initialValues, setInitialValues] = useState({
+    purchaseRequisitionId: '',
+    supplierId: '',
+    status: 'draft',
+    notes: '',
+    price_per_unit: '',
+    total_price: '',
+  });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, title: '', content: '', onConfirm: null });
 
   useEffect(() => {
@@ -72,6 +80,14 @@ const POForm = () => {
         if (id) {
           const orderRes = await api.get(`/api/inventory/purchase-orders/${id}/`);
           setPurchaseOrder(orderRes.data);
+          setInitialValues({
+            purchaseRequisitionId: orderRes.data.purchase_requisition_id,
+            supplierId: orderRes.data.supplier_id,
+            status: orderRes.data.status,
+            notes: orderRes.data.notes,
+            price_per_unit: orderRes.data.price_per_unit,
+            total_price: orderRes.data.total_price,
+          });
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -79,15 +95,6 @@ const POForm = () => {
     };
     fetchData();
   }, [id]);
-
-  const initialValues = {
-    purchaseRequisitionId: purchaseOrder?.purchase_requisition_id || '1',
-    supplierId: purchaseOrder?.supplier_id || '',
-    status: purchaseOrder?.status || 'draft',
-    notes: purchaseOrder?.notes || '',
-    price_per_unit: purchaseOrder?.price_per_unit || '',
-    total_price: purchaseOrder?.total_price || '',
-  };
 
   const validationSchema = Yup.object({
     purchaseRequisitionId: Yup.number().required('Purchase Requisition is required'),

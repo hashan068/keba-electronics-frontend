@@ -94,7 +94,7 @@ export default function Quotations() {
       field: 'date',
       headerName: 'Date',
       type: 'date',
-      width: 150,
+      width: 180,
       valueFormatter: (params) =>
         params.value && format(new Date(params.value), 'yyyy/MM/dd'),
     },
@@ -102,17 +102,19 @@ export default function Quotations() {
       field: 'expiration_date',
       headerName: 'Expiration Date',
       type: 'date',
-      width: 150,
+      width: 180,
       valueFormatter: (params) =>
         params.value && format(new Date(params.value), 'yyyy/MM/dd'),
     },
-    { field: 'total_amount', headerName: 'Total Amount', type: 'number', width: 150 },
+    
     {
       field: 'status',
       headerName: 'Status',
       width: 150,
       renderCell: renderStatusChip
     },
+
+    { field: 'total_amount', headerName: 'Total Amount', type: 'number', width: 150 },
   ];
 
   return (

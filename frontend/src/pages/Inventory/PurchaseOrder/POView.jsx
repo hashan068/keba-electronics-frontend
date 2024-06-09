@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
 import {
   Typography, Container, Grid, Card, CardHeader, CardContent, Button,
   AppBar, Toolbar, Box, Stepper, Step, StepLabel, Skeleton, Chip, Dialog,
-  DialogTitle, DialogContent, DialogActions, TextField, Alert
+  DialogTitle, DialogContent, DialogActions, TextField, Alert, TableContainer,
+  Table, TableHead, TableRow, TableCell, TableBody, Paper
 } from '@mui/material';
 import {
   Assignment, Edit, Delete, CheckCircle, Cancel, ArrowBack, Warning, Business,
   PriorityHigh, Receipt, LocalShipping, Send
 } from '@mui/icons-material';
 import api from '../../../api';
-import InvoiceTable from './InvoiceTable';
-import { createRow } from './utils';
 
 const STATUS_CHOICES = [
   { value: 'draft', label: 'Draft', icon: <Edit /> },
@@ -20,10 +18,6 @@ const STATUS_CHOICES = [
   { value: 'approved', label: 'Approved', icon: <CheckCircle /> },
   { value: 'received', label: 'Received', icon: <LocalShipping /> },
   { value: 'invoiced', label: 'Invoiced', icon: <Receipt /> },
-];
-
-const rows = [
-  createRow('Paperclips (Box)', 100, 1.15),
 ];
 
 const getStatusStep = (status) => {
@@ -43,22 +37,95 @@ const getStatusChip = (status) => {
   );
 };
 
+// Utils
+export function ccyFormat(num) {
+  return `${num.toFixed(2)}`;
+}
+
+export function priceRow(qty, unit) {
+  return qty * unit;
+}
+
+export function createRow(desc, qty, unit) {
+  const price = priceRow(qty, unit);
+  return { desc, qty, unit, price };
+}
+
+// InvoiceTable component
+const InvoiceTable = ({ rows, editable, onPriceChange }) => {
+  const [invoiceRows, setInvoiceRows] = useState(rows);
+  useEffect(() => {
+    setInvoiceRows(rows);
+  }, [rows]);
+  const handlePriceChange = (e, desc) => {
+    const newPrice = parseFloat(e.target.value);
+    const updatedRows = invoiceRows.map((row) =>
+      row.desc === desc ? { ...row, price: newPrice } : row
+    );
+    setInvoiceRows(updatedRows);
+    onPriceChange(updatedRows);
+  };
+  const invoiceSubtotal = invoiceRows.map(({ price }) => price).reduce((sum, i) => sum + i, 0);
+  return (
+    <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 700 }} aria-label="spanning table">
+        <TableHead>
+          <TableRow>
+            <TableCell align="center" colSpan={3}>
+              Details
+            </TableCell>
+            <TableCell align="right">Price</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Desc</TableCell>
+            <TableCell align="right">Qty.</TableCell>
+            <TableCell align="right">Sum</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {invoiceRows.map((row) => (
+            <TableRow key={row.desc}>
+              <TableCell>{row.desc}</TableCell>
+              <TableCell align="right">{row.qty}</TableCell>
+              <TableCell align="right">
+                {editable ? (
+                  <TextField
+                    value={row.price}
+                    onChange={(e) => handlePriceChange(e, row.desc)}
+                    type="number"
+                    inputProps={{ min: 0, step: 0.01 }}
+                    variant="outlined"
+                    size="small"
+                  />
+                ) : (
+                  ccyFormat(row.price)
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+          <TableRow>
+            <TableCell colSpan={3}>Total</TableCell>
+            <TableCell align="right">{ccyFormat(invoiceSubtotal)}</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
+
 const POView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [purchaseOrder, setPurchaseOrder] = useState({
     price_per_unit: '',
     total_price: '',
+    purchase_requisition: { quantity: 1 }
   });
-  const [editedValues, setEditedValues] = useState({
-    price_per_unit: '',
-    total_price: '',
-  });
+  const [rows, setRows] = useState([createRow('Paperclips (Box)', 100, 1.15)]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
-  const [editedPrice, setEditedPrice] = useState(rows[0].price);
 
   useEffect(() => {
     const fetchPurchaseOrder = async () => {
@@ -66,11 +133,8 @@ const POView = () => {
       setError(null);
       try {
         const response = await api.get(`/api/inventory/purchase-orders/${id}/`);
-        setPurchaseOrder({
-          ...response.data,
-          price_per_unit: response.data.price_per_unit || '',
-          total_price: response.data.total_price || '',
-        });
+        setPurchaseOrder(response.data);
+        setRows([createRow('Paperclips (Box)', response.data.purchase_requisition.quantity, response.data.price_per_unit)]);
       } catch (error) {
         console.error('Error fetching purchase order:', error);
         setError(error.message || 'An error occurred while fetching the purchase order.');
@@ -80,6 +144,26 @@ const POView = () => {
     };
     fetchPurchaseOrder();
   }, [id]);
+
+  const handleSend = async () => {
+    try {
+      const updatedValues = {
+        ...purchaseOrder,
+        price_per_unit: editedValues.price_per_unit || purchaseOrder.price_per_unit,
+        total_price: editedValues.total_price || purchaseOrder.total_price,
+        status: 'open_order',
+      };
+      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, updatedValues);
+      setPurchaseOrder(response.data);
+      setEditedValues({
+        price_per_unit: '',
+        total_price: '',
+      });
+    } catch (error) {
+      console.error('Error sending purchase order:', error);
+      setError('Failed to send the purchase order. Please try again.');
+    }
+  };
 
   const handleApprove = async () => {
     try {
@@ -116,57 +200,18 @@ const POView = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    setEditedValues({
-      ...editedValues,
-      [e.target.name]: e.target.value,
-    });
+  const handlePriceChange = (updatedRows) => {
+    const newPrice = updatedRows[0].price;
+    const newTotalPrice = newPrice * purchaseOrder.purchase_requisition.quantity;
+    setRows(updatedRows);
+    handlePriceUpdate(newPrice, newTotalPrice);
   };
 
-  const handleSend = async () => {
-    try {
-      const updatedValues = {
-        ...purchaseOrder,
-        price_per_unit: editedValues.price_per_unit || purchaseOrder.price_per_unit,
-        total_price: editedValues.total_price || purchaseOrder.total_price,
-        status: 'open_order',
-      };
-      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, updatedValues);
-      setPurchaseOrder(response.data);
-      setEditedValues({
-        price_per_unit: '',
-        total_price: '',
-      });
-    } catch (error) {
-      console.error('Error sending purchase order:', error);
-      setError('Failed to send the purchase order. Please try again.');
-    }
-  };
-
-  const handleOrderReceived = async () => {
-    try {
-      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, {
-        status: 'received',
-        price_per_unit: purchaseOrder.price_per_unit,
-        total_price: purchaseOrder.total_price,
-      });
-      setPurchaseOrder(response.data);
-    } catch (error) {
-      console.error('Error updating purchase order status:', error);
-      setError('Failed to update purchase order status. Please try again.');
-    }
-  };
-
-  const handlePriceChange = (newPrice) => {
-    setEditedPrice(newPrice);
-    handlePriceUpdate(newPrice);
-  };
-
-  const handlePriceUpdate = async (newPrice) => {
+  const handlePriceUpdate = async (newPrice, newTotalPrice) => {
     try {
       const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, {
         price_per_unit: newPrice,
-        total_price: newPrice * purchaseOrder.purchase_requisition?.quantity, // Update total_price based on the new price and quantity
+        total_price: newTotalPrice,
       });
       setPurchaseOrder(response.data);
     } catch (error) {
@@ -174,6 +219,7 @@ const POView = () => {
       setError('Failed to update the purchase order price. Please try again.');
     }
   };
+
   return (
     <Container maxWidth="lg" sx={{ py: 4, px: 2, bgcolor: '#f5f5f5' }}>
       <AppBar position="static" color="default" sx={{ mb: 4 }}>
@@ -239,10 +285,9 @@ const POView = () => {
               <CardContent>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
-                    <Typography variant="h6" gutterBottom>Purchase Requisition</Typography>
                     <Box sx={{ p: 2, bgcolor: '#f0f0f0', borderRadius: 1 }}>
                       <Grid container spacing={2}>
-                        <Grid item xs={6}><Typography><strong>ID:</strong> {purchaseOrder.purchase_requisition?.id || 'N/A'}</Typography></Grid>
+                        <Grid item xs={6}><Typography><strong>Purchase Requisition ID:</strong> {purchaseOrder.purchase_requisition?.id || 'N/A'}</Typography></Grid>
                         <Grid item xs={6}><Typography><strong>Component ID:</strong> {purchaseOrder.purchase_requisition?.component_id || 'N/A'}</Typography></Grid>
                         <Grid item xs={6}><Typography><strong>Quantity:</strong> {purchaseOrder.purchase_requisition?.quantity || 'N/A'}</Typography></Grid>
                         <Grid item xs={6}>
@@ -254,13 +299,13 @@ const POView = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={6}><Typography><strong>Supplier ID:</strong> {purchaseOrder.supplier_id || 'N/A'}</Typography></Grid>
+                        
                         <Grid item xs={6}><Typography><strong>Created By:</strong> User {purchaseOrder.creator_id || 'N/A'}</Typography></Grid>
                         <Grid item xs={6}><Typography><strong>Updated At:</strong> {purchaseOrder.updated_at ? new Date(purchaseOrder.updated_at).toLocaleString() : 'N/A'}</Typography></Grid>
                       </Grid>
                     </Box>
                   </Grid>
-  
+                  <Grid item xs={6}><Typography><strong>Supplier ID:</strong> {purchaseOrder.supplier_id || 'N/A'}</Typography></Grid>
                   <InvoiceTable
                     rows={rows}
                     editable={purchaseOrder.status === 'open_order'}
@@ -302,5 +347,6 @@ const POView = () => {
       </Dialog>
     </Container>
   );
-}
+};
+
 export default POView;
