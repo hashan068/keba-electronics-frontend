@@ -64,8 +64,8 @@ const menuItems = [
   {
     section: 'Reports',
     items: [
-      { text: 'Sales Report', icon: <AssessmentRoundedIcon />, path: '/sales/sales-reports', roles: ['Admin', 'General Manager', 'sales'] },
-      { text: 'Manufacturing Report', icon: <AssessmentRoundedIcon />, path: '/inventory/mfg-reports', roles: ['Admin', 'General Manager','Production Manager'] },
+      { text: 'Sales Report', icon: <AssessmentRoundedIcon />, path: '/sales/sales-reports', roles: ['Admin', 'General Manager', 'Salesperson'] },
+      { text: 'Manufacturing Report', icon: <AssessmentRoundedIcon />, path: '/mfg/mfg-reports', roles: ['Admin', 'General Manager','Production Manager'] },
       { text: 'Inventory Report', icon: <AssessmentRoundedIcon />, path: '/inventory/inventory-reports', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
     ],
   },

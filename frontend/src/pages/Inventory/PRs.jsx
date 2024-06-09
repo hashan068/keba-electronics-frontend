@@ -25,7 +25,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import api from '../../api';
 
 const STATUS_CHOICES = {
-  pending: { label: 'Pending', color: 'warning' },
+  created: { label: 'Created', color: 'warning' },
   approved: { label: 'Approved', color: 'success' },
   rejected: { label: 'Rejected', color: 'error' },
   cancelled: { label: 'Cancelled', color: 'default' },
@@ -121,7 +121,8 @@ export default function PRs() {
 
   const columns = [
     { field: 'id', headerName: 'PR ID', width: 100 },
-    { field: 'component_id', headerName: 'Component ID', width: 150 },
+    { field: 'component_id', headerName: 'Component ID', width: 100 },
+    { field: 'component_name', headerName: 'Component Name', width: 250 },
     { field: 'quantity', headerName: 'Quantity', type: 'number', width: 100 },
     { field: 'status', headerName: 'Status', width: 150, renderCell: renderStatusChip },
     { field: 'priority', headerName: 'Priority', width: 150, renderCell: renderPriorityChip },

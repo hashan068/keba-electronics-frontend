@@ -1,10 +1,11 @@
 import React from 'react';
-import MyTableauViz from './MyTableauViz';
+
+import MfgReportTableau from './MfgReportTableau';
 
 const ManufacturingReport = () => {
   return (
     <div>
-      {/* <MyTableauViz/> */}
+      <MfgReportTableau/>
     </div>
   );
 }

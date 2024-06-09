@@ -115,7 +115,7 @@ export default function SalesOrder() {
     },
     {
       field: 'created_at_date',
-      headerName: 'Date',
+      headerName: 'Order Date',
       type: 'date',
       width: 150,
       valueFormatter: (params) => params.value && new Date(params.value).toLocaleDateString(),
