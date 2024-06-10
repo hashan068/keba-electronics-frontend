@@ -10,14 +10,20 @@ import {
   Toolbar,
   TextField,
   Chip,
-  Stack
+  Stack,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Pagination,
 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarExport, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import api from '../../api';
 import { format } from 'date-fns';
+import pageAppbarStyles from '../../styles/pageAppbarStyles';
 
 const STATUS_CHOICES = {
   quotation: { label: 'Quotation', color: 'default' },
@@ -31,9 +37,12 @@ const STATUS_CHOICES = {
 
 export default function Quotations() {
   const [quotations, setQuotations] = useState([]);
+  const [filteredQuotations, setFilteredQuotations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
-  const [filteredQuotations, setFilteredQuotations] = useState([]);
+  const [pageSize, setPageSize] = useState(8);
+  const [page, setPage] = useState(1);
+
   const navigate = useNavigate();
 
   const getQuotations = () => {
@@ -72,7 +81,29 @@ export default function Quotations() {
       )
     );
     setFilteredQuotations(filteredData);
+    setPage(1); // Reset to the first page whenever the search text changes
   };
+
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (event) => {
+    setPageSize(event.target.value);
+    setPage(1); // Reset to the first page whenever the page size changes
+  };
+
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
+        <GridToolbarDensitySelector />
+        <Box sx={{ flexGrow: 1 }} />
+        <GridToolbarExport />
+      </GridToolbarContainer>
+    );
+  }
 
   const renderStatusChip = (params) => {
     const status = params.value;
@@ -88,11 +119,11 @@ export default function Quotations() {
   };
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'id', headerName: 'Quotation ID', width: 100 },
     { field: 'customer_name', headerName: 'Customer', width: 200 },
     {
       field: 'date',
-      headerName: 'Date',
+      headerName: 'Quotation Date',
       type: 'date',
       width: 180,
       valueFormatter: (params) =>
@@ -106,20 +137,18 @@ export default function Quotations() {
       valueFormatter: (params) =>
         params.value && format(new Date(params.value), 'yyyy/MM/dd'),
     },
-    
     {
       field: 'status',
       headerName: 'Status',
       width: 150,
       renderCell: renderStatusChip
     },
-
     { field: 'total_amount', headerName: 'Total Amount', type: 'number', width: 150 },
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 3 }}>
-      <Paper sx={{ p: 3, mb: 3 }}>
+    <Container maxWidth="lg" sx={pageAppbarStyles.container}>
+      <Paper sx={pageAppbarStyles.paper}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Quotations
@@ -134,6 +163,7 @@ export default function Quotations() {
               startAdornment: <SearchIcon position="start" />,
             }}
             sx={{ marginRight: 2 }}
+          
           />
           <Button
             variant="contained"
@@ -152,28 +182,43 @@ export default function Quotations() {
               <CircularProgress />
             </Box>
           ) : (
-            <Paper sx={{ p: 2, height: 500 }}>
-              <DataGrid
-                rows={filteredQuotations}
-                columns={columns}
-                onRowClick={handleRowClick}
-                sx={{
-                  '& .MuiDataGrid-cell:hover': {
-                    backgroundColor: '#f5f5f5',
-                  },
-                  '& .MuiDataGrid-iconSeparator': {
-                    display: 'none',
-                  },
-                  '& .MuiDataGrid-columnHeaders': {
-                    backgroundColor: '#fafafa',
-                    borderBottom: '1px solid #e0e0e0',
-                  },
-                  '& .MuiDataGrid-footerContainer': {
-                    borderTop: '1px solid #e0e0e0',
-                  },
-                }}
-              />
-            </Paper>
+            <>
+              <Paper sx={{ p: 2, height: 500 }}>
+                <DataGrid
+                  rows={filteredQuotations.slice((page - 1) * pageSize, page * pageSize)}
+                  columns={columns}
+                  pageSize={pageSize}
+                  rowCount={filteredQuotations.length}
+                  paginationMode="server"
+                  onRowClick={handleRowClick}
+                  slots={{
+                    toolbar: CustomToolbar,
+                  }}
+                  sx={pageAppbarStyles.dataGrid}
+                  hideFooter
+                />
+              </Paper>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel>Rows per page</InputLabel>
+                  <Select
+                    value={pageSize}
+                    onChange={handlePageSizeChange}
+                    label="Rows per page"
+                  >
+                    <MenuItem value={8}>8</MenuItem>
+                    <MenuItem value={16}>16</MenuItem>
+                    <MenuItem value={24}>24</MenuItem>
+                  </Select>
+                </FormControl>
+                <Pagination
+                  count={Math.ceil(filteredQuotations.length / pageSize)}
+                  page={page}
+                  onChange={handlePageChange}
+                  color="primary"
+                />
+              </Box>
+            </>
           )}
         </Grid>
       </Grid>

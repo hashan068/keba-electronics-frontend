@@ -22,6 +22,7 @@ import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-g
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
+import pageAppbarStyles from '../../styles/pageAppbarStyles';
 import api from '../../api';
 
 const STATUS_CHOICES = {
@@ -112,8 +113,8 @@ export default function ManufacturingOrder() {
       renderCell: renderStatusChip
     },
     {
-      field: 'created_at',
-      headerName: 'Created At',
+      field: 'created_at_date',
+      headerName: 'Order Date',
       type: 'date',
       width: 180,
       valueFormatter: (params) => params.value && new Date(params.value).toLocaleDateString(),
@@ -128,7 +129,7 @@ export default function ManufacturingOrder() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={pageAppbarStyles.paper}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Manufacturing Orders
@@ -144,7 +145,7 @@ export default function ManufacturingOrder() {
             }}
             sx={{ marginRight: 2 }}
           />
-          <Button
+          {/* <Button
             variant="contained"
             color="primary"
             onClick={handleAddManufacturingOrder}
@@ -157,7 +158,7 @@ export default function ManufacturingOrder() {
             }}
           >
             Add Manufacturing Order
-          </Button>
+          </Button> */}
         </Toolbar>
       </Paper>
       <Grid container spacing={2}>
@@ -203,6 +204,7 @@ export default function ManufacturingOrder() {
                       backgroundColor: theme.palette.secondary.light,
                       color: '#fff',
                     },
+                    
                   }}
                 />
               </Paper>

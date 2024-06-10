@@ -1,13 +1,14 @@
 // src/styles/pageAppbarStyles.jsx
 
+import { Height } from "@mui/icons-material";
+
 const pageAppbarStyles = {
   container: {
     py: 3,
-    width: '10000px',
   },
   paper: {
-    p: 3,
-    mb: 3,
+    p: 2,
+    mb: 2,
     backgroundColor: '#eceff1',
   },
   toolbar: {

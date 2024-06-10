@@ -125,7 +125,7 @@ export default function Product() {
     <Container maxWidth="lg" sx={pageAppbarStyles.container}>
       <Paper sx={pageAppbarStyles.paper}>
         <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Products
           </Typography>
           <TextField
@@ -137,7 +137,8 @@ export default function Product() {
             InputProps={{
               startAdornment: <SearchIcon position="start" />,
             }}
-            sx={pageAppbarStyles.dataGrid}
+            sx={{ marginRight: 2 }}
+          
           />
           <Button
             variant="contained"
@@ -169,6 +170,7 @@ export default function Product() {
                     toolbar: CustomToolbar,
                   }}
                   sx={pageAppbarStyles.dataGrid}
+                  hideFooter
                 />
               </Paper>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>

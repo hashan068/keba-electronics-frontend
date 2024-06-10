@@ -10,10 +10,10 @@ import api from '../../../api';
 
 const InventoryStatistics = () => {
   const [data, setData] = useState([
-    { label: 'Components', value: 0, icon: <InventoryIcon />, color: '#4caf50', percentage: '10%' },
-    { label: 'Purchase Requisitions', value: 0, icon: <ReceiptIcon />, color: '#ff9800', percentage: '-5%' },
-    { label: 'Suppliers', value: 0, icon: <PeopleIcon />, color: '#2196f3', percentage: '0%' },
-    { label: 'Purchase Orders', value: 0, icon: <ShoppingCartIcon />, color: '#9c27b0', percentage: '25%' },
+    { label: 'Components', value: 0, icon: <InventoryIcon />, color: '#4caf50'},
+    { label: 'Purchase Requisitions', value: 0, icon: <ReceiptIcon />, color: '#ff9800'},
+    { label: 'Suppliers', value: 0, icon: <PeopleIcon />, color: '#2196f3'},
+    { label: 'Purchase Orders', value: 0, icon: <ShoppingCartIcon />, color: '#9c27b0'},
   ]);
 
   const [loading, setLoading] = useState(true);
@@ -51,7 +51,7 @@ const InventoryStatistics = () => {
   }
 
   return (
-    <Box sx={{ flexGrow: 1, padding: '20px' }}>
+    <Box sx={{ flexGrow: 1, padding: '10px' }}>
       <Grid container spacing={3}>
         {data.map((item, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
@@ -62,9 +62,7 @@ const InventoryStatistics = () => {
               </Box>
 
               <Typography variant="subtitle1">{item.label}</Typography>
-              <Typography variant="subtitle2" sx={{ marginTop: '10px', color: item.percentage.includes('-') ? 'red' : 'green' }}>
-                {item.percentage} from last month
-              </Typography>
+
             </Paper>
           </Grid>
         ))}

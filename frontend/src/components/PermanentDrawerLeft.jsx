@@ -25,7 +25,7 @@ import logo from '../assets/logo.png';
 import '../styles/drawer.css';
 import { useNavigate } from 'react-router-dom';
 
-const drawerWidth = 250;
+const drawerWidth = 260;
 
 // Salesperson, Production Manager, General Manager, Inventory Manager, Purchasing Manager, Admin
 
@@ -52,7 +52,7 @@ const menuItems = [
     items: [
       { text: 'Material Requisitions', icon: <AssignmentIcon />, path: '/mfg/materialreq', roles: ['Admin', 'General Manager', 'Inventory Manager','Production Manager'] },
       { text: 'Components', icon: <WidgetsIcon />, path: '/inventory/component', roles: ['Admin', 'Inventory Manager', 'Purchasing Manager'] },
-      { text: 'Purchase Requisitions', icon: <LocalShippingIcon />, path: '/inventory/purchase-req', roles: ['Admin', 'General Manager', 'inventory', 'Purchasing Manager'] },
+      { text: 'Purchase Requisitions', icon: <LocalShippingIcon />, path: '/inventory/purchase-req', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
       { text: 'Purchase Orders', icon: <ShoppingCartIcon />, path: '/inventory/po', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
     ],
   },
@@ -131,7 +131,7 @@ export default function PermanentDrawerLeft() {
                 return (
                   <React.Fragment key={index}>
                     <Toolbar>
-                      <Typography style={{ fontSize: '1rem' }} noWrap component="div">
+                      <Typography style={{ fontSize: '0.8rem' }} noWrap component="div">
                         {item.section}
                       </Typography>
                     </Toolbar>
@@ -140,15 +140,15 @@ export default function PermanentDrawerLeft() {
                       <ListItem key={subIndex} disablePadding onClick={() => handleNavigate(subItem.path)}>
                         <ListItemButton
                           sx={{
-                            minHeight: '30px',
+                            minHeight: '28px',
                             justifyContent: 'center',
                             '&:hover': {
                               backgroundColor: '#333333',
                             },
                           }}
                         >
-                          <ListItemIcon sx={{ color: '#ffffff', fontSize: '0.8rem' }}>{subItem.icon}</ListItemIcon>
-                          <ListItemText primary={subItem.text} style={{ fontSize: '0.9rem' }}  />
+                          <ListItemIcon sx={{ color: '#ffffff', fontSize: '8px' }}>{subItem.icon}</ListItemIcon>
+                          <ListItemText primary={subItem.text} style={{ fontSize: '0.5rem' }}  />
                         </ListItemButton>
                       </ListItem>
                     ))}
