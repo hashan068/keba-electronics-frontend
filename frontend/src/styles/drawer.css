@@ -44,3 +44,15 @@
 .drawer-spacer {
   flex-grow: 1;
 }
+/* Adjust the font size for list item text */
+.MuiListItemText-primary {
+  font-size: 0.9rem;
+}
+
+/* Adjust the font size for section headings */
+.MuiTypography-h8 {
+  font-size: 0.8rem;
+}
+body {
+  font-size: 0.9rem;
+}

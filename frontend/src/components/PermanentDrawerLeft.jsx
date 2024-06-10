@@ -10,6 +10,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import Avatar from '@mui/material/Avatar';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DescriptionIcon from '@mui/icons-material/Description';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -24,7 +25,7 @@ import logo from '../assets/logo.png';
 import '../styles/drawer.css';
 import { useNavigate } from 'react-router-dom';
 
-const drawerWidth = 260;
+const drawerWidth = 250;
 
 // Salesperson, Production Manager, General Manager, Inventory Manager, Purchasing Manager, Admin
 
@@ -74,10 +75,13 @@ const menuItems = [
 export default function PermanentDrawerLeft() {
   const navigate = useNavigate();
   const [role, setRole] = React.useState(null);
+  const [username, setUsername] = React.useState(null);
 
   React.useEffect(() => {
     const userRole = localStorage.getItem('userrole');
+    const userName = localStorage.getItem('username');
     setRole(userRole);
+    setUsername(userName);
   }, []);
 
   const handleNavigate = (path) => {
@@ -102,10 +106,23 @@ export default function PermanentDrawerLeft() {
         anchor="left"
       >
         {/* Logo Container */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', py: 2, px: 3}}>
-          <img src={logo} alt="Logo" style={{ maxHeight: '50px', maxWidth: '100%' }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', py: 1, px: 3 }}>
+          <img src={logo} alt="Logo" style={{ maxHeight: '48px', maxWidth: '100%' }} />
         </Box>
-        <Divider sx={{ bgcolor: '#333333' }} />
+        <Divider sx={{ bgcolor: 'gray' }} />
+        {/* Profile Container */}
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 3, py: 1 }}>
+          <Avatar alt={username} src="/broken-image.jpg" />
+          <Box sx={{ ml: 2 }}>
+            <Typography variant="h6" component="div">
+              {username}
+            </Typography>
+            <Typography variant="body2" component="div">
+              {role}
+            </Typography>
+          </Box>
+        </Box>
+        <Divider sx={{ bgcolor: 'gray' }} />
         <List>
           {menuItems.map((item, index) => {
             if (item.section) {
@@ -114,7 +131,7 @@ export default function PermanentDrawerLeft() {
                 return (
                   <React.Fragment key={index}>
                     <Toolbar>
-                      <Typography variant="h8" noWrap component="div">
+                      <Typography style={{ fontSize: '1rem' }} noWrap component="div">
                         {item.section}
                       </Typography>
                     </Toolbar>
@@ -130,11 +147,12 @@ export default function PermanentDrawerLeft() {
                             },
                           }}
                         >
-                          <ListItemIcon sx={{ color: '#ffffff' }}>{subItem.icon}</ListItemIcon>
-                          <ListItemText primary={subItem.text} />
+                          <ListItemIcon sx={{ color: '#ffffff', fontSize: '0.8rem' }}>{subItem.icon}</ListItemIcon>
+                          <ListItemText primary={subItem.text} style={{ fontSize: '0.9rem' }}  />
                         </ListItemButton>
                       </ListItem>
                     ))}
+                    <Divider sx={{ bgcolor: '#333333' }} />
                   </React.Fragment>
                 );
               }
@@ -155,6 +173,7 @@ export default function PermanentDrawerLeft() {
                     <ListItemIcon sx={{ color: '#ffffff' }}>{item.icon}</ListItemIcon>
                     <ListItemText primary={item.text} />
                   </ListItemButton>
+                  <Divider sx={{ bgcolor: '#333333' }} />
                 </ListItem>
               );
             }

@@ -17,12 +17,11 @@ import {
 } from '@mui/material';
 import { IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-
 import { Autocomplete } from '@mui/material';
 import { styled } from '@mui/system';
 import { useFormik, FormikProvider, Form, FieldArray } from 'formik';
 import * as Yup from 'yup';
-
+import api from './../../api';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -49,35 +48,30 @@ const QuotationForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const customersResponse = await fetch('http://127.0.0.1:8000/api/sales/customers/');
-        const customersData = await customersResponse.json();
-        setCustomers(customersData);
+        const customersResponse = await api.get('/api/sales/customers/');
+        setCustomers(customersResponse.data);
 
-        const productsResponse = await fetch('http://127.0.0.1:8000/api/sales/products/');
-        const productsData = await productsResponse.json();
-        setProducts(productsData.map(product => ({
+        const productsResponse = await api.get('/api/sales/products/');
+        setProducts(productsResponse.data.map(product => ({
           id: product.id,
           name: product.product_name,
           description: product.description,
           price: parseFloat(product.price),
           bom: product.bom
         })));
+
         if (formik.values.customer) {
           formik.setFieldValue('invoicingAndShippingAddress', getCustomerAddress(formik.values.customer.id));
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+        setAlert({ severity: 'error', message: 'Error fetching data: ' + error.message });
       }
     };
 
     fetchData();
-  }, []);
+  }, []); // Dependency array is correct for running only once
 
-  // get customer addres from customersData when given customer id
-  // const getCustomerAddress = (customerId) => {
-  //   const customer = customers.find((customer) => customer.id === customerId);
-  //   return customer ? customer.address : '';
-  // };
   const getCustomerAddress = (customerId) => {
     const customer = customers.find((customer) => customer.id === customerId);
     if (customer) {
@@ -86,35 +80,32 @@ const QuotationForm = () => {
       return '';
     }
   };
-  
 
   const addItemValidationSchema = Yup.object({
     newProduct: Yup.object().nullable().required('Please select a product.'),
     newQuantity: Yup.number()
       .min(1, 'Quantity must be greater than 0')
-      .required('Please enter a quantity.')
+      .required('Please enter a quantity.'),
   });
 
   const validationSchema = Yup.object({
     customer: Yup.object().nullable().required('Please select a customer.'),
     date: Yup.string().required('Please enter a date.'),
-  
     expirationDate: Yup.string()
-    .required('Please enter an expiration date.')
-    .test('is-greater', 'Expiration date must be later than the date', function (value) {
-      const { date } = this.parent;
-      return date && value && new Date(value) > new Date(date);
-    }),
+      .required('Please enter an expiration date.')
+      .test('is-greater', 'Expiration date must be later than the date', function (value) {
+        const { date } = this.parent;
+        return date && value && new Date(value) > new Date(date);
+      }),
     invoicingAndShippingAddress: Yup.string().required('Please enter an invoicing and shipping address.'),
-
     quotationItems: Yup.array()
       .of(
         Yup.object().shape({
           product: Yup.object().nullable().required('Please select a product.'),
           quantity: Yup.number().min(1, 'Quantity must be at least 1').required('Please enter a quantity.'),
-        })
+        }),
       )
-      .min(1, 'Please add at least one item to the quotation.')
+      .min(1, 'Please add at least one item to the quotation.'),
   });
 
   const formik = useFormik({
@@ -144,22 +135,14 @@ const QuotationForm = () => {
       };
 
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/sales/quotations/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(quotationData),
-        });
+        const response = await api.post('/api/sales/quotations/', quotationData);
 
-        const responseData = await response.json();
-
-        if (response.ok) {
+        if (response.status === 201) {
           setAlert({ severity: 'success', message: 'Quotation Created Successfully!' });
           formik.resetForm();
           setTimeout(() => setAlert(null), 3000);
         } else {
-          setAlert({ severity: 'error', message: `Error creating quotation: ${responseData.error || 'Unknown error'}` });
+          setAlert({ severity: 'error', message: `Error creating quotation: ${response.data.error || 'Unknown error'}` });
         }
       } catch (error) {
         console.error('Error creating quotation:', error);
@@ -167,7 +150,6 @@ const QuotationForm = () => {
       }
     },
   });
-
   return (
     <StyledContainer maxWidth="lg">
       <Typography variant="h4" gutterBottom>
@@ -186,12 +168,10 @@ const QuotationForm = () => {
                 value={formik.values.customer}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('customer', newValue);
-                  formik.setFieldValue('invoicingAndShippingAddress', getCustomerAddress(newValue.id));
+                  formik.setFieldValue('invoicingAndShippingAddress', newValue ? getCustomerAddress(newValue.id) : '');
                 }}
                 renderInput={(params) => <TextField {...params} label="Customer" />}
               />
-
-
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
@@ -219,7 +199,7 @@ const QuotationForm = () => {
             </Grid>
             <Grid item xs={12}>
               <TextField
-                label="Invoicing  Address"
+                label="Invoicing Address"
                 value={formik.values.invoicingAndShippingAddress}
                 onChange={formik.handleChange('invoicingAndShippingAddress')}
                 error={Boolean(formik.touched.invoicingAndShippingAddress && formik.errors.invoicingAndShippingAddress)}
