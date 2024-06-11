@@ -3,6 +3,7 @@ import { Box, Typography, TextField, Button, Alert, Container, Paper, Grid, Dial
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import api from './../../api';
 
 // Validation schema using Yup
 const validationSchema = Yup.object({
@@ -31,18 +32,9 @@ const CustomerForm = () => {
     onSubmit: async (values, { setSubmitting }) => {
       setOpen(false);  // Close confirmation dialog
       try {
-        const response = await fetch('http://localhost:8000/api/sales/customers/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        });
+        const response = await api.post('/api/sales/customers/', values);
 
-        const responseData = await response.json();
-        console.log('Received data:', responseData);
-
-        if (response.ok) {
+        if (response.status === 201) {
           setAlert({ severity: 'success', message: 'Customer created successfully.' });
           formik.resetForm();
           setAlertDialogOpen(true);
@@ -51,11 +43,11 @@ const CustomerForm = () => {
             navigate('/sales/customer');  // Redirect to product page after 3 seconds
           }, 3000);
         } else {
-          setAlert({ severity: 'error', message: `Error creating customer: ${JSON.stringify(responseData)}` });
+          setAlert({ severity: 'error', message: `Error creating customer: ${response.data.error || 'Unknown error'}` });
           setAlertDialogOpen(true);
         }
       } catch (error) {
-        console.error('Fetch Error:', error);
+        console.error('Error creating customer:', error);
         setAlert({ severity: 'error', message: 'An error occurred while creating the customer.' });
         setAlertDialogOpen(true);
       } finally {

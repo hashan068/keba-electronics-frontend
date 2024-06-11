@@ -1,21 +1,33 @@
-// src/components/Form.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import api from "../api";
-import { Button, TextField, Box, CircularProgress } from '@mui/material';
+import { Button, TextField, Box, CircularProgress, Typography, Alert } from '@mui/material';
 import "../styles/Form.css";
 
 function Form({ route, method }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     const name = method === "login" ? "Login" : "Register";
 
+    const validateForm = () => {
+        if (username === "" || password === "") {
+            setError("Username and password are required.");
+            return false;
+        }
+        setError(null);
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateForm()) {
+            return;
+        }
         setLoading(true);
 
         try {
@@ -37,7 +49,11 @@ function Form({ route, method }) {
                 navigate("/login");
             }
         } catch (error) {
-            alert(error);
+            if (error.response && error.response.data && error.response.data.detail) {
+                setError(error.response.data.detail);
+            } else {
+                setError("An error occurred. Please try again.");
+            }
         } finally {
             setLoading(false);
         }
@@ -45,6 +61,11 @@ function Form({ route, method }) {
 
     return (
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+            {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {error}
+                </Alert>
+            )}
             <TextField
                 margin="normal"
                 fullWidth
@@ -53,6 +74,7 @@ function Form({ route, method }) {
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
                 autoFocus
+                error={Boolean(error)}
             />
             <TextField
                 margin="normal"
@@ -62,6 +84,7 @@ function Form({ route, method }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
+                error={Boolean(error)}
             />
             {loading && <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}><CircularProgress /></Box>}
             <Button
@@ -70,6 +93,7 @@ function Form({ route, method }) {
                 variant="contained"
                 color="primary"
                 sx={{ mt: 3, mb: 2 }}
+                disabled={loading}
             >
                 {name}
             </Button>

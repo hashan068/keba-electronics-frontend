@@ -146,14 +146,14 @@ const MaterialReq = () => {
             }}
             sx={{ marginRight: 2 }}
           />
-          <Button
+          {/* <Button
             variant="contained"
             color="primary"
             onClick={handleAddMaterialReq}
             startIcon={<AddIcon />}
           >
             Add Material Requisition
-          </Button>
+          </Button> */}
         </Toolbar>
       </Paper>
       <Grid container spacing={2}>
