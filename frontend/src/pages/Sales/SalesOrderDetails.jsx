@@ -171,7 +171,7 @@ const SalesOrderDetails = () => {
       <AppBar position="static" color="default" sx={{ mb: 4 }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            {`Sales Order Details - ${salesOrder.customer_name}`}
+            {`Sales Order Details - ID ${salesOrder.id}`}
           </Typography>
           {renderStatusControls()}
         </Toolbar>

@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 import api from './../../api';
 
 // Validation schema using Yup
+
 const validationSchema = Yup.object({
   name: Yup.string().required('Name is required'),
   email: Yup.string().email('Invalid email address').required('Email is required'),

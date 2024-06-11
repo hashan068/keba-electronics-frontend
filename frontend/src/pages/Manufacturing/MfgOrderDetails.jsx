@@ -47,7 +47,6 @@ const MfgOrderDetails = () => {
       await api.post(`/api/manufacturing/material-requisitions/`, payload);
       setIsMaterialRequested(true);
       setStatus('mr_sent');
-      // Fetch the latest manufacturing order data after updating the status
       const response = await api.get(`/api/manufacturing/manufacturing-orders/${id}/`);
       setManufacturingOrder(response.data);
     } catch (error) {
@@ -59,7 +58,6 @@ const MfgOrderDetails = () => {
     try {
       await api.patch(`/api/manufacturing/manufacturing-orders/${id}/`, { status: newStatus });
       setStatus(newStatus);
-      // Fetch the latest manufacturing order data after updating the status
       const response = await api.get(`/api/manufacturing/manufacturing-orders/${id}/`);
       setManufacturingOrder(response.data);
     } catch (error) {
