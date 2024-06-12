@@ -31,6 +31,7 @@ const drawerWidth = 260;
 
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/', roles: ['Admin', 'Production Manager', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
+  { text: 'Insights', icon: <DashboardIcon />, path: '/sales/insights', roles: ['Admin','General Manager'] },
   {
     section: 'Sales',
     items: [
@@ -54,6 +55,7 @@ const menuItems = [
       { text: 'Components', icon: <WidgetsIcon />, path: '/inventory/component', roles: ['Admin', 'Inventory Manager', 'Purchasing Manager'] },
       { text: 'Purchase Requisitions', icon: <LocalShippingIcon />, path: '/inventory/purchase-req', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
       { text: 'Purchase Orders', icon: <ShoppingCartIcon />, path: '/inventory/po', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
+      { text: 'Suppliers', icon: <InventoryIcon />, path: '/inventory/suppliers', roles: ['Admin', 'General Manager','Purchasing Manager'] },
     ],
   },
   {

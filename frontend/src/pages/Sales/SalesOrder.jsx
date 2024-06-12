@@ -18,7 +18,14 @@ import {
   Pagination,
   Chip,
 } from '@mui/material';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import {
+  DataGrid,
+  GridToolbarContainer,
+  GridToolbarColumnsButton,
+  GridToolbarFilterButton,
+  GridToolbarExport,
+  GridToolbarDensitySelector,
+} from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
@@ -28,10 +35,11 @@ import pageAppbarStyles from '../../styles/pageAppbarStyles';
 const STATUS_CHOICES = {
   pending: { label: 'Pending', color: 'warning' },
   confirmed: { label: 'Confirmed', color: 'success' },
+  delivered: { label: 'Delivered', color: 'primary' },
   processing: { label: 'Processing', color: 'info' },
   completed: { label: 'Completed', color: 'success' },
   cancelled: { label: 'Cancelled', color: 'error' },
-  // Add more status mappings as needed
+  // Add more status mappings
 };
 
 const renderStatusChip = (params) => {
@@ -58,7 +66,7 @@ export default function SalesOrder() {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
+  
   const getSalesOrders = () => {
     setLoading(true);
     api
@@ -106,10 +114,29 @@ export default function SalesOrder() {
     setPageSize(event.target.value);
   };
 
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer sx={{ margin: '6px'}}>
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
+        <GridToolbarDensitySelector
+          slotProps={{ tooltip: { title: 'Change density' } }}
+        />
+        <Box sx={{ flexGrow: 1 }} />
+        <GridToolbarExport
+          slotProps={{
+            tooltip: { title: 'Export data' },
+            button: { variant: 'outlined' },
+          }}
+        />
+      </GridToolbarContainer>
+    );
+  }
+
   const columns = [
     { field: 'id', headerName: 'Order ID', width: 150 },
-    { field: 'customer_name', headerName: 'Customer', width: 200 },
-    { field: 'total_amount', headerName: 'Total Amount', type: 'number', width: 150 },
+    { field: 'customer_name', headerName: 'Customer', width: 300 },
+    
     {
       field: 'status',
       headerName: 'Status',
@@ -123,13 +150,10 @@ export default function SalesOrder() {
       width: 150,
       valueFormatter: (params) => params.value && new Date(params.value).toLocaleDateString(),
     },
-  ];
 
-  const CustomToolbar = () => (
-    <GridToolbarContainer>
-      <GridToolbarExport />
-    </GridToolbarContainer>
-  );
+    { field: 'total_amount', headerName: 'Total Amount', type: 'number', width: 150 },
+  ];
+  
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
@@ -181,24 +205,11 @@ export default function SalesOrder() {
                   rowCount={filteredSalesOrders.length}
                   paginationMode="server"
                   onRowClick={handleRowClick}
-                  components={{
-                    Toolbar: CustomToolbar,
+
+                  slots={{
+                    toolbar: CustomToolbar,
                   }}
-                  sx={{
-                    '& .MuiDataGrid-cell:hover': { backgroundColor: '#f5f5f5' },
-                    '& .MuiDataGrid-iconSeparator': { display: 'none' },
-                    '& .MuiDataGrid-columnHeaders': {
-                      backgroundColor: '#fafafa',
-                      borderBottom: '1px solid #e0e0e0',
-                    },
-                    '& .MuiDataGrid-footerContainer': { borderTop: '1px solid #e0e0e0' },
-                    '& .MuiDataGrid-sortIcon': { color: theme.palette.secondary.main },
-                    '& .MuiTablePagination-root': { color: theme.palette.secondary.main },
-                    '& .MuiPaginationItem-root.Mui-selected': {
-                      backgroundColor: theme.palette.secondary.light,
-                      color: '#fff',
-                    },
-                  }}
+                  hideFooter
                 />
               </Paper>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>

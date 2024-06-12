@@ -45,7 +45,7 @@ const RecentTransactions = () => {
 
   return (
     <Box sx={{ bgcolor: 'white', p: 2, borderRadius: '4px' }}>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h6" gutterBottom>
         Recent Transactions
       </Typography>
       <Stepper orientation="vertical" sx={{ py: 2 }}>

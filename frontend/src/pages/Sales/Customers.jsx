@@ -107,6 +107,7 @@ export default function Customers() {
   };
 
   const columns = [
+    { field: 'id', headerName: 'Customer ID', width: 150, align : 'center', headerAlign: 'center'},
     { field: 'name', headerName: 'Name', width: 240 },
     { field: 'email', headerName: 'Email', width: 250 },
     { field: 'phone', headerName: 'Phone', width: 150 },

@@ -245,37 +245,40 @@ const QuotationForm = () => {
                       ))}
                       <TableRow>
                         <TableCell>
-                          <Autocomplete
-                            options={products}
-                            value={formik.values.newProduct}
-                            onChange={(event, newValue) => formik.setFieldValue('newProduct', newValue)}
-                            getOptionLabel={(option) => option.name}
-                            renderOption={(props, option) => (
-                              <li {...props} key={option.id}>
-                                {option.name}
-                              </li>
-                            )}
-                            renderInput={(params) => <TextField {...params} label="Product" margin="normal" />}
-                            sx={{ width: '100%', marginLeft: 4 }}
-                          />
+                          <Grid container spacing={2} alignItems="center">
+                            <Grid item xs={8}>
+                              <Autocomplete
+                                options={products}
+                                value={formik.values.newProduct}
+                                onChange={(event, newValue) => formik.setFieldValue('newProduct', newValue)}
+                                getOptionLabel={(option) => option.name}
+                                renderOption={(props, option) => (
+                                  <li {...props} key={option.id}>
+                                    {option.name}
+                                  </li>
+                                )}
+                                renderInput={(params) => <TextField {...params} label="Product" margin="normal" />}
+                                sx={{ width: '100%' }}
+                              />
+                            </Grid>
+                            <Grid item xs={4}>
+                              <TextField
+                                type="number"
+                                value={formik.values.newQuantity}
+                                onChange={formik.handleChange('newQuantity')}
+                                label="Quantity"
+                                fullWidth
+                                error={Boolean(formik.touched.newQuantity && formik.errors.newQuantity)}
+                                helperText={formik.touched.newQuantity && formik.errors.newQuantity}
+                                InputProps={{
+                                  inputProps: {
+                                    min: 1,
+                                  },
+                                }}
+                              />
+                            </Grid>
+                          </Grid>
                         </TableCell>
-                        <TableCell align="right">
-                          <TextField
-                            type="number"
-                            value={formik.values.newQuantity}
-                            onChange={formik.handleChange('newQuantity')}
-                            label="Quantity"
-                            fullWidth
-                            error={Boolean(formik.touched.newQuantity && formik.errors.newQuantity)}
-                            helperText={formik.touched.newQuantity && formik.errors.newQuantity}
-                            InputProps={{
-                              inputProps: {
-                                min: 1,
-                              },
-                            }}
-                          />
-                        </TableCell>
-
                         <TableCell align="right">
                           <Button
                             variant="contained"
@@ -294,11 +297,10 @@ const QuotationForm = () => {
                                   ]);
                                   formik.setFieldValue('newProduct', null);
                                   formik.setFieldValue('newQuantity', '');
-                                  // Reset the touched state for newProduct and newQuantity
                                   formik.setFieldTouched('newProduct', false);
-                                  formik.setFieldTouched('newQuantity', false); // Reset touched state
+                                  formik.setFieldTouched('newQuantity', false);
                                 }).catch((error) => {
-                                  console.log(error.errors); // Handle validation errors
+                                  console.log(error.errors);
                                 });
                               } else {
                                 formik.setFieldTouched('newProduct', true, true);
@@ -308,9 +310,9 @@ const QuotationForm = () => {
                           >
                             Add Item
                           </Button>
-
                         </TableCell>
                       </TableRow>
+
                     </>
                   )}
                 </FieldArray>

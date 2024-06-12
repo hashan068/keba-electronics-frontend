@@ -212,6 +212,7 @@ export default function ProductDetails() {
               <Button
                 variant="contained"
                 color="primary"
+                sx={{ mt: 2, mb: 2, float: 'center'}}
                 onClick={handleUpdateProduct}
               >
                 Update Product

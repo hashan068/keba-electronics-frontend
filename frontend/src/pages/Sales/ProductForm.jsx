@@ -21,6 +21,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import api from '../../api';
 
 // Validation schema using Yup
 const validationSchema = Yup.object({
@@ -59,18 +60,9 @@ const ProductForm = () => {
     onSubmit: async (values, { setSubmitting }) => {
       setOpen(false); // Close confirmation dialog
       try {
-        const response = await fetch('http://localhost:8000/api/sales/products/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        });
+        const response = await api.post('/api/sales/products/', values);
 
-        const responseData = await response.json();
-        console.log('Received data:', responseData);
-
-        if (response.ok) {
+        if (response.status === 201) {
           setAlert({ severity: 'success', message: 'Product created successfully.' });
           formik.resetForm();
           setAlertDialogOpen(true);
@@ -79,7 +71,7 @@ const ProductForm = () => {
             navigate('/sales/product'); // Redirect to product page after 3 seconds
           }, 3000);
         } else {
-          setAlert({ severity: 'error', message: `Error creating product: ${JSON.stringify(responseData)}` });
+          setAlert({ severity: 'error', message: `Error creating product: ${response.data}` });
           setAlertDialogOpen(true);
         }
       } catch (error) {
@@ -111,7 +103,7 @@ const ProductForm = () => {
         </Typography>
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={3}>
-          <Grid item xs={12}>
+            <Grid item xs={12}>
               <TextField
                 label="Description"
                 name="description"
@@ -190,7 +182,7 @@ const ProductForm = () => {
                 required
               />
             </Grid>
-  
+
             <Grid item xs={12}>
               <TextField
                 label="Efficiency (%)"
@@ -268,7 +260,7 @@ const ProductForm = () => {
             </Grid>
           </Grid>
         </form>
-  
+
         <Dialog
           open={open}
           onClose={handleDialogClose}
@@ -290,7 +282,7 @@ const ProductForm = () => {
             </Button>
           </DialogActions>
         </Dialog>
-  
+
         <Dialog
           open={alertDialogOpen}
           onClose={handleAlertDialogClose}
@@ -312,6 +304,6 @@ const ProductForm = () => {
       </Paper>
     </Container>
   );
-  };
-  
-  export default ProductForm;
+};
+
+export default ProductForm;

@@ -29,7 +29,7 @@ const InventoryStatistics = () => {
         const components = componentsResponse.data.length;
         const pendingPurchaseRequisitions = purchaseRequisitionsResponse.data.filter(req => req.status === 'pending').length;
         const suppliers = suppliersResponse.data.length;
-        const pendingPurchaseOrders = purchaseOrdersResponse.data.filter(order => order.status === 'pending').length;
+        const pendingPurchaseOrders = purchaseOrdersResponse.data.filter(order => order.status === 'draft').length;
 
         setData(prevData => prevData.map(item => {
           if (item.label === 'Components') return { ...item, value: components };

@@ -31,6 +31,18 @@ const SalesOrderDetails = () => {
   const [salesOrder, setSalesOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [salesOrderItems, setSalesOrderItems] = useState([]);
+  const [role, setRole] = useState(null);
+  const [username, setUsername] = useState(null);
+  const [userId, setUserId] = useState(null);
+  
+  useEffect(() => {
+    const userRole = localStorage.getItem('userrole');
+    const userName = localStorage.getItem('username');
+    const userId = localStorage.getItem('user_id');
+    setRole(userRole);
+    setUsername(userName);
+    setUserId(userId);
+  }, []);
 
   useEffect(() => {
     const fetchSalesOrder = async () => {
@@ -72,6 +84,7 @@ const SalesOrderDetails = () => {
         quantity: salesOrderItem.quantity,
         product_id: salesOrderItem.product,
         bom: product.bom, // Include the BOM ID from the product details
+        creater: userId,
       };
 
       console.log(manufacturingOrderData);
@@ -109,11 +122,20 @@ const SalesOrderDetails = () => {
   const renderStatusControls = () => {
     switch (salesOrder?.status) {
       case 'pending':
+      if (role === 'Production Manager') {
         return (
-          <Button variant="contained" color="primary" onClick={() => { handleStatusUpdate('confirmed'); handleManufacture(); }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              handleStatusUpdate('confirmed');
+              handleManufacture();
+            }}
+          >
             Manufacture
           </Button>
         );
+      }
       // case 'confirmed':
       //   return (
       //     <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('processing')}>
