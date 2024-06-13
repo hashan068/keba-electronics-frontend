@@ -34,7 +34,8 @@ const SalesOrderDetails = () => {
   const [role, setRole] = useState(null);
   const [username, setUsername] = useState(null);
   const [userId, setUserId] = useState(null);
-  
+  const [status, setStatus] = useState(null);
+
   useEffect(() => {
     const userRole = localStorage.getItem('userrole');
     const userName = localStorage.getItem('username');
@@ -52,6 +53,7 @@ const SalesOrderDetails = () => {
           const { data } = await api.get(`/api/sales/orders/${id}/`);
           setSalesOrder(data);
           setSalesOrderItems(data.order_items);
+          setStatus(data.status); // Set the status of the sales order
         } catch (error) {
           console.error(error);
         } finally {
@@ -66,14 +68,14 @@ const SalesOrderDetails = () => {
     { value: 'pending', label: 'Pending' },
     { value: 'confirmed', label: 'Confirmed' },
     { value: 'processing', label: 'Processing' },
-    { value: 'in_production', label: 'In Production' },
-    { value: 'ready_for_delivery', label: 'Ready for Delivery' },
-    { value: 'cancelled', label: 'Cancelled' },
+    { value: 'in_Production', label: 'In Production' },
+    { value: 'Ready_for_delivery', label: 'Ready for Delivery' },
+    // { value: 'cancelled', label: 'Cancelled' },
     { value: 'delivered', label: 'Delivered' },
   ];
 
   const createManufacturingOrder = async (salesOrderItemId) => {
-    const salesOrderItem = salesOrderItems.find(item => item.id === salesOrderItemId);
+    const salesOrderItem = salesOrderItems.find(item => item.sales_order_item_id === salesOrderItemId);
 
     if (!salesOrderItem) return;
 
@@ -83,7 +85,7 @@ const SalesOrderDetails = () => {
         sales_order_item: salesOrderItem.sales_order_item_id,
         quantity: salesOrderItem.quantity,
         product_id: salesOrderItem.product,
-        bom: product.bom, // Include the BOM ID from the product details
+        bom: product.bom,
         creater: userId,
       };
 
@@ -102,8 +104,9 @@ const SalesOrderDetails = () => {
 
   const handleManufacture = () => {
     salesOrderItems.forEach((item) => {
-      createManufacturingOrder(item.id);
+      createManufacturingOrder(item.sales_order_item_id);
     });
+    handleStatusUpdate('in_production'); // Automatically update the status to 'in_production' after manufacturing orders are created
   };
 
   const getStatusStep = (status) => {
@@ -112,49 +115,64 @@ const SalesOrderDetails = () => {
 
   const handleStatusUpdate = async (newStatus) => {
     try {
-      await api.patch(`/api/sales/orders/${id}/`, { status: newStatus });
-      setSalesOrder((prevOrder) => ({ ...prevOrder, status: newStatus }));
+      const payload = { status: newStatus }; 
+
+      console.log('Payload:', payload);
+
+      await api.patch(`/api/sales/orders/${id}/`, payload);
+
+      // Fetch and update the sales order state
+      const response = await api.get(`/api/sales/orders/${id}/`);
+      setSalesOrder(response.data);
+      setStatus(newStatus);
+
+      console.log('Status updated successfully:', newStatus);
     } catch (error) {
-      console.error('Error updating status:', error);
+      if (error.response) {
+
+      } else {
+        console.error('Error message:', error.message);
+      }
     }
   };
 
   const renderStatusControls = () => {
-    switch (salesOrder?.status) {
+    switch (status) {
       case 'pending':
-      if (role === 'Production Manager') {
+        if (role === 'Production Manager') {
+          return (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleStatusUpdate('confirmed');
+                handleManufacture();
+              }}
+            >
+              Manufacture
+            </Button>
+          );
+        }
+        break;
+      case 'confirmed':
         return (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              handleStatusUpdate('confirmed');
-              handleManufacture();
-            }}
-          >
-            Manufacture
+          <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('processing')}>
+            Start Processing
           </Button>
         );
-      }
-      // case 'confirmed':
-      //   return (
-      //     <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('processing')}>
-      //       Start Processing
-      //     </Button>
-      //   );
-      // case 'processing':
-      //   return (
-      //     <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('in_production')}>
-      //       Start Production
-      //     </Button>
-      //   );
-      case 'in_production':
+      case 'processing':
         return (
-          <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('ready_for_delivery')}>
+          <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('in_Production')}>
+            Start Production
+          </Button>
+        );
+      case 'in_Production':
+        return (
+          <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('Ready_for_delivery')}>
             Ready for Delivery
           </Button>
         );
-      case 'ready_for_delivery':
+      case 'Ready_for_delivery':
         return (
           <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('delivered')}>
             Mark as Delivered
@@ -239,30 +257,22 @@ const SalesOrderDetails = () => {
                       <TableCell align="right" sx={{ fontWeight: 'bold' }}>ID</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 'bold' }}>Product</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Price</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Unit Price</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total Price</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {salesOrderItems.map((item) => (
-                      <TableRow key={item.product}>
+                      <TableRow key={item.sales_order_item_id}>
                         <TableCell align="right">{item.sales_order_item_id}</TableCell>
-                        <TableCell align="right">{item.product_name}</TableCell>
+                        <TableCell align="right">{item.product}</TableCell>
                         <TableCell align="right">{item.quantity}</TableCell>
-                        <TableCell align="right">{item.price}</TableCell>
-                        <TableCell align="right">{(item.quantity * parseFloat(item.price)).toFixed(2)}</TableCell>
+                        <TableCell align="right">{item.unit_price}</TableCell>
+                        <TableCell align="right">{item.total_price}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  sx={{ color: '#424242', fontWeight: 'bold', margin: 4, textAlign: 'right' }}
-                >
-                  Total Amount: {salesOrder.total_amount}
-                </Typography>
               </TableContainer>
             </CardContent>
           </Card>

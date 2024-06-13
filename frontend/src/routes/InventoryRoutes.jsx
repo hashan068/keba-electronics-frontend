@@ -19,13 +19,15 @@ const InventoryRoutes = () => (
     <Route path="/component/new" element={<ComponentForm />} />
     <Route path="/component/:id" element={<ComponentDetails />} />
     <Route path="/purchase-req" element={<PRs />} />
-    <Route path="/po" element={<POs />} />
+    
 
     <Route path="/purchase-requisition/new" element={<PRForm />} />
 
-    <Route path="/purchase-order/new" element={<POForm />} />
+    
     <Route path="/purchase-requisition/:id" element={<PRView />} />
 
+    <Route path="/po" element={<POs />} />
+    <Route path="/purchase-order/new" element={<POForm />} />
     <Route path="/purchase-order/edit/:id" element={<POEdit />} />
     <Route path="/purchase-order/:id" element={<POView />} />
 

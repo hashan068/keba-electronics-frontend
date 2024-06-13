@@ -1,7 +1,7 @@
 // components/NotificationWindow.jsx
 import React from 'react';
 import notificationService from '../../services/notificationService';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import '../../styles/NotificationWindow.css';
 
 const NotificationWindow = ({ onClose }) => {
@@ -55,13 +55,13 @@ const NotificationWindow = ({ onClose }) => {
           >
             <div className="notification-message">{notification.message}</div>
             <div className="notification-timestamp">
-              {moment(notification.timestamp).format("MMMM D, YYYY h:mm A")}
+              {dayjs(notification.timestamp).format("MMMM D, YYYY h:mm A")}
             </div>
             {notification.read ? (
               <span className="read-indicator">&#10003;</span>
             ) : null}
           </li>
-        ))}3
+        ))}
       </ul>
     </div>
   );

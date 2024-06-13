@@ -60,6 +60,10 @@ const MfgOrderDetails = () => {
       setStatus(newStatus);
       const response = await api.get(`/api/manufacturing/manufacturing-orders/${id}/`);
       setManufacturingOrder(response.data);
+      // Also update the corresponding sales order status if starting production
+      if (newStatus === 'in_production') {
+        await api.patch(`/api/sales/orders/${manufacturingOrder.sales_order_item}/`, { status: 'in_production' });
+      }
     } catch (error) {
       console.error('Error updating status:', error);
     }

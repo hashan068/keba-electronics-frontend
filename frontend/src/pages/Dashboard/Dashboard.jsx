@@ -21,6 +21,7 @@ const Dashboard = () => {
       {userRole === 'Salesperson' && <SalesDashboard />}
       {userRole === 'Production Manager' && <MfgDashboard />}
       {userRole === 'Inventory Manager' && <InventoryDashboard />}
+      {userRole === 'Purchasing Manager' && <InventoryDashboard />}
       {userRole === 'Admin' && <InventoryDashboard />}
     </Container>
   );

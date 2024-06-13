@@ -27,6 +27,7 @@ import pageAppbarStyles from '../../styles/pageAppbarStyles';
 
 const STATUS_CHOICES = {
   created: { label: 'Created', color: 'warning' },
+  pending: { label: 'Pending', color: 'warning' },
   approved: { label: 'Approved', color: 'success' },
   rejected: { label: 'Rejected', color: 'error' },
   cancelled: { label: 'Cancelled', color: 'default' },

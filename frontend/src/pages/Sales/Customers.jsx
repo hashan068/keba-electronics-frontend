@@ -168,7 +168,7 @@ export default function Customers() {
                   sx={{
                     ...pageAppbarStyles.dataGrid,
                     '& .MuiDataGrid-columnHeader': {
-                      backgroundColor: '#cfd8dc', // Change  color
+                      backgroundColor: '#eceff1', // Change  color
                       color: 'black', // Adjust the text color
                     },
                   }}

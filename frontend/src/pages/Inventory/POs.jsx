@@ -83,10 +83,6 @@ export default function POs() {
     navigate(`/inventory/purchase-order/${params.row.id}`);
   };
 
-  // const handleAddPurchaseOrder = () => {
-  //   navigate('/inventory/purchase-order/new');
-  // };
-
   const handleSearchChange = (event) => {
     const value = event.target.value;
     setSearchText(value);
@@ -105,10 +101,9 @@ export default function POs() {
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 100 },
-    { field: 'purchase_requisition_details', headerName: 'Purchase Requisition', width: 300 },
+    
     { field: 'supplier_id', headerName: 'Supplier', width: 150 },
     { field: 'status', headerName: 'Status', width: 150, renderCell: renderStatusChip },
-  
     { field: 'created_at', headerName: 'Created At', width: 200 },
     { field: 'price_per_unit', headerName: 'Price Per Unit', width: 150 },
     { field: 'total_price', headerName: 'Total Price', width: 150 },

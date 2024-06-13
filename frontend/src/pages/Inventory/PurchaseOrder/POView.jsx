@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Typography, Container, Grid, Card, CardHeader, CardContent, Button,
-  AppBar, Toolbar, Box, Stepper, Step, StepLabel, Skeleton, Chip, Dialog,
-  DialogTitle, DialogContent, DialogActions, TextField, Alert, TableContainer,
+  AppBar, Toolbar, Box, Stepper, Step, StepLabel, Skeleton, Chip, Alert, TableContainer,
   Table, TableHead, TableRow, TableCell, TableBody, Paper
 } from '@mui/material';
 import {
-  Assignment, Edit, Delete, CheckCircle, Cancel, ArrowBack, Warning, Business,
-  PriorityHigh, Receipt, LocalShipping, Send
+  Assignment, Edit, CheckCircle, Cancel, ArrowBack, PriorityHigh, LocalShipping, Receipt
 } from '@mui/icons-material';
 import api from '../../../api';
 
@@ -52,60 +50,32 @@ export function createRow(desc, qty, unit) {
 }
 
 // InvoiceTable component
-const InvoiceTable = ({ rows, editable, onPriceChange }) => {
-  const [invoiceRows, setInvoiceRows] = useState(rows);
-  useEffect(() => {
-    setInvoiceRows(rows);
-  }, [rows]);
-  const handlePriceChange = (e, desc) => {
-    const newPrice = parseFloat(e.target.value);
-    const updatedRows = invoiceRows.map((row) =>
-      row.desc === desc ? { ...row, price: newPrice } : row
-    );
-    setInvoiceRows(updatedRows);
-    onPriceChange(updatedRows);
-  };
-  const invoiceSubtotal = invoiceRows.map(({ price }) => price).reduce((sum, i) => sum + i, 0);
+const InvoiceTable = ({ rows }) => {
+  const invoiceSubtotal = rows.map(({ price }) => price).reduce((sum, i) => sum + i, 0);
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 700 }} aria-label="spanning table">
+      <Table sx={{ minWidth: 800 }} aria-label="spanning table">
         <TableHead>
+       
           <TableRow>
-            <TableCell align="center" colSpan={3}>
-              Details
-            </TableCell>
-            <TableCell align="right">Price</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Desc</TableCell>
-            <TableCell align="right">Qty.</TableCell>
-            <TableCell align="right">Sum</TableCell>
+            <TableCell width="600px">Desc</TableCell>
+            <TableCell width="300px" align="right">Qty.</TableCell>
+            <TableCell width="300px" align="right">Price per Unit</TableCell>
+            <TableCell width="300px" align="right">Sum</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {invoiceRows.map((row) => (
+          {rows.map((row) => (
             <TableRow key={row.desc}>
               <TableCell>{row.desc}</TableCell>
               <TableCell align="right">{row.qty}</TableCell>
-              <TableCell align="right">
-                {editable ? (
-                  <TextField
-                    value={row.price}
-                    onChange={(e) => handlePriceChange(e, row.desc)}
-                    type="number"
-                    inputProps={{ min: 0, step: 0.01 }}
-                    variant="outlined"
-                    size="small"
-                  />
-                ) : (
-                  ccyFormat(row.price)
-                )}
-              </TableCell>
+              <TableCell align="right">{ccyFormat(row.unit)}</TableCell>
+              <TableCell align="right">{ccyFormat(row.price)}</TableCell>
             </TableRow>
           ))}
-          <TableRow>
-            <TableCell colSpan={3}>Total</TableCell>
-            <TableCell align="right">{ccyFormat(invoiceSubtotal)}</TableCell>
+          <TableRow sx={{ minWidth: 800 }} >
+            <TableCell colSpan={4}>Total</TableCell>
+            <TableCell  align="right">{ccyFormat(invoiceSubtotal)}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
@@ -124,8 +94,6 @@ const POView = () => {
   const [rows, setRows] = useState([createRow('Paperclips (Box)', 100, 1.15)]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
 
   useEffect(() => {
     const fetchPurchaseOrder = async () => {
@@ -134,7 +102,7 @@ const POView = () => {
       try {
         const response = await api.get(`/api/inventory/purchase-orders/${id}/`);
         setPurchaseOrder(response.data);
-        setRows([createRow('Paperclips (Box)', response.data.purchase_requisition.quantity, response.data.price_per_unit)]);
+        setRows([createRow('Paperclips (Box)', response.data.purchase_requisition.quantity, parseFloat(response.data.price_per_unit))]);
       } catch (error) {
         console.error('Error fetching purchase order:', error);
         setError(error.message || 'An error occurred while fetching the purchase order.');
@@ -145,81 +113,6 @@ const POView = () => {
     fetchPurchaseOrder();
   }, [id]);
 
-  const handleSend = async () => {
-    try {
-      const updatedValues = {
-        ...purchaseOrder,
-        price_per_unit: editedValues.price_per_unit || purchaseOrder.price_per_unit,
-        total_price: editedValues.total_price || purchaseOrder.total_price,
-        status: 'open_order',
-      };
-      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, updatedValues);
-      setPurchaseOrder(response.data);
-      setEditedValues({
-        price_per_unit: '',
-        total_price: '',
-      });
-    } catch (error) {
-      console.error('Error sending purchase order:', error);
-      setError('Failed to send the purchase order. Please try again.');
-    }
-  };
-
-  const handleApprove = async () => {
-    try {
-      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, {
-        status: 'approved',
-        purchase_manager_approval: true,
-        price_per_unit: purchaseOrder.price_per_unit,
-        total_price: purchaseOrder.total_price,
-      });
-      setPurchaseOrder(response.data);
-    } catch (error) {
-      console.error('Error approving purchase order:', error);
-      setError('Failed to approve the purchase order. Please try again.');
-    }
-  };
-
-  const handleReject = () => {
-    setOpenDialog(true);
-  };
-
-  const confirmReject = async () => {
-    try {
-      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, {
-        status: 'rejected',
-        notes: rejectionReason,
-        price_per_unit: purchaseOrder.price_per_unit,
-        total_price: purchaseOrder.total_price,
-      });
-      setPurchaseOrder(response.data);
-      setOpenDialog(false);
-    } catch (error) {
-      console.error('Error rejecting purchase order:', error);
-      setError('Failed to reject the purchase order. Please try again.');
-    }
-  };
-
-  const handlePriceChange = (updatedRows) => {
-    const newPrice = updatedRows[0].price;
-    const newTotalPrice = newPrice * purchaseOrder.purchase_requisition.quantity;
-    setRows(updatedRows);
-    handlePriceUpdate(newPrice, newTotalPrice);
-  };
-
-  const handlePriceUpdate = async (newPrice, newTotalPrice) => {
-    try {
-      const response = await api.patch(`/api/inventory/purchase-orders/${id}/`, {
-        price_per_unit: newPrice,
-        total_price: newTotalPrice,
-      });
-      setPurchaseOrder(response.data);
-    } catch (error) {
-      console.error('Error updating purchase order price:', error);
-      setError('Failed to update the purchase order price. Please try again.');
-    }
-  };
-
   return (
     <Container maxWidth="lg" sx={{ py: 4, px: 2, bgcolor: '#f5f5f5' }}>
       <AppBar position="static" color="default" sx={{ mb: 4 }}>
@@ -228,26 +121,6 @@ const POView = () => {
           <Typography variant="h6" sx={{ flexGrow: 1, ml: 2 }}>
             Purchase Order #{isLoading ? 'Loading...' : purchaseOrder?.id || 'N/A'}
           </Typography>
-          {!isLoading && purchaseOrder?.status === 'draft' && (
-            <Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSend} sx={{ mx: 1 }}>
-              Send PO by Email
-            </Button>
-          )}
-          {!isLoading && purchaseOrder?.status === 'open_order' && (
-            <>
-              <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={handleApprove} sx={{ mx: 1 }}>
-                Approve
-              </Button>
-              <Button variant="contained" color="error" startIcon={<Cancel />} onClick={handleReject} sx={{ mx: 1 }}>
-                Reject
-              </Button>
-            </>
-          )}
-          {!isLoading && purchaseOrder?.status === 'approved' && (
-            <Button variant="contained" color="primary" startIcon={<LocalShipping />} onClick={handleOrderReceived} sx={{ mx: 1 }}>
-              Order Received
-            </Button>
-          )}
         </Toolbar>
       </AppBar>
   
@@ -308,8 +181,6 @@ const POView = () => {
                   <Grid item xs={6}><Typography><strong>Supplier ID:</strong> {purchaseOrder.supplier_id || 'N/A'}</Typography></Grid>
                   <InvoiceTable
                     rows={rows}
-                    editable={purchaseOrder.status === 'open_order'}
-                    onPriceChange={handlePriceChange}
                   />
   
                   <Grid item xs={12}>
@@ -324,27 +195,6 @@ const POView = () => {
       ) : (
         <Typography>No purchase order found or an error occurred.</Typography>
       )}
-  
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Reject Purchase Order</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="rejection-reason"
-            label="Reason for Rejection"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={rejectionReason}
-            onChange={(e) => setRejectionReason(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={confirmReject} color="error">Reject</Button>
-        </DialogActions>
-      </Dialog>
     </Container>
   );
 };

@@ -30,32 +30,32 @@ const drawerWidth = 260;
 // Salesperson, Production Manager, General Manager, Inventory Manager, Purchasing Manager, Admin
 
 const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/', roles: ['Admin', 'Production Manager', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
-  { text: 'Insights', icon: <DashboardIcon />, path: '/sales/insights', roles: ['Admin','General Manager'] },
+  { text: 'Dashboard', icon: <DashboardIcon />, path: '/', roles: ['Admin', 'Salesperson', 'Production Manager', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
+  // { text: 'Insights', icon: <DashboardIcon />, path: '/sales/insights', roles: ['Admin', 'General Manager'] },
   {
     section: 'Sales',
     items: [
       { text: 'Quotations', icon: <DescriptionIcon />, path: '/sales/quotations', roles: ['Admin', 'Salesperson', 'General Manager'] },
       { text: 'Products', icon: <InventoryIcon />, path: '/sales/product', roles: ['Admin', 'Salesperson', 'General Manager'] },
       { text: 'Customers', icon: <InventoryIcon />, path: '/sales/customer', roles: ['Admin', 'Salesperson', 'General Manager'] },
-      { text: 'Sales Orders', icon: <ShoppingCartIcon />, path: '/sales/salesorder', roles: ['Admin', 'Salesperson', 'General Manager','Production Manager'] },
+      { text: 'Sales Orders', icon: <ShoppingCartIcon />, path: '/sales/salesorder', roles: ['Admin', 'Salesperson', 'General Manager', 'Production Manager'] },
     ],
   },
   {
     section: 'Manufacturing',
     items: [
-      { text: 'Manufacturing Orders', icon: <BuildIcon />, path: '/mfg/mfgorder', roles: ['Admin', 'General Manager', 'Salesperson','Production Manager'] },
-      { text: 'BOM', icon: <AccountTreeIcon />, path: '/mfg/bom', roles: ['Admin', 'General Manager', 'mfg','Production Manager'] },
+      { text: 'Manufacturing Orders', icon: <BuildIcon />, path: '/mfg/mfgorder', roles: ['Admin', 'General Manager', 'Salesperson', 'Production Manager'] },
+      { text: 'BOM', icon: <AccountTreeIcon />, path: '/mfg/bom', roles: ['Admin', 'General Manager', 'mfg', 'Production Manager'] },
     ],
   },
   {
     section: 'Inventory',
     items: [
-      { text: 'Material Requisitions', icon: <AssignmentIcon />, path: '/mfg/materialreq', roles: ['Admin', 'General Manager', 'Inventory Manager','Production Manager'] },
+      { text: 'Material Requisitions', icon: <AssignmentIcon />, path: '/mfg/materialreq', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Production Manager'] },
       { text: 'Components', icon: <WidgetsIcon />, path: '/inventory/component', roles: ['Admin', 'Inventory Manager', 'Purchasing Manager'] },
       { text: 'Purchase Requisitions', icon: <LocalShippingIcon />, path: '/inventory/purchase-req', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
       { text: 'Purchase Orders', icon: <ShoppingCartIcon />, path: '/inventory/po', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
-      { text: 'Suppliers', icon: <InventoryIcon />, path: '/inventory/suppliers', roles: ['Admin', 'General Manager','Purchasing Manager'] },
+      { text: 'Suppliers', icon: <InventoryIcon />, path: '/inventory/suppliers', roles: ['Admin', 'General Manager', 'Purchasing Manager'] },
     ],
   },
   {
@@ -68,7 +68,7 @@ const menuItems = [
     section: 'Reports',
     items: [
       { text: 'Sales Report', icon: <AssessmentRoundedIcon />, path: '/sales/sales-reports', roles: ['Admin', 'General Manager', 'Salesperson'] },
-      { text: 'Manufacturing Report', icon: <AssessmentRoundedIcon />, path: '/mfg/mfg-reports', roles: ['Admin', 'General Manager','Production Manager'] },
+      { text: 'Manufacturing Report', icon: <AssessmentRoundedIcon />, path: '/mfg/mfg-reports', roles: ['Admin', 'General Manager', 'Production Manager'] },
       { text: 'Inventory Report', icon: <AssessmentRoundedIcon />, path: '/inventory/inventory-reports', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
     ],
   },
@@ -116,12 +116,13 @@ export default function PermanentDrawerLeft() {
         <Box sx={{ display: 'flex', alignItems: 'center', px: 3, py: 1 }}>
           <Avatar alt={username} src="/broken-image.jpg" />
           <Box sx={{ ml: 2 }}>
-            <Typography variant="h6" component="div">
+            <Typography variant="h6" component="div" style={{ fontSize: '24px' }}>
               {username}
             </Typography>
-            <Typography variant="body2" component="div">
+            <Typography variant="body2" component="div" style={{ fontSize: '16px' }}>
               {role}
             </Typography>
+
           </Box>
         </Box>
         <Divider sx={{ bgcolor: 'gray' }} />
@@ -150,7 +151,7 @@ export default function PermanentDrawerLeft() {
                           }}
                         >
                           <ListItemIcon sx={{ color: '#ffffff', fontSize: '8px' }}>{subItem.icon}</ListItemIcon>
-                          <ListItemText primary={subItem.text} style={{ fontSize: '0.5rem' }}  />
+                          <ListItemText primary={subItem.text} style={{ fontSize: '24px' }} />
                         </ListItemButton>
                       </ListItem>
                     ))}

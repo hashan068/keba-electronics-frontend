@@ -60,7 +60,7 @@ export default function QuotationDetail() {
     if (!validateForm()) {
       return;
     }
-  
+
     const salesOrderData = {
       customer: quotation.customer,
       order_items: salesOrderItems.map((item) => ({
@@ -69,19 +69,24 @@ export default function QuotationDetail() {
         price: item.unit_price,
       })),
     };
-  
+
     console.log('Sending data:', salesOrderData);
-  
+
     try {
       const response = await api.post('/api/sales/orders/', salesOrderData);
       console.log('Received data:', response.data);
-  
+
       if (response.status === 201) {
         setAlert({ severity: 'success', message: 'Sales order created successfully!' });
         setTimeout(() => {
           setAlert(null);
         }, 3000);
         setSalesOrderItems([]);
+
+      // Update the quotation status to 'accepted'
+      const updatedQuotation = await api.patch(`/api/sales/quotations/${id}/`, { status: 'accepted' });
+      setQuotation(updatedQuotation.data);
+
       } else {
         setAlert({ severity: 'error', message: `Error creating sales order: ${response.data.error || 'Unknown error'}` });
       }
@@ -94,7 +99,7 @@ export default function QuotationDetail() {
   const handleSendEmail = async () => {
     try {
       const response = await api.post(`/api/sales/quotations/${id}/send-email/`);
-  
+
       if (response.status === 200) {
         setAlert({ severity: 'success', message: 'Email sent successfully!' });
       } else {
@@ -112,7 +117,7 @@ export default function QuotationDetail() {
 
   return (
     <Box sx={{ flexGrow: 1, padding: 3 }}>
-      <AppBar position="static" color="default" sx={{ mb: 4, mt:2}}>
+      <AppBar position="static" color="default" sx={{ mb: 4, mt: 2 }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Quotation Details - {quotation.customer}
@@ -169,38 +174,36 @@ export default function QuotationDetail() {
       </Box>
 
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', marginBottom: 3 }}>
-        <Button 
-          variant="contained" 
-          color="success" 
-          startIcon={<CheckCircle />} 
-          sx={{ textTransform: 'none' }}
-          onClick={handleSubmit}
-        >
-          Approve
-        </Button>
-        <Button 
-          variant="contained" 
-          color="error" 
-          startIcon={<Cancel />} 
-          sx={{ textTransform: 'none' }}
-          onClick={() => console.log('Rejected')}
-        >
-          Reject
-        </Button>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          sx={{ textTransform: 'none' }}
-          onClick={handleSendEmail}
-        >
-          Send Quotation Email
-        </Button>
+        {/* Render the "Approve" and "Reject" buttons only if the status is "pending" */}
+        {quotation.status === 'pending' (
+          <>
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<CheckCircle />}
+              sx={{ textTransform: 'none' }}
+              onClick={handleSubmit}
+            >
+              Approve
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<Cancel />}
+              sx={{ textTransform: 'none' }}
+              onClick={() => console.log('Rejected')}
+            >
+              Reject
+            </Button>
+          </>
+        )}
+
       </Box>
 
-      <PreviewDownloadButtons 
+      {/* <PreviewDownloadButtons 
         onPreview={handlePreview} 
         onDownload={handleDownload} 
-      />
+      /> */}
     </Box>
   );
 }

@@ -80,6 +80,7 @@ export default function Components() {
   };
 
   const columns = [
+    { field: 'id', headerName: 'Component ID', width: 250 },
     { field: 'name', headerName: 'Component Name', width: 250 },
     // { field: 'description', headerName: 'Description', width: 300 },
     { field: 'quantity', headerName: 'Quantity', type: 'number', width: 150 },
