@@ -21,7 +21,7 @@ import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-g
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
-import api from '../../api';
+import api from '../../../api';
 
 export default function Suppliers() {
   const [suppliers, setSuppliers] = useState([]);

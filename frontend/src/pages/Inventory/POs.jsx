@@ -23,6 +23,7 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import api from '../../api';
+import pageAppbarStyles from '../../styles/pageAppbarStyles';
 
 const STATUS_CHOICES = {
   draft: { label: 'Draft', color: 'default' },
@@ -82,10 +83,6 @@ export default function POs() {
     navigate(`/inventory/purchase-order/${params.row.id}`);
   };
 
-  // const handleAddPurchaseOrder = () => {
-  //   navigate('/inventory/purchase-order/new');
-  // };
-
   const handleSearchChange = (event) => {
     const value = event.target.value;
     setSearchText(value);
@@ -104,10 +101,9 @@ export default function POs() {
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 100 },
-    { field: 'purchase_requisition_details', headerName: 'Purchase Requisition', width: 300 },
+    
     { field: 'supplier_id', headerName: 'Supplier', width: 150 },
     { field: 'status', headerName: 'Status', width: 150, renderCell: renderStatusChip },
-  
     { field: 'created_at', headerName: 'Created At', width: 200 },
     { field: 'price_per_unit', headerName: 'Price Per Unit', width: 150 },
     { field: 'total_price', headerName: 'Total Price', width: 150 },
@@ -121,7 +117,7 @@ export default function POs() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={pageAppbarStyles.paper}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Purchase Orders

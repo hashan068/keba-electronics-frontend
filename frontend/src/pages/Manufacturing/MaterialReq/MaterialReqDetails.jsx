@@ -58,6 +58,12 @@ const MaterialReqDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [alert, setAlert] = useState(null);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const userRole = localStorage.getItem('userrole');
+    setRole(userRole);
+  }, []);
 
   useEffect(() => {
     const fetchMaterialReq = async () => {
@@ -137,32 +143,30 @@ const MaterialReqDetails = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:8000/api/inventory/consumption-transactions/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await api.post('/api/inventory/consumption-transactions/', payload);
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         console.log('Material requisition item approved:', item.id);
         const response = await api.get(`/api/manufacturing/material-requisitions/${id}/`);
         setMaterialReq(response.data);
-        // await fetchComponents(response.data.items);
         return true;
+      } else if (response.status === 401) {
+        // Handle unauthorized error
+        console.error('Authentication credentials were not provided.');
+        setAlert({ severity: 'error', message: 'Authentication credentials were not provided. Please log in and try again.' });
+        return false;
       } else {
-        const responseText = await response.text();
-        console.error('Error approving material requisition item:', responseText);
+        console.error('Error approving material requisition item:', response.data);
+        setAlert({ severity: 'error', message: 'An error occurred while approving the material requisition item. Please try again later.' });
         return false;
       }
-      
     } catch (error) {
       console.error('Error approving material requisition item:', error);
       setAlert({ severity: 'error', message: 'An error occurred while approving the material requisition item. Please try again later.' });
       return false;
     }
   };
+
 
   const handleDismissAlert = () => {
     setAlert(null);
@@ -181,7 +185,7 @@ const MaterialReqDetails = () => {
       </Container>
     );
   }
-  
+
 
   return (
     <Container maxWidth="lg" sx={{ py: 4, px: 2, bgcolor: '#f5f5f5' }}>
@@ -193,16 +197,17 @@ const MaterialReqDetails = () => {
           <Button variant="contained" onClick={() => navigate(-1)}>
             Back
           </Button>
-          {(materialReq.status === 'pending' || materialReq.status === 'partialy_approved') && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleApproveRequisition}
-              sx={{ ml: 2 }}
-            >
-              Approve
-            </Button>
-          )}
+          {(materialReq.status === 'pending' || materialReq.status === 'partialy_approved') &&
+            role === 'Inventory Manager' && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleApproveRequisition}
+                sx={{ ml: 2 }}
+              >
+                Approve
+              </Button>
+            )}
         </Toolbar>
       </AppBar>
 
@@ -219,7 +224,7 @@ const MaterialReqDetails = () => {
       </Card>
 
       <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12}>
           <Card sx={{ boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
             {/* <CardHeader title="Material Requisition Details" /> */}
             <CardContent>
@@ -227,17 +232,16 @@ const MaterialReqDetails = () => {
                 {[
                   { label: 'Order ID:', value: materialReq.id },
                   { label: 'BOM ID:', value: materialReq.bom },
-
                   { label: 'Created At:', value: new Date(materialReq.created_at).toLocaleString() },
                   { label: 'Updated At:', value: new Date(materialReq.updated_at).toLocaleString() },
                 ].map((item, index) => (
                   <React.Fragment key={index}>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={6} md={3}>
                       <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
                         {item.label}
                       </Typography>
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={6} md={3}>
                       <Typography variant="body1" gutterBottom sx={{ color: '#666' }}>
                         {item.value}
                       </Typography>
@@ -259,60 +263,56 @@ const MaterialReqDetails = () => {
           <Card sx={{ boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
             <CardHeader title="Items" />
             <CardContent>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TableContainer>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>
-                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                              Item ID
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                              Component
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                              Quantity
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                              Status
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {materialReq.items.map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell>{item.id}</TableCell>
-                            <TableCell>{components[item.component] || 'Loading...'}</TableCell>
-                            <TableCell>{item.quantity}</TableCell>
-                            <TableCell>
-                              <Typography
-                                color={
-                                  item.status === 'approved'
-                                    ? 'success.main'
-                                    : item.status === 'rejected'
-                                      ? 'error.main'
-                                      : 'warning.main'
-                                }
-                              >
-                                {item.status}
-                              </Typography>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Grid>
-              </Grid>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                          Item ID
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                          Component
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                          Quantity
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                          Status
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {materialReq.items.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.id}</TableCell>
+                        <TableCell>{components[item.component] || 'Loading...'}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                        <TableCell>
+                          <Typography
+                            color={
+                              item.status === 'approved'
+                                ? 'success.main'
+                                : item.status === 'rejected'
+                                  ? 'error.main'
+                                  : 'warning.main'
+                            }
+                          >
+                            {item.status}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </CardContent>
           </Card>
         </Grid>

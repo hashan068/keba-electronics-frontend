@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import api from '../../api';
+import pageAppbarStyles from '../../styles/pageAppbarStyles';
 
 export default function Components() {
   const [components, setComponents] = useState([]);
@@ -79,10 +80,11 @@ export default function Components() {
   };
 
   const columns = [
-    { field: 'name', headerName: 'Component Name', width: 200 },
-    { field: 'description', headerName: 'Description', width: 300 },
-    { field: 'quantity', headerName: 'Quantity', type: 'number', width: 100 },
-    { field: 'reorder_level', headerName: 'Reorder Level', type: 'number', width: 100 },
+    { field: 'id', headerName: 'Component ID', width: 250 },
+    { field: 'name', headerName: 'Component Name', width: 250 },
+    // { field: 'description', headerName: 'Description', width: 300 },
+    { field: 'quantity', headerName: 'Quantity', type: 'number', width: 150 },
+    { field: 'reorder_level', headerName: 'Reorder Level', type: 'number', width: 150 },
     { field: 'unit_of_measure', headerName: 'Unit of Measure', width: 100 },
     { field: 'cost', headerName: 'Cost', type: 'number', width: 150 },
   ];
@@ -95,7 +97,7 @@ export default function Components() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={pageAppbarStyles.paper}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Components
@@ -146,31 +148,8 @@ export default function Components() {
                   components={{
                     Toolbar: CustomToolbar,
                   }}
-                  sx={{
-                    '& .MuiDataGrid-cell:hover': {
-                      backgroundColor: '#f5f5f5',
-                    },
-                    '& .MuiDataGrid-iconSeparator': {
-                      display: 'none',
-                    },
-                    '& .MuiDataGrid-columnHeaders': {
-                      backgroundColor: '#fafafa',
-                      borderBottom: '1px solid #e0e0e0',
-                    },
-                    '& .MuiDataGrid-footerContainer': {
-                      borderTop: '1px solid #e0e0e0',
-                    },
-                    '& .MuiDataGrid-sortIcon': {
-                      color: theme.palette.secondary.main,
-                    },
-                    '& .MuiTablePagination-root': {
-                      color: theme.palette.secondary.main,
-                    },
-                    '& .MuiPaginationItem-root.Mui-selected': {
-                      backgroundColor: theme.palette.secondary.light,
-                      color: '#fff',
-                    },
-                  }}
+                  hideFooter
+                  
                 />
               </Paper>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>

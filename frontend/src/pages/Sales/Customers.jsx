@@ -15,7 +15,14 @@ import {
   InputLabel,
   Pagination,
 } from '@mui/material';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import {
+  DataGrid,
+  GridToolbarContainer,
+  GridToolbarColumnsButton,
+  GridToolbarFilterButton,
+  GridToolbarExport,
+  GridToolbarDensitySelector,
+} from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
@@ -30,6 +37,26 @@ export default function Customers() {
   const [searchText, setSearchText] = useState('');
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const navigate = useNavigate();
+
+
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer sx={{ margin: '6px'}}>
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
+        <GridToolbarDensitySelector
+          slotProps={{ tooltip: { title: 'Change density' } }}
+        />
+        <Box sx={{ flexGrow: 1 }} />
+        <GridToolbarExport
+          slotProps={{
+            tooltip: { title: 'Export data' },
+            button: { variant: 'outlined' },
+          }}
+        />
+      </GridToolbarContainer>
+    );
+  }
 
   const getCustomers = () => {
     setLoading(true);
@@ -80,18 +107,20 @@ export default function Customers() {
   };
 
   const columns = [
-    { field: 'name', headerName: 'Name', width: 200 },
-    { field: 'email', headerName: 'Email', width: 200 },
+    { field: 'id', headerName: 'Customer ID', width: 150, align : 'center', headerAlign: 'center'},
+    { field: 'name', headerName: 'Name', width: 240 },
+    { field: 'email', headerName: 'Email', width: 250 },
     { field: 'phone', headerName: 'Phone', width: 150 },
-    { field: 'street_address', headerName: 'Street Address', width: 200 },
+    { field: 'street_address', headerName: 'Street Address', width: 320 },
     { field: 'city', headerName: 'City', width: 150 },
   ];
+
 
   return (
     <Container maxWidth="lg" sx={pageAppbarStyles.container}>
       <Paper sx={pageAppbarStyles.paper}>
         <Toolbar sx={pageAppbarStyles.toolbar}>
-          <Typography variant="h6">
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Customers
           </Typography>
           <TextField
@@ -103,7 +132,8 @@ export default function Customers() {
             InputProps={{
               startAdornment: <SearchIcon position="start" />,
             }}
-            sx={pageAppbarStyles.textField}
+            sx={{ marginRight: 2 }}
+          
           />
           <Button
             variant="contained"
@@ -123,7 +153,7 @@ export default function Customers() {
             </Box>
           ) : (
             <>
-              <Paper sx={{ p: 2, height: 500 }}>
+              <Paper sx={{ p: 2, height: 600 }}>
                 <DataGrid
                   rows={filteredCustomers.slice((page - 1) * pageSize, page * pageSize)}
                   columns={columns}
@@ -132,9 +162,17 @@ export default function Customers() {
                   paginationMode="server"
                   onRowClick={handleRowClick}
                   slots={{
-                    toolbar: GridToolbar,
+                    toolbar: CustomToolbar,
                   }}
-                  sx={pageAppbarStyles.dataGrid}
+                  // sx={pageAppbarStyles.dataGrid}
+                  sx={{
+                    ...pageAppbarStyles.dataGrid,
+                    '& .MuiDataGrid-columnHeader': {
+                      backgroundColor: '#eceff1', // Change  color
+                      color: 'black', // Adjust the text color
+                    },
+                  }}
+                  hideFooter
                 />
               </Paper>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>

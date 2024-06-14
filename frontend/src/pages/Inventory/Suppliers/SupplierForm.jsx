@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import api from '../../api';
+import api from '../../../api';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import {
@@ -62,6 +62,8 @@ const SupplierForm = () => {
     notes: '',
   });
 
+  const [submitAction, setSubmitAction] = useState('close');
+
   useEffect(() => {
     if (id) {
       api
@@ -117,8 +119,8 @@ const SupplierForm = () => {
         response = await api.post('/api/inventory/suppliers/', data);
       }
 
-      if (id) {
-        navigate(`/inventory/supplier`);
+      if (submitAction === 'close') {
+        navigate(`/inventory/suppliers`);
       } else {
         resetForm();
         setInitialValues({
@@ -249,11 +251,25 @@ const SupplierForm = () => {
                   color="primary"
                   disabled={isSubmitting}
                   onClick={() => {
+                    setSubmitAction('close');
                     handleSubmit();
                   }}
                   sx={{ flexGrow: 2 }}
                 >
                   {id ? 'Update and Close' : 'Create and Close'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    setSubmitAction('addNew');
+                    handleSubmit();
+                  }}
+                  sx={{ flexGrow: 2 }}
+                >
+                  {id ? 'Update and Add New' : 'Create and Add New'}
                 </Button>
               </Stack>
             </form>

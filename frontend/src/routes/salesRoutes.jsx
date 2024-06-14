@@ -12,6 +12,7 @@ import CustomerForm from '../pages/Sales/CustomerForm';
 import CustomerDetail from '../pages/Sales/CustomerDetail';
 import SalesReport from '../pages/Reports/SalesReport';
 import ProductForm from '../pages/Sales/ProductForm';
+import Insights from '../pages/Reports/Insights/Insights';
 
 const SalesRoutes = () => (
   <Routes>
@@ -30,6 +31,8 @@ const SalesRoutes = () => (
     <Route path="salesorder/new" element={<SalesOrderForm />} />
     <Route path="salesorder/:id" element={<SalesOrderDetails />} />
     <Route path="sales-reports" element={<SalesReport />} />
+
+    <Route path="insights" element={<Insights />} />
   </Routes>
 );
 

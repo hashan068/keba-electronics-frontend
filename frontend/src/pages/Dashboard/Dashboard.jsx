@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Typography, Container } from '@mui/material';
 import SalesDashboard from './SalesDashboard';
+import ManagerDashboard from './ManagerDashboard/ManagerDashboard';
+import { Container } from '@mui/material';
+import { useState, useEffect } from 'react';
+import MfgDashboard from './ManufacturingDashboard/MfgDashboard';
+import InventoryDashboard from './InventoryDashboard/InventoryDashboard';
+
 
 const Dashboard = () => {
   const [userRole, setUserRole] = useState('');
@@ -12,10 +16,13 @@ const Dashboard = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      {/* <Typography variant="h3" align="center" gutterBottom>
-        Dashboard
-      </Typography> */}
-      {userRole.includes('Admin') && <SalesDashboard />}
+      {userRole === 'General Manager' && <ManagerDashboard />}
+      {/* {userRole === 'Admin' && <ManagerDashboard />} */}
+      {userRole === 'Salesperson' && <SalesDashboard />}
+      {userRole === 'Production Manager' && <MfgDashboard />}
+      {userRole === 'Inventory Manager' && <InventoryDashboard />}
+      {userRole === 'Purchasing Manager' && <InventoryDashboard />}
+      {userRole === 'Admin' && <InventoryDashboard />}
     </Container>
   );
 };

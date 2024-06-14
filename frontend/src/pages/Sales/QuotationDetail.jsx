@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Button, Alert } from '@mui/material';
+import { Box, Typography, Button, Alert, AppBar, Toolbar } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { CheckCircle, Cancel } from '@mui/icons-material';
 import api from '../../api';
@@ -51,8 +51,6 @@ export default function QuotationDetail() {
       });
   };
 
-  
-
   const validateForm = () => {
     return true;
   };
@@ -75,24 +73,22 @@ export default function QuotationDetail() {
     console.log('Sending data:', salesOrderData);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/sales/orders/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(salesOrderData),
-      });
-      const responseData = await response.json();
-      console.log('Received data:', responseData);
+      const response = await api.post('/api/sales/orders/', salesOrderData);
+      console.log('Received data:', response.data);
 
-      if (response.ok) {
+      if (response.status === 201) {
         setAlert({ severity: 'success', message: 'Sales order created successfully!' });
         setTimeout(() => {
           setAlert(null);
         }, 3000);
         setSalesOrderItems([]);
+
+      // Update the quotation status to 'accepted'
+      const updatedQuotation = await api.patch(`/api/sales/quotations/${id}/`, { status: 'accepted' });
+      setQuotation(updatedQuotation.data);
+
       } else {
-        setAlert({ severity: 'error', message: `Error creating sales order: ${responseData.error || 'Unknown error'}` });
+        setAlert({ severity: 'error', message: `Error creating sales order: ${response.data.error || 'Unknown error'}` });
       }
     } catch (error) {
       console.error('Error creating sales order:', error);
@@ -102,17 +98,15 @@ export default function QuotationDetail() {
 
   const handleSendEmail = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/sales/quotations/${id}/send-email/`, {
-        method: 'POST',
-      });
-      const result = await response.json();
+      const response = await api.post(`/api/sales/quotations/${id}/send-email/`);
 
-      if (response.ok) {
+      if (response.status === 200) {
         setAlert({ severity: 'success', message: 'Email sent successfully!' });
       } else {
-        setAlert({ severity: 'error', message: result.error || 'Error sending email' });
+        setAlert({ severity: 'error', message: response.data.error || 'Error sending email' });
       }
     } catch (error) {
+      console.error('Error sending email:', error);
       setAlert({ severity: 'error', message: 'An error occurred while sending the email. Please try again later.' });
     }
   };
@@ -123,9 +117,24 @@ export default function QuotationDetail() {
 
   return (
     <Box sx={{ flexGrow: 1, padding: 3 }}>
-      <Typography variant="h3" align="center" sx={{ marginBottom: 3 }}>
-        Quotation Details
-      </Typography>
+      <AppBar position="static" color="default" sx={{ mb: 4, mt: 2 }}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Quotation Details - {quotation.customer}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSendEmail}
+            sx={{
+              backgroundColor: '#1a237e',
+              '&:hover': { backgroundColor: '#0d1b5e' },
+            }}
+          >
+            Send Quotation Email
+          </Button>
+        </Toolbar>
+      </AppBar>
 
       {alert && (
         <Alert severity={alert.severity} onClose={() => setAlert(null)} sx={{ marginBottom: 2 }}>
@@ -165,38 +174,36 @@ export default function QuotationDetail() {
       </Box>
 
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', marginBottom: 3 }}>
-        <Button 
-          variant="contained" 
-          color="success" 
-          startIcon={<CheckCircle />} 
-          sx={{ textTransform: 'none' }}
-          onClick={handleSubmit}
-        >
-          Approve
-        </Button>
-        <Button 
-          variant="contained" 
-          color="error" 
-          startIcon={<Cancel />} 
-          sx={{ textTransform: 'none' }}
-          onClick={() => console.log('Rejected')}
-        >
-          Reject
-        </Button>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          sx={{ textTransform: 'none' }}
-          onClick={handleSendEmail}
-        >
-          Send Quotation Email
-        </Button>
+        {/* Render the "Approve" and "Reject" buttons only if the status is "pending" */}
+        {quotation.status === 'pending' (
+          <>
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<CheckCircle />}
+              sx={{ textTransform: 'none' }}
+              onClick={handleSubmit}
+            >
+              Approve
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<Cancel />}
+              sx={{ textTransform: 'none' }}
+              onClick={() => console.log('Rejected')}
+            >
+              Reject
+            </Button>
+          </>
+        )}
+
       </Box>
 
-      <PreviewDownloadButtons 
+      {/* <PreviewDownloadButtons 
         onPreview={handlePreview} 
         onDownload={handleDownload} 
-      />
+      /> */}
     </Box>
   );
 }

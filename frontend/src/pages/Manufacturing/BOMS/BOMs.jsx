@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import api from '../../../api';
+import pageAppbarStyles from '../../../styles/pageAppbarStyles';
 
 const BOMs = () => {
   const [boms, setBoms] = useState([]);
@@ -99,7 +100,7 @@ const BOMs = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={pageAppbarStyles.paper}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Bill of Materials

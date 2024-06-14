@@ -8,10 +8,10 @@ import api from '../../api';
 
 const StatisticsDashboard = () => {
   const [data, setData] = useState([
-    { label: 'Quotations', value: 0, icon: <ReceiptIcon />, color: '#4caf50', percentage: '10%' },
-    { label: 'Sales Orders', value: 0, icon: <ShoppingCartIcon />, color: '#ff9800', percentage: '-5%' },
-    { label: 'Customers', value: 0, icon: <PeopleIcon />, color: '#2196f3', percentage: '0%' },
-    { label: 'Products', value: 0, icon: <InventoryIcon />, color: '#9c27b0', percentage: '25%' },
+    { label: 'Quotations', value: 0, icon: <ReceiptIcon />, color: '#4caf50'},
+    { label: 'Sales Orders', value: 0, icon: <ShoppingCartIcon />, color: '#ff9800'},
+    { label: 'Customers', value: 0, icon: <PeopleIcon />, color: '#2196f3'},
+    { label: 'Products', value: 0, icon: <InventoryIcon />, color: '#9c27b0'},
   ]);
 
   const [loading, setLoading] = useState(true);
@@ -60,9 +60,7 @@ const StatisticsDashboard = () => {
               </Box>
 
               <Typography variant="subtitle1">{item.label}</Typography>
-              <Typography variant="subtitle2" sx={{ marginTop: '10px', color: item.percentage.includes('-') ? 'red' : 'green' }}>
-                {item.percentage} from last month
-              </Typography>
+
             </Paper>
           </Grid>
         ))}

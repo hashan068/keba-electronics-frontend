@@ -107,25 +107,28 @@ export default function Product() {
   }
 
   const columns = [
+    { field: 'id', headerName: 'Product ID', width: 150, align : 'center', headerAlign: 'center'},
     { field: 'product_name', headerName: 'Product Name', width: 200 },
-    { field: 'description', headerName: 'Description', width: 300 },
-    { field: 'price', headerName: 'Price', type: 'number', width: 150 },
-    { field: 'bom', headerName: 'BOM', width: 150 },
+    // { field: 'description', headerName: 'Description', width: 300 },
+    { field: 'price', headerName: 'Price', type: 'number', width: 150, align : 'center', headerAlign: 'center'},
+    { field: 'warranty_years', headerName: 'Warranty Years', type: 'number', width: 150, align : 'center', headerAlign: 'center' },
+    { field: 'input_voltage', headerName: 'Input Voltage', width: 150, align : 'center', headerAlign: 'center' },
+    { field: 'output_voltage', headerName: 'Output Voltage', width: 150, align : 'center', headerAlign: 'center' },
+    { field: 'bom', headerName: 'BOM ID', width: 150, align : 'center', headerAlign: 'center' },
     { field: 'inverter_type', headerName: 'Inverter Type', width: 150 },
     { field: 'power_rating', headerName: 'Power Rating', type: 'number', width: 150 },
     { field: 'frequency', headerName: 'Frequency', width: 150 },
     { field: 'efficiency', headerName: 'Efficiency', width: 150 },
     { field: 'surge_power', headerName: 'Surge Power', type: 'number', width: 150 },
-    { field: 'warranty_years', headerName: 'Warranty Years', type: 'number', width: 150 },
-    { field: 'input_voltage', headerName: 'Input Voltage', width: 150 },
-    { field: 'output_voltage', headerName: 'Output Voltage', width: 150 },
+
+
   ];
 
   return (
     <Container maxWidth="lg" sx={pageAppbarStyles.container}>
       <Paper sx={pageAppbarStyles.paper}>
         <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Products
           </Typography>
           <TextField
@@ -137,7 +140,8 @@ export default function Product() {
             InputProps={{
               startAdornment: <SearchIcon position="start" />,
             }}
-            sx={pageAppbarStyles.dataGrid}
+            sx={{ marginRight: 2 }}
+          
           />
           <Button
             variant="contained"
@@ -169,6 +173,7 @@ export default function Product() {
                     toolbar: CustomToolbar,
                   }}
                   sx={pageAppbarStyles.dataGrid}
+                  hideFooter
                 />
               </Paper>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>

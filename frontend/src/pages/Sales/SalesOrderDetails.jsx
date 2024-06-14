@@ -17,6 +17,11 @@ import {
   CardHeader,
   CardContent,
   Skeleton,
+  AppBar,
+  Toolbar,
+  Stepper,
+  Step,
+  StepLabel,
 } from '@mui/material';
 import api from '../../api';
 
@@ -26,7 +31,19 @@ const SalesOrderDetails = () => {
   const [salesOrder, setSalesOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [salesOrderItems, setSalesOrderItems] = useState([]);
-  const [bomId, setBomId] = useState(null);
+  const [role, setRole] = useState(null);
+  const [username, setUsername] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    const userRole = localStorage.getItem('userrole');
+    const userName = localStorage.getItem('username');
+    const userId = localStorage.getItem('user_id');
+    setRole(userRole);
+    setUsername(userName);
+    setUserId(userId);
+  }, []);
 
   useEffect(() => {
     const fetchSalesOrder = async () => {
@@ -36,7 +53,7 @@ const SalesOrderDetails = () => {
           const { data } = await api.get(`/api/sales/orders/${id}/`);
           setSalesOrder(data);
           setSalesOrderItems(data.order_items);
-          console.log(data);
+          setStatus(data.status); // Set the status of the sales order
         } catch (error) {
           console.error(error);
         } finally {
@@ -47,18 +64,18 @@ const SalesOrderDetails = () => {
     fetchSalesOrder();
   }, [id]);
 
-  const fetchBomId = async (productId) => {
-    try {
-      const response = await api.get(`/api/sales/products/${productId}/`);
-      setBomId(response.data.bom);
-      console.log(response.data.bom);
-    } catch (error) {
-      console.error('Error fetching BOM ID:', error);
-    }
-  };
+  const STATUS_CHOICES = [
+    { value: 'pending', label: 'Pending' },
+    { value: 'confirmed', label: 'Confirmed' },
+    { value: 'processing', label: 'Processing' },
+    { value: 'in_Production', label: 'In Production' },
+    { value: 'Ready_for_delivery', label: 'Ready for Delivery' },
+    // { value: 'cancelled', label: 'Cancelled' },
+    { value: 'delivered', label: 'Delivered' },
+  ];
 
   const createManufacturingOrder = async (salesOrderItemId) => {
-    const salesOrderItem = salesOrderItems.find(item => item.id === salesOrderItemId);
+    const salesOrderItem = salesOrderItems.find(item => item.sales_order_item_id === salesOrderItemId);
 
     if (!salesOrderItem) return;
 
@@ -68,7 +85,8 @@ const SalesOrderDetails = () => {
         sales_order_item: salesOrderItem.sales_order_item_id,
         quantity: salesOrderItem.quantity,
         product_id: salesOrderItem.product,
-        bom: product.bom, // Include the BOM ID from the product details
+        bom: product.bom,
+        creater: userId,
       };
 
       console.log(manufacturingOrderData);
@@ -86,10 +104,88 @@ const SalesOrderDetails = () => {
 
   const handleManufacture = () => {
     salesOrderItems.forEach((item) => {
-      createManufacturingOrder(item.id);
+      createManufacturingOrder(item.sales_order_item_id);
     });
+    handleStatusUpdate('in_production'); // Automatically update the status to 'in_production' after manufacturing orders are created
   };
 
+  const getStatusStep = (status) => {
+    return STATUS_CHOICES.findIndex(choice => choice.value === status);
+  };
+
+  const handleStatusUpdate = async (newStatus) => {
+    try {
+      const payload = { status: newStatus }; 
+
+      console.log('Payload:', payload);
+
+      await api.patch(`/api/sales/orders/${id}/`, payload);
+
+      // Fetch and update the sales order state
+      const response = await api.get(`/api/sales/orders/${id}/`);
+      setSalesOrder(response.data);
+      setStatus(newStatus);
+
+      console.log('Status updated successfully:', newStatus);
+    } catch (error) {
+      if (error.response) {
+
+      } else {
+        console.error('Error message:', error.message);
+      }
+    }
+  };
+
+  const renderStatusControls = () => {
+    switch (status) {
+      case 'pending':
+        if (role === 'Production Manager') {
+          return (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleStatusUpdate('confirmed');
+                handleManufacture();
+              }}
+            >
+              Manufacture
+            </Button>
+          );
+        }
+        break;
+      case 'confirmed':
+        return (
+          <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('processing')}>
+            Start Processing
+          </Button>
+        );
+      case 'processing':
+        return (
+          <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('in_Production')}>
+            Start Production
+          </Button>
+        );
+      case 'in_Production':
+        return (
+          <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('Ready_for_delivery')}>
+            Ready for Delivery
+          </Button>
+        );
+      case 'Ready_for_delivery':
+        return (
+          <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('delivered')}>
+            Mark as Delivered
+          </Button>
+        );
+      case 'delivered':
+        return <Typography variant="body1">Order Delivered</Typography>;
+      case 'cancelled':
+        return <Typography variant="body1">Order Cancelled</Typography>;
+      default:
+        return null;
+    }
+  };
 
   if (isLoading) {
     return (
@@ -111,32 +207,40 @@ const SalesOrderDetails = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 2, py: 4, px: 2, backgroundColor: '#b0bec5' }}>
+    <Container maxWidth="lg" sx={{ mt: 2, py: 4, px: 2, backgroundColor: '#eceff1' }}>
+      <AppBar position="static" color="default" sx={{ mb: 4 }}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            {`Sales Order Details - ID ${salesOrder.id}`}
+          </Typography>
+          {renderStatusControls()}
+        </Toolbar>
+      </AppBar>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Typography variant="h4" gutterBottom sx={{ color: '#3f51b5', fontWeight: 'bold' }}>
-            Sales Order Details
-          </Typography>
+          <Box sx={{ width: '100%', mb: 4 }}>
+            <Stepper activeStep={getStatusStep(salesOrder.status)} alternativeLabel>
+              {STATUS_CHOICES.map((choice) => (
+                <Step key={choice.value}>
+                  <StepLabel>{choice.label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </Box>
         </Grid>
         <Grid item xs={12}>
           <Card sx={{ boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)' }}>
-            <CardHeader
-              title="Order Details"
-              action={
-                <Button variant="contained" color="primary" onClick={handleManufacture} sx={{ backgroundColor: '#3f51b5', '&:hover': { backgroundColor: '#303fff' } }}>
-                  Manufacture
-                </Button>
-              }
-            />
             <CardContent>
-              <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
+              <Typography variant="body1" gutterBottom sx={{ color: '#424242', fontWeight: 'bold' }}>
                 Order ID: {salesOrder.id}
               </Typography>
-              <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
+              <Typography variant="body1" gutterBottom sx={{ color: '#424242', fontWeight: 'bold' }}>
                 Customer: {salesOrder.customer_name}
               </Typography>
-
-              <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold' }}>
+              <Typography variant="body1" gutterBottom sx={{ color: '#424242', fontWeight: 'bold' }}>
+                Order Date: {new Date(salesOrder.created_at).toLocaleString()}
+              </Typography>
+              <Typography variant="body1" gutterBottom sx={{ color: '#424242', fontWeight: 'bold' }}>
                 Status: {salesOrder.status}
               </Typography>
             </CardContent>
@@ -153,27 +257,22 @@ const SalesOrderDetails = () => {
                       <TableCell align="right" sx={{ fontWeight: 'bold' }}>ID</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 'bold' }}>Product</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Price</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Unit Price</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total Price</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {salesOrderItems.map((item) => (
-                      <TableRow key={item.product}>
+                      <TableRow key={item.sales_order_item_id}>
                         <TableCell align="right">{item.sales_order_item_id}</TableCell>
-                        <TableCell align="right">{item.product_name}</TableCell>
+                        <TableCell align="right">{item.product}</TableCell>
                         <TableCell align="right">{item.quantity}</TableCell>
-                        <TableCell align="right">{item.price}</TableCell>
-                        <TableCell align="right">{(item.quantity * parseFloat(item.price)).toFixed(2)}</TableCell>
+                        <TableCell align="right">{item.unit_price}</TableCell>
+                        <TableCell align="right">{item.total_price}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-
-                <Typography variant="body1" gutterBottom sx={{ color: '#666', fontWeight: 'bold', margin: 4, textAlign: 'right' }}>
-                  Total Amount: {salesOrder.total_amount}
-                </Typography>
-
               </TableContainer>
             </CardContent>
           </Card>
@@ -181,7 +280,6 @@ const SalesOrderDetails = () => {
       </Grid>
     </Container>
   );
-
 };
 
 export default SalesOrderDetails;

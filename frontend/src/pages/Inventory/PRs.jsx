@@ -23,8 +23,10 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import api from '../../api';
+import pageAppbarStyles from '../../styles/pageAppbarStyles';
 
 const STATUS_CHOICES = {
+  created: { label: 'Created', color: 'warning' },
   pending: { label: 'Pending', color: 'warning' },
   approved: { label: 'Approved', color: 'success' },
   rejected: { label: 'Rejected', color: 'error' },
@@ -121,7 +123,8 @@ export default function PRs() {
 
   const columns = [
     { field: 'id', headerName: 'PR ID', width: 100 },
-    { field: 'component_id', headerName: 'Component ID', width: 150 },
+    { field: 'component_id', headerName: 'Component ID', width: 100 },
+    { field: 'component_name', headerName: 'Component Name', width: 250 },
     { field: 'quantity', headerName: 'Quantity', type: 'number', width: 100 },
     { field: 'status', headerName: 'Status', width: 150, renderCell: renderStatusChip },
     { field: 'priority', headerName: 'Priority', width: 150, renderCell: renderPriorityChip },
@@ -136,7 +139,7 @@ export default function PRs() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={pageAppbarStyles.paper}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Purchase Requisitions

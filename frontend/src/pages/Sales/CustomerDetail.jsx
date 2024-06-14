@@ -43,12 +43,21 @@ export default function CustomerDetail() {
 
   const handleSaveClick = () => {
     api
-      .put(`/api/sales/customers/${id}/`, customer)
-      .then(() => {
+      .put(`/api/sales/customers/${id}/`, customer, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then((res) => {
         setIsEditing(false);
+        setCustomer(res.data); // Update customer state with latest data from server
       })
       .catch((err) => {
-        console.error(err);
+        if (err.response) {
+          console.error('Error response:', err.response.data);
+        } else {
+          console.error('Error message:', err.message);
+        }
       });
   };
 
