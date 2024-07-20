@@ -129,25 +129,28 @@ export default function ManufacturingOrder() {
   };
 
   const columns = [
-    { field: 'id', headerName: 'Order ID', width: 150 },
-    {
-      field: 'created_at_date',
-      headerName: 'Manufacturing Order Date',
-      type: 'date',
-      width: 180,
-      valueFormatter: (params) => params.value && new Date(params.value).toLocaleDateString(),
-    },
+    { field: 'id', headerName: 'Order ID', width: 100 },
+    { field: 'product_id', headerName: 'Product', width: 100 },
+    
+    { field: 'product_name', headerName: 'Product Name', width: 360 },
     {
       field: 'status',
       headerName: 'Status',
       width: 150,
+      align : 'center', headerAlign: 'center',
       renderCell: renderStatusChip
     },
-    { field: 'product_id', headerName: 'Product', width: 150 },
-    { field: 'product_name', headerName: 'Product Name', width: 300 },
+    {
+      field: 'created_at_date',
+      headerName: 'Manufacturing Order Date',
+      type: 'date',
+      width: 200,
+      align : 'center', headerAlign: 'center',
+      valueFormatter: (params) => params.value && new Date(params.value).toLocaleDateString(),
+    },
     { field: 'quantity', headerName: 'Quantity', type: 'number', width: 150 },
     
-    
+
   ];
 
 

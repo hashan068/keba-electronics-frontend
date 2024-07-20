@@ -26,7 +26,7 @@ import { format } from 'date-fns';
 import pageAppbarStyles from '../../styles/pageAppbarStyles';
 
 const STATUS_CHOICES = {
-  quotation: { label: 'Quotation', color: 'default' },
+  quotation: { label: 'Pending', color: 'default' },
   quotation_sent: { label: 'Quotation Sent', color: 'primary' },
   accepted: { label: 'Accepted', color: 'success' },
   rejected: { label: 'Rejected', color: 'error' },
@@ -126,7 +126,7 @@ export default function Quotations() {
   };
 
   const columns = [
-    { field: 'id', headerName: 'Quotation ID', width: 100 },
+    { field: 'id', headerName: 'Quotation ID', width: 120 },
     { field: 'customer_name', headerName: 'Customer', width: 200 },
     {
       field: 'date',

@@ -181,6 +181,7 @@ const MfgOrderDetails = () => {
                 <Grid container spacing={2}>
                   {[
                     { label: 'Order ID:', value: manufacturingOrder?.id || 'N/A' },
+                    { label: 'Sales Order ID:', value: manufacturingOrder?.sales_order || 'N/A' },
                     { label: 'Product ID:', value: manufacturingOrder?.product_id || 'N/A' },
                     { label: 'Quantity:', value: manufacturingOrder?.quantity || 'N/A' },
                     { label: 'BOM ID:', value: bomId || 'N/A' },

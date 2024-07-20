@@ -135,7 +135,7 @@ function ResponsiveAppBar() {
                 </Typography>
                 <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                   {/* Add navigation items here */}
-                  <MenuItem
+                  {/* <MenuItem
                     component={Link}
                     to="/dashboard"
                     sx={{
@@ -147,14 +147,15 @@ function ResponsiveAppBar() {
                     }}
                   >
                     Dashboard
-                  </MenuItem>
+                  </MenuItem> */}
                   {/* Add more navigation items */}
                 </Box>
+
                 <Box sx={{ flexGrow: 0 }}>
                   <Tooltip title="Notifications">
                     <IconButton
                       onClick={handleNotificationsClick}
-                      sx={{ p: 2 }}
+                      sx={{ p: 1 }}
                       color="inherit"
                       className="notification-icon"
                     >
@@ -166,6 +167,7 @@ function ResponsiveAppBar() {
                       <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
                     </IconButton>
                   </Tooltip>
+
                   <Menu
                     sx={{ mt: '45px' }}
                     id="menu-appbar"

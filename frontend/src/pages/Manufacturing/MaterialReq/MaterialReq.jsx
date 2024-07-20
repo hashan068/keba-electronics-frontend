@@ -16,7 +16,14 @@ import {
   InputLabel,
   Pagination,
 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import {
+  DataGrid,
+  GridToolbarContainer,
+  GridToolbarColumnsButton,
+  GridToolbarFilterButton,
+  GridToolbarExport,
+  GridToolbarDensitySelector,
+} from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
@@ -100,8 +107,34 @@ const MaterialReq = () => {
     setPage(1); // Reset to the first page whenever the page size changes
   };
 
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
+        <GridToolbarDensitySelector
+          slotProps={{ tooltip: { title: 'Change density' } }}
+        />
+        <Box sx={{ flexGrow: 1 }} />
+        <GridToolbarExport
+          slotProps={{
+            tooltip: { title: 'Export data' },
+            button: { variant: 'outlined' },
+          }}
+        />
+      </GridToolbarContainer>
+    );
+  }
+
   const columns = [
-    { field: 'id', headerName: 'Requisition ID', width: 150 },
+    { field: 'id', headerName: 'MR ID', width: 150, align : 'center', headerAlign: 'center' },
+    {
+      field: 'manufacturing_order',
+      headerName: 'MO ID',
+      width: 150, align : 'center', headerAlign: 'center'
+      
+    },
+
     {
       field: 'status',
       headerName: 'Status',
@@ -120,12 +153,7 @@ const MaterialReq = () => {
       width: 300,
 
     },
-    {
-      field: 'manufacturing_order',
-      headerName: 'MO ID',
-      width: 300,
 
-    },
   ];
 
   return (
@@ -172,21 +200,11 @@ const MaterialReq = () => {
                   rowCount={filteredMaterialReqs.length}
                   paginationMode="server"
                   onRowClick={handleRowClick}
-                  sx={{
-                    '& .MuiDataGrid-cell:hover': {
-                      backgroundColor: '#f5f5f5',
-                    },
-                    '& .MuiDataGrid-iconSeparator': {
-                      display: 'none',
-                    },
-                    '& .MuiDataGrid-columnHeaders': {
-                      backgroundColor: '#fafafa',
-                      borderBottom: '1px solid #e0e0e0',
-                    },
-                    '& .MuiDataGrid-footerContainer': {
-                      borderTop: '1px solid #e0e0e0',
-                    },
+                  slots={{
+                    toolbar: CustomToolbar,
                   }}
+                  sx={pageAppbarStyles.dataGrid}
+                  hideFooter
                 />
               </Paper>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>

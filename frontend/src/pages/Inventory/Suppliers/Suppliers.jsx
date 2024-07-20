@@ -17,11 +17,19 @@ import {
   useMediaQuery,
   Pagination,
 } from '@mui/material';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import {
+  DataGrid,
+  GridToolbarContainer,
+  GridToolbarColumnsButton,
+  GridToolbarFilterButton,
+  GridToolbarExport,
+  GridToolbarDensitySelector,
+} from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import api from '../../../api';
+import pageAppbarStyles from '../../../styles/pageAppbarStyles';
 
 export default function Suppliers() {
   const [suppliers, setSuppliers] = useState([]);
@@ -77,6 +85,24 @@ export default function Suppliers() {
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
   };
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
+        <GridToolbarDensitySelector
+          slotProps={{ tooltip: { title: 'Change density' } }}
+        />
+        <Box sx={{ flexGrow: 1 }} />
+        <GridToolbarExport
+          slotProps={{
+            tooltip: { title: 'Export data' },
+            button: { variant: 'outlined' },
+          }}
+        />
+      </GridToolbarContainer>
+    );
+  }
 
   const columns = [
     { field: 'name', headerName: 'Supplier Name', width: 200 },
@@ -87,11 +113,7 @@ export default function Suppliers() {
     { field: 'notes', headerName: 'Notes', width: 300 },
   ];
 
-  const CustomToolbar = () => (
-    <GridToolbarContainer>
-      <GridToolbarExport />
-    </GridToolbarContainer>
-  );
+
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
@@ -143,34 +165,13 @@ export default function Suppliers() {
                   rowCount={filteredSuppliers.length}
                   paginationMode="server"
                   onRowClick={handleRowClick}
-                  components={{
-                    Toolbar: CustomToolbar,
+
+                  slots={{
+                    toolbar: CustomToolbar,
                   }}
-                  sx={{
-                    '& .MuiDataGrid-cell:hover': {
-                      backgroundColor: '#f5f5f5',
-                    },
-                    '& .MuiDataGrid-iconSeparator': {
-                      display: 'none',
-                    },
-                    '& .MuiDataGrid-columnHeaders': {
-                      backgroundColor: '#fafafa',
-                      borderBottom: '1px solid #e0e0e0',
-                    },
-                    '& .MuiDataGrid-footerContainer': {
-                      borderTop: '1px solid #e0e0e0',
-                    },
-                    '& .MuiDataGrid-sortIcon': {
-                      color: theme.palette.secondary.main,
-                    },
-                    '& .MuiTablePagination-root': {
-                      color: theme.palette.secondary.main,
-                    },
-                    '& .MuiPaginationItem-root.Mui-selected': {
-                      backgroundColor: theme.palette.secondary.light,
-                      color: '#fff',
-                    },
-                  }}
+                  sx={pageAppbarStyles.dataGrid}
+                  hideFooter
+
                 />
               </Paper>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
