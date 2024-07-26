@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
-import api from "../api";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constants";
+import api from "../../api";
 import { Button, TextField, Box, CircularProgress, Typography, Alert } from '@mui/material';
 import "../styles/Form.css";
 
