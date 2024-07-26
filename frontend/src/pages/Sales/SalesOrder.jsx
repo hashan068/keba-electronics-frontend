@@ -39,6 +39,7 @@ const STATUS_CHOICES = {
   processing: { label: 'Processing', color: 'info' },
   completed: { label: 'Completed', color: 'success' },
   cancelled: { label: 'Cancelled', color: 'error' },
+  Ready_for_delivery: { label: 'Ready', color: 'success' },
   // Add more status mappings
 };
 

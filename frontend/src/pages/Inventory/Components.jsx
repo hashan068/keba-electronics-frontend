@@ -17,7 +17,14 @@ import {
   useMediaQuery,
   Pagination,
 } from '@mui/material';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import {
+  DataGrid,
+  GridToolbarContainer,
+  GridToolbarColumnsButton,
+  GridToolbarFilterButton,
+  GridToolbarExport,
+  GridToolbarDensitySelector,
+} from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
@@ -89,11 +96,24 @@ export default function Components() {
     { field: 'cost', headerName: 'Cost', type: 'number', width: 150 },
   ];
 
-  const CustomToolbar = () => (
-    <GridToolbarContainer>
-      <GridToolbarExport />
-    </GridToolbarContainer>
-  );
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
+        <GridToolbarDensitySelector
+          slotProps={{ tooltip: { title: 'Change density' } }}
+        />
+        <Box sx={{ flexGrow: 1 }} />
+        <GridToolbarExport
+          slotProps={{
+            tooltip: { title: 'Export data' },
+            button: { variant: 'outlined' },
+          }}
+        />
+      </GridToolbarContainer>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
@@ -145,12 +165,14 @@ export default function Components() {
                   rowCount={filteredComponents.length}
                   paginationMode="server"
                   onRowClick={handleRowClick}
-                  components={{
-                    Toolbar: CustomToolbar,
+                  slots={{
+                    toolbar: CustomToolbar,
                   }}
+                  sx={pageAppbarStyles.dataGrid}
                   hideFooter
-                  
                 />
+                  
+
               </Paper>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                 <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>

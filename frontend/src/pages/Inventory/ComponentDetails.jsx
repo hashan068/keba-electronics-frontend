@@ -65,9 +65,9 @@ const ComponentDetails = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseReplenishDialog}>Cancel</Button>
-          <Button onClick={handleReplenish} disabled={replenishQuantity <= 0}>
+          {/* <Button onClick={handleReplenish} disabled={replenishQuantity <= 0}>
             Replenish
-          </Button>
+          </Button> */}
         </DialogActions>
       </Dialog>
     </div>

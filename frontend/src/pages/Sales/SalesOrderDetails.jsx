@@ -65,13 +65,13 @@ const SalesOrderDetails = () => {
   }, [id]);
 
   const STATUS_CHOICES = [
-    { value: 'pending', label: 'Pending' },
+    // { value: 'pending', label: 'Pending' },
     { value: 'confirmed', label: 'Confirmed' },
     { value: 'processing', label: 'Processing' },
     { value: 'in_Production', label: 'In Production' },
     { value: 'Ready_for_delivery', label: 'Ready for Delivery' },
     // { value: 'cancelled', label: 'Cancelled' },
-    { value: 'delivered', label: 'Delivered' },
+    // { value: 'delivered', label: 'Delivered' },
   ];
 
   const createManufacturingOrder = async (salesOrderItemId) => {
@@ -106,7 +106,7 @@ const SalesOrderDetails = () => {
     salesOrderItems.forEach((item) => {
       createManufacturingOrder(item.sales_order_item_id);
     });
-    handleStatusUpdate('in_production'); // Automatically update the status to 'in_production' after manufacturing orders are created
+    handleStatusUpdate('in_production');
   };
 
   const getStatusStep = (status) => {
@@ -138,14 +138,14 @@ const SalesOrderDetails = () => {
 
   const renderStatusControls = () => {
     switch (status) {
-      case 'pending':
+      case 'confirmed':
         if (role === 'Production Manager') {
           return (
             <Button
               variant="contained"
               color="primary"
               onClick={() => {
-                handleStatusUpdate('confirmed');
+                handleStatusUpdate('processing');
                 handleManufacture();
               }}
             >
@@ -154,12 +154,12 @@ const SalesOrderDetails = () => {
           );
         }
         break;
-      case 'confirmed':
-        return (
-          <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('processing')}>
-            Start Processing
-          </Button>
-        );
+      // case 'confirmed':
+      //   return (
+      //     <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('processing')}>
+      //       Start Processing
+      //     </Button>
+      //   );
       case 'processing':
         return (
           <Button variant="contained" color="primary" onClick={() => handleStatusUpdate('in_Production')}>
@@ -178,10 +178,10 @@ const SalesOrderDetails = () => {
             Mark as Delivered
           </Button>
         );
-      case 'delivered':
-        return <Typography variant="body1">Order Delivered</Typography>;
-      case 'cancelled':
-        return <Typography variant="body1">Order Cancelled</Typography>;
+      // case 'delivered':
+      //   return <Typography variant="body1">Order Delivered</Typography>;
+      // case 'cancelled':
+      //   return <Typography variant="body1">Order Cancelled</Typography>;
       default:
         return null;
     }
@@ -255,8 +255,8 @@ const SalesOrderDetails = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell align="right" sx={{ fontWeight: 'bold' }}>ID</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Product</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Product</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 'bold' }}>Unit Price</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total Price</TableCell>
                     </TableRow>
@@ -265,15 +265,18 @@ const SalesOrderDetails = () => {
                     {salesOrderItems.map((item) => (
                       <TableRow key={item.sales_order_item_id}>
                         <TableCell align="right">{item.sales_order_item_id}</TableCell>
-                        <TableCell align="right">{item.product}</TableCell>
-                        <TableCell align="right">{item.quantity}</TableCell>
-                        <TableCell align="right">{item.unit_price}</TableCell>
-                        <TableCell align="right">{item.total_price}</TableCell>
+                        <TableCell align="center">{item.product_name}</TableCell>
+                        <TableCell align="center">{item.quantity}</TableCell>
+                        <TableCell align="right">{item.price}</TableCell>
+                        <TableCell align="right">{item.quantity * item.price}.00</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </TableContainer>
+              <Typography variant="body1" gutterBottom sx={{ color: '#424242', fontWeight: 'bold',marginTop: '16px', textAlign: 'right',marginRight: '14px' }}>
+                Total : {salesOrder.total_amount}
+              </Typography>
             </CardContent>
           </Card>
         </Grid>

@@ -58,12 +58,12 @@ const menuItems = [
       { text: 'Suppliers', icon: <InventoryIcon />, path: '/inventory/suppliers', roles: ['Admin', 'General Manager', 'Purchasing Manager'] },
     ],
   },
-  {
-    section: 'Notifications',
-    items: [
-      { text: 'Notifications', icon: <AssessmentRoundedIcon />, path: '/sales/sales-reports', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
-    ],
-  },
+  // {
+  //   section: 'Notifications',
+  //   items: [
+  //     { text: 'Notifications', icon: <AssessmentRoundedIcon />, path: '/sales/sales-reports', roles: ['Admin', 'General Manager', 'Inventory Manager', 'Purchasing Manager'] },
+  //   ],
+  // },
   {
     section: 'Reports',
     items: [
@@ -113,13 +113,13 @@ export default function PermanentDrawerLeft() {
         </Box>
         <Divider sx={{ bgcolor: 'gray' }} />
         {/* Profile Container */}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 3, py: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 3, py: 2 }}>
           <Avatar alt={username} src="/broken-image.jpg" />
           <Box sx={{ ml: 2 }}>
-            <Typography variant="h6" component="div" style={{ fontSize: '24px' }}>
+            <Typography variant="h6" component="div" style={{ fontSize: '22px' }}>
               {username}
             </Typography>
-            <Typography variant="body2" component="div" style={{ fontSize: '16px' }}>
+            <Typography variant="body2" component="div" style={{ fontSize: '14px' }}>
               {role}
             </Typography>
 
@@ -151,7 +151,7 @@ export default function PermanentDrawerLeft() {
                           }}
                         >
                           <ListItemIcon sx={{ color: '#ffffff', fontSize: '8px' }}>{subItem.icon}</ListItemIcon>
-                          <ListItemText primary={subItem.text} style={{ fontSize: '24px' }} />
+                          <ListItemText primary={subItem.text} style={{ fontSize: '22px' }} />
                         </ListItemButton>
                       </ListItem>
                     ))}
