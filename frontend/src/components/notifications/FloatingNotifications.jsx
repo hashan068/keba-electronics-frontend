@@ -1,5 +1,5 @@
 import React from 'react';
-import notificationService from '../services/notificationService';
+import notificationService from '../../services/notificationService';
 import { Avatar, Typography, Box, Paper, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 

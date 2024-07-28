@@ -13,7 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
-import FloatingNotifications from './FloatingNotifications';
+import FloatingNotifications from './notifications/FloatingNotifications';
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
@@ -135,20 +135,7 @@ function ResponsiveAppBar() {
                 </Typography>
                 <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                   {/* Add navigation items here */}
-                  {/* <MenuItem
-                    component={Link}
-                    to="/dashboard"
-                    sx={{
-                      color: 'black',
-                      textDecoration: 'none',
-                      '&:hover': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                      },
-                    }}
-                  >
-                    Dashboard
-                  </MenuItem> */}
-                  {/* Add more navigation items */}
+
                 </Box>
 
                 <Box sx={{ flexGrow: 0 }}>
