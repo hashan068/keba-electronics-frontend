@@ -1,14 +1,17 @@
 import { Routes, Route } from 'react-router-dom';
-import Components from '../pages/Inventory/Components';
-import ComponentForm from '../pages/Inventory/ComponentForm';
-import ComponentDetails from '../pages/Inventory/ComponentDetails';
-import PRs from '../pages/Inventory/PRs';
-import POs from '../pages/Inventory/POs';
-import PRForm from '../pages/Inventory/PRForm';
-import POForm from '../pages/Inventory/POForm';
-import POEdit from '../pages/Inventory/POEdit';
-import PRView from '../pages/Inventory/PRView';
+import Components from '../pages/Inventory/Component/Components';
+import ComponentForm from '../pages/Inventory/Component/ComponentForm';
+import ComponentDetails from '../pages/Inventory/Component/ComponentDetails';
+
+import PRs from '../pages/Inventory/PR/PRs';
+import PRView from '../pages/Inventory/PR/PRView';
+import PRForm from '../pages/Inventory/PR/PRForm';
+
+import POs from '../pages/Inventory/PurchaseOrder/POs';
+import POForm from '../pages/Inventory/PurchaseOrder/POForm';
+import POEdit from '../pages/Inventory/PurchaseOrder/POEdit';
 import POView from '../pages/Inventory/PurchaseOrder/POView';
+
 import InventoryReport from '../pages/Reports/InventoryReport';
 import Suppliers from '../pages/Inventory/Suppliers/Suppliers';
 import SupplierForm from '../pages/Inventory/Suppliers/SupplierForm';

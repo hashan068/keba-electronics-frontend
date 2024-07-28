@@ -1,5 +1,4 @@
-import SalesDashboard from './SalesDashboard';
-import ManagerDashboard from './ManagerDashboard/ManagerDashboard';
+import SalesDashboard from './SalesDashboard/SalesDashboard';
 import { Container } from '@mui/material';
 import { useState, useEffect } from 'react';
 import MfgDashboard from './ManufacturingDashboard/MfgDashboard';
@@ -17,7 +16,6 @@ const Dashboard = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
       {userRole === 'General Manager' && <ManagerDashboard />}
-      {/* {userRole === 'Admin' && <ManagerDashboard />} */}
       {userRole === 'Salesperson' && <SalesDashboard />}
       {userRole === 'Production Manager' && <MfgDashboard />}
       {userRole === 'Inventory Manager' && <InventoryDashboard />}

@@ -29,8 +29,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
-import api from '../../api';
-import pageAppbarStyles from '../../styles/pageAppbarStyles';
+import api from '../../../api';
+import pageAppbarStyles from '../../../styles/pageAppbarStyles';
 
 const STATUS_CHOICES = {
   draft: { label: 'Draft', color: 'default' },

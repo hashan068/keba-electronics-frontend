@@ -1,7 +1,7 @@
 // TopSellingProducts.jsx
 import React, { useState, useEffect } from 'react';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel } from '@mui/material';
-import api from '../../api';
+import api from '../../../api';
 
 const TopSellingProducts = () => {
   const [topProducts, setTopProducts] = useState([]);

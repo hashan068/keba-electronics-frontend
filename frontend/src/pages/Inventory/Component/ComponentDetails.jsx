@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ComponentForm from './ComponentForm';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
-import api from '../../api';
+import api from '../../../api';
 
 const ComponentDetails = () => {
   const { id } = useParams();

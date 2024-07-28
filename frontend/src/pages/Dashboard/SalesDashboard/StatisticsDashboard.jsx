@@ -4,7 +4,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import PeopleIcon from '@mui/icons-material/People';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import api from '../../api';
+import api from '../../../api';
 
 const StatisticsDashboard = () => {
   const [data, setData] = useState([

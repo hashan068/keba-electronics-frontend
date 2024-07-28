@@ -9,6 +9,7 @@ import {
   CircularProgress,
   Toolbar,
   TextField,
+  Chip,
   Select,
   MenuItem,
   FormControl,
@@ -28,28 +29,69 @@ import {
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
-import api from '../../api';
-import pageAppbarStyles from '../../styles/pageAppbarStyles';
+import api from '../../../api';
+import pageAppbarStyles from '../../../styles/pageAppbarStyles';
 
-export default function Components() {
-  const [components, setComponents] = useState([]);
+const STATUS_CHOICES = {
+  created: { label: 'Created', color: 'warning' },
+  pending: { label: 'Pending', color: 'warning' },
+  approved: { label: 'Approved', color: 'success' },
+  rejected: { label: 'Rejected', color: 'error' },
+  cancelled: { label: 'Cancelled', color: 'default' },
+  fulfilled: { label: 'Fulfilled', color: 'success' },
+};
+
+const PRIORITY_CHOICES = {
+  high: { label: 'High', color: 'error' },
+  medium: { label: 'Medium', color: 'warning' },
+  low: { label: 'Low', color: 'success' },
+};
+
+const renderStatusChip = (params) => {
+  const status = params.value;
+  const statusConfig = STATUS_CHOICES[status] || {};
+  return (
+    <Chip
+      label={statusConfig.label}
+      color={statusConfig.color}
+      variant="outlined"
+      size="small"
+    />
+  );
+};
+
+const renderPriorityChip = (params) => {
+  const priority = params.value;
+  const priorityConfig = PRIORITY_CHOICES[priority] || {};
+  return (
+    <Chip
+      label={priorityConfig.label}
+      color={priorityConfig.color}
+      variant="outlined"
+      size="small"
+    />
+  );
+};
+
+export default function PRs() {
+  const [purchaseRequisitions, setPurchaseRequisitions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(8);
   const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState('');
-  const [filteredComponents, setFilteredComponents] = useState([]);
+  const [filteredPurchaseRequisitions, setFilteredPurchaseRequisitions] = useState([]);
   const navigate = useNavigate();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const getComponents = () => {
+  const getPurchaseRequisitions = () => {
     setLoading(true);
     api
-      .get('/api/inventory/components/')
+      .get('/api/inventory/purchase-requisitions/')
       .then((res) => {
-        setComponents(res.data);
-        setFilteredComponents(res.data);
+        setPurchaseRequisitions(res.data);
+        setFilteredPurchaseRequisitions(res.data);
         setLoading(false);
       })
       .catch((err) => {
@@ -59,26 +101,26 @@ export default function Components() {
   };
 
   useEffect(() => {
-    getComponents();
+    getPurchaseRequisitions();
   }, []);
 
   const handleRowClick = (params) => {
-    navigate(`/inventory/component/${params.row.id}`);
+    navigate(`/inventory/purchase-requisition/${params.row.id}`);
   };
 
-  const handleAddComponent = () => {
-    navigate('/inventory/component/new');
+  const handleAddPurchaseRequisition = () => {
+    navigate('/inventory/purchase-requisition/new');
   };
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
     setSearchText(value);
-    const filteredData = components.filter((component) =>
-      Object.values(component).some((field) =>
+    const filteredData = purchaseRequisitions.filter((pr) =>
+      Object.values(pr).some((field) =>
         field.toString().toLowerCase().includes(value.toLowerCase())
       )
     );
-    setFilteredComponents(filteredData);
+    setFilteredPurchaseRequisitions(filteredData);
     setPage(1); // Reset to the first page whenever the search text changes
   };
 
@@ -87,13 +129,13 @@ export default function Components() {
   };
 
   const columns = [
-    { field: 'id', headerName: 'Component ID', width: 250 },
-    { field: 'name', headerName: 'Component Name', width: 250 },
-    // { field: 'description', headerName: 'Description', width: 300 },
-    { field: 'quantity', headerName: 'Quantity', type: 'number', width: 150 },
-    { field: 'reorder_level', headerName: 'Reorder Level', type: 'number', width: 150 },
-    { field: 'unit_of_measure', headerName: 'Unit of Measure', width: 100 },
-    { field: 'cost', headerName: 'Cost', type: 'number', width: 150 },
+    { field: 'id', headerName: 'PR ID', width: 100 },
+    { field: 'component_id', headerName: 'Component ID', width: 100 },
+    { field: 'component_name', headerName: 'Component Name', width: 250 },
+    { field: 'quantity', headerName: 'Quantity', type: 'number', width: 100 },
+    { field: 'status', headerName: 'Status', width: 150, renderCell: renderStatusChip },
+    { field: 'priority', headerName: 'Priority', width: 150, renderCell: renderPriorityChip },
+    { field: 'created_at_date', headerName: 'Created Date', width: 200 },
   ];
 
   function CustomToolbar() {
@@ -120,7 +162,7 @@ export default function Components() {
       <Paper sx={pageAppbarStyles.paper}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Components
+            Purchase Requisitions
           </Typography>
           <TextField
             variant="outlined"
@@ -136,7 +178,7 @@ export default function Components() {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleAddComponent}
+            onClick={handleAddPurchaseRequisition}
             startIcon={<AddIcon />}
             sx={{
               backgroundColor: theme.palette.secondary.main,
@@ -145,7 +187,7 @@ export default function Components() {
               },
             }}
           >
-            Add Component
+            Add Purchase Requisition
           </Button>
         </Toolbar>
       </Paper>
@@ -159,10 +201,10 @@ export default function Components() {
             <>
               <Paper sx={{ p: 2, height: 500 }}>
                 <DataGrid
-                  rows={filteredComponents.slice((page - 1) * pageSize, page * pageSize)}
+                  rows={filteredPurchaseRequisitions.slice((page - 1) * pageSize, page * pageSize)}
                   columns={columns}
                   pageSize={pageSize}
-                  rowCount={filteredComponents.length}
+                  rowCount={filteredPurchaseRequisitions.length}
                   paginationMode="server"
                   onRowClick={handleRowClick}
                   slots={{
@@ -171,8 +213,6 @@ export default function Components() {
                   sx={pageAppbarStyles.dataGrid}
                   hideFooter
                 />
-                  
-
               </Paper>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                 <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
@@ -188,7 +228,7 @@ export default function Components() {
                   </Select>
                 </FormControl>
                 <Pagination
-                  count={Math.ceil(filteredComponents.length / pageSize)}
+                  count={Math.ceil(filteredPurchaseRequisitions.length / pageSize)}
                   page={page}
                   onChange={handlePageChange}
                   color="primary"

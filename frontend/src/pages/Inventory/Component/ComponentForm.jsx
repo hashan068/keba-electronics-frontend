@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import api from '../../api';
+import api from '../../../api';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import {
@@ -16,7 +16,6 @@ import {
   ThemeProvider,
   createTheme,
   Stack,
-  Autocomplete,
 } from '@mui/material';
 
 const theme = createTheme({
@@ -51,48 +50,41 @@ const theme = createTheme({
   },
 });
 
-const PRForm = () => {
+const ComponentForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [initialValues, setInitialValues] = useState({
-    component: null, // Change from componentId to component
-    quantity: '',
-
-    notes: '',
-    priority: 'high',
+    name: '',
+    description: '',
+    quantity: 0,
+    reorderLevel: 0,
+    unitOfMeasure: '',
+    cost: 0,
   });
 
-  const [components, setComponents] = useState([]);
   const [submitAction, setSubmitAction] = useState('close');
 
   useEffect(() => {
-    const fetchComponents = async () => {
-      try {
-        const response = await api.get('/api/inventory/components/');
-        setComponents(response.data);
-      } catch (error) {
-        console.error('Error fetching components:', error);
-      }
-    };
-
-    fetchComponents();
-
     if (id) {
       api
-        .get(`/api/inventory/purchase-requisitions/${id}/`)
+        .get(`/api/inventory/components/${id}/`)
         .then((response) => {
           const {
-            component,
+            name,
+            description,
             quantity,
-            notes,
-            priority,
+            reorder_level,
+            unit_of_measure,
+            cost,
           } = response.data;
           setInitialValues({
-            component,
+            name,
+            description,
             quantity,
-            notes,
-            priority,
+            reorderLevel: reorder_level,
+            unitOfMeasure: unit_of_measure,
+            cost,
           });
         })
         .catch((error) => console.error(error));
@@ -100,13 +92,18 @@ const PRForm = () => {
   }, [id]);
 
   const validationSchema = Yup.object({
-    component: Yup.object().required('Component is required'),
+    name: Yup.string().required('Name is required'),
+    description: Yup.string().required('Description is required'),
     quantity: Yup.number()
       .required('Quantity is required')
       .positive('Quantity must be a positive number'),
-
-    notes: Yup.string(),
-    priority: Yup.string().required('Priority is required'),
+    reorderLevel: Yup.number()
+      .required('Reorder Level is required')
+      .positive('Reorder Level must be a positive number'),
+    unitOfMeasure: Yup.string().required('Unit of Measure is required'),
+    cost: Yup.number()
+      .required('Cost is required')
+      .positive('Cost must be a positive number'),
   });
 
   const handleSubmit = async (values, { setSubmitting, setFieldError, resetForm }) => {
@@ -114,38 +111,41 @@ const PRForm = () => {
       setSubmitting(true);
 
       const data = {
-        component_id: values.component.id, // Use values.component.id instead of values.componentId
+        name: values.name,
+        description: values.description,
         quantity: parseInt(values.quantity, 10),
-
-        notes: values.notes,
-        priority: values.priority,
+        reorder_level: parseInt(values.reorderLevel, 10),
+        unit_of_measure: values.unitOfMeasure,
+        cost: parseFloat(values.cost),
       };
 
       let response;
       if (id) {
-        response = await api.put(`/api/inventory/purchase-requisitions/${id}/`, data);
+        response = await api.put(`/api/inventory/components/${id}/`, data);
       } else {
-        response = await api.post('/api/inventory/purchase-requisitions/', data);
+        response = await api.post('/api/inventory/components/', data);
       }
 
       const { id: newId } = response.data;
 
       if (submitAction === 'close') {
-        navigate(`/inventory/purchase-requisition/${newId}`);
+        navigate(`/inventory/component`);
       } else {
         resetForm();
         setInitialValues({
-          component: null,
+          name: '',
+          description: '',
           quantity: 0,
-          notes: '',
-          priority: 'high',
+          reorderLevel: 0,
+          unitOfMeasure: '',
+          cost: 0,
         });
       }
 
       setSubmitting(false);
     } catch (error) {
       console.error(error);
-      setFieldError('general', 'Failed to create purchase requisition.');
+      setFieldError('general', 'Failed to create component.');
       setSubmitting(false);
     }
   };
@@ -154,7 +154,7 @@ const PRForm = () => {
     <ThemeProvider theme={theme}>
       <Box sx={{ p: 4, bgcolor: 'background.paper', boxShadow: 3, borderRadius: 2 }}>
         <Typography variant="h4" gutterBottom>
-          {id ? 'Edit Purchase Requisition' : 'Create Purchase Requisition'}
+          {id ? 'Edit Component' : 'Create Component'}
         </Typography>
         <Formik
           initialValues={initialValues}
@@ -165,29 +165,33 @@ const PRForm = () => {
           {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
             <form onSubmit={handleSubmit}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Autocomplete
-                    options={components}
-                    value={values.component}
-                    onChange={(event, newValue) => {
-                      handleChange({
-                        target: { name: 'component', value: newValue },
-                      });
-                    }}
-                    getOptionLabel={(option) => option.name || ''}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Component"
-                        error={touched.component && Boolean(errors.component)}
-                        helperText={touched.component && errors.component}
-                        required
-                      />
-                    )}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Name"
+                    value={values.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.name && Boolean(errors.name)}
+                    helperText={touched.name && errors.name}
+                    fullWidth
+                    required
+                    name="name"
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Description"
+                    value={values.description}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.description && Boolean(errors.description)}
+                    helperText={touched.description && errors.description}
+                    fullWidth
+                    required
+                    name="description"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     label="Quantity"
                     value={values.quantity}
@@ -201,35 +205,48 @@ const PRForm = () => {
                     name="quantity"
                   />
                 </Grid>
-                <Grid item xs={12}>
-
-                </Grid>
-                <Grid>
-                  <InputLabel>Priority</InputLabel>
-                  <Select
-                    value={values.priority}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Reorder Level"
+                    value={values.reorderLevel}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    error={touched.priority && Boolean(errors.priority)}
-                    name="priority"
-                  >
-                    <MenuItem value="high">High</MenuItem>
-                    <MenuItem value="medium">Medium</MenuItem>
-                    <MenuItem value="low">Low</MenuItem>
-                  </Select>
+                    error={touched.reorderLevel && Boolean(errors.reorderLevel)}
+                    helperText={touched.reorderLevel && errors.reorderLevel}
+                    type="number"
+                    fullWidth
+                    required
+                    name="reorderLevel"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth required>
+                    <InputLabel>Unit of Measure</InputLabel>
+                    <Select
+                      value={values.unitOfMeasure}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.unitOfMeasure && Boolean(errors.unitOfMeasure)}
+                      name="unitOfMeasure"
+                    >
+                      <MenuItem value="pcs">Pieces</MenuItem>
+                      <MenuItem value="kg">Kilograms</MenuItem>
+                      <MenuItem value="l">Liters</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
-                    label="Notes"
-                    value={values.notes}
+                    label="Cost"
+                    value={values.cost}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    error={touched.notes && Boolean(errors.notes)}
-                    helperText={touched.notes && errors.notes}
+                    error={touched.cost && Boolean(errors.cost)}
+                    helperText={touched.cost && errors.cost}
+                    type="number"
                     fullWidth
-                    multiline
-                    rows={4}
-                    name="notes"
+                    required
+                    name="cost"
                   />
                 </Grid>
               </Grid>
@@ -275,6 +292,6 @@ const PRForm = () => {
       </Box>
     </ThemeProvider>
   );
-};
+}
 
-export default PRForm;
+export default ComponentForm;

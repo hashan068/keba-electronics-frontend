@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Typography, Box, CircularProgress, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import api from '../../api';
+import api from '../../../api';
 import dayjs from 'dayjs';
 
 const SalesChart = () => {
