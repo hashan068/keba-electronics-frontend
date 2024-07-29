@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom'; // Importing React Router hooks
 import api from '../../../api';
-import { Formik } from 'formik';
-import * as Yup from 'yup';
+import { Formik } from 'formik'; // Importing Formik for form handling
+import * as Yup from 'yup'; // Importing Yup for validation schema
 import {
   Box,
   Typography,
@@ -16,8 +16,9 @@ import {
   ThemeProvider,
   createTheme,
   Stack,
-} from '@mui/material';
+} from '@mui/material'; // Importing Material-UI components
 
+// Creating a custom theme for the form
 const theme = createTheme({
   palette: {
     primary: {
@@ -51,8 +52,8 @@ const theme = createTheme({
 });
 
 const ComponentForm = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams(); // Extracting the 'id' from URL parameters
+  const navigate = useNavigate(); // Hook for navigation
 
   const [initialValues, setInitialValues] = useState({
     name: '',
@@ -91,6 +92,7 @@ const ComponentForm = () => {
     }
   }, [id]);
 
+  // Validation schema for the form
   const validationSchema = Yup.object({
     name: Yup.string().required('Name is required'),
     description: Yup.string().required('Description is required'),
@@ -106,9 +108,10 @@ const ComponentForm = () => {
       .positive('Cost must be a positive number'),
   });
 
+  // Submit handler for the form
   const handleSubmit = async (values, { setSubmitting, setFieldError, resetForm }) => {
     try {
-      setSubmitting(true);
+      setSubmitting(true); // Setting submitting state to true
 
       const data = {
         name: values.name,
@@ -117,7 +120,7 @@ const ComponentForm = () => {
         reorder_level: parseInt(values.reorderLevel, 10),
         unit_of_measure: values.unitOfMeasure,
         cost: parseFloat(values.cost),
-      };
+      }; // Preparing data for API call based on form values
 
       let response;
       if (id) {
@@ -126,7 +129,7 @@ const ComponentForm = () => {
         response = await api.post('/api/inventory/components/', data);
       }
 
-      const { id: newId } = response.data;
+      // const { id: newId } = response.data;
 
       if (submitAction === 'close') {
         navigate(`/inventory/component`);
@@ -153,17 +156,21 @@ const ComponentForm = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ p: 4, bgcolor: 'background.paper', boxShadow: 3, borderRadius: 2 }}>
+
         <Typography variant="h4" gutterBottom>
           {id ? 'Edit Component' : 'Create Component'}
         </Typography>
+
         <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          enableReinitialize
-          onSubmit={handleSubmit}
+          initialValues={initialValues}       // Initial values of the form
+          validationSchema={validationSchema} // Validation schema to validate form fields
+          enableReinitialize                  // Reinitialize the form when initialValues change
+          onSubmit={handleSubmit}            // Submit handler for the form
         >
           {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+            
             <form onSubmit={handleSubmit}>
+
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <TextField
