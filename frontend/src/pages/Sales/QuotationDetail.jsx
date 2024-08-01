@@ -3,8 +3,6 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import { useParams } from 'react-router-dom';
 import { CheckCircle, Cancel } from '@mui/icons-material';
 import api from '../../api';
-import saveAs from 'file-saver';
-
 
 export default function QuotationDetail() {
   const { id } = useParams();
@@ -23,33 +21,6 @@ export default function QuotationDetail() {
         setAlert({ severity: 'error', message: 'Error fetching quotation details' });
       });
   }, [id]);
-
-  const handlePreview = () => {
-    console.log('Preview clicked');
-  };
-
-  const handleConfirm = () => {
-    console.log('Confirm clicked');
-  };
-
-  const handleDownload = () => {
-    api
-      .get(`/api/sales/quotations/${id}/download/`, {
-        responseType: 'blob',
-      })
-      .then((res) => {
-        const pdfBlob = new Blob([res.data], { type: 'application/pdf' });
-        saveAs(pdfBlob, `quotation_${id}.pdf`);
-      })
-      .catch((err) => {
-        if (err.response && err.response.status === 404) {
-          setAlert({ severity: 'error', message: 'Quotation download URL not found' });
-        } else {
-          console.log(err);
-          setAlert({ severity: 'error', message: 'Error downloading quotation' });
-        }
-      });
-  };
 
   const validateForm = () => {
     return true;
@@ -239,11 +210,6 @@ export default function QuotationDetail() {
           </>
         )}
       </Box>
-
-      {/* <PreviewDownloadButtons 
-        onPreview={handlePreview} 
-        onDownload={handleDownload} 
-      /> */}
     </Box>
   );
 }

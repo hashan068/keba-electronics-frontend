@@ -135,7 +135,7 @@ export default function PRs() {
     { field: 'quantity', headerName: 'Quantity', type: 'number', width: 100 },
     { field: 'status', headerName: 'Status', width: 150, renderCell: renderStatusChip },
     { field: 'priority', headerName: 'Priority', width: 150, renderCell: renderPriorityChip },
-    { field: 'created_at_date', headerName: 'Created Date', width: 200 },
+    // { field: 'created_at_date', headerName: 'Created Date', width: 200 },
   ];
 
   function CustomToolbar() {
